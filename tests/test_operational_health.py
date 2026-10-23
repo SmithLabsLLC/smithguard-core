@@ -460,8 +460,8 @@ def test_public_readiness_requires_a_current_openssf_catalog(public_runtime_data
 
 def test_reviewed_migration_matches_the_candidate_runtime_release() -> None:
     journal = json.loads(MIGRATION_JOURNAL.read_text(encoding="ascii"))
-    assert journal["migrations"][-1]["revision"] == "0035_bulletin_automation"
-    assert EXPECTED_MIGRATION == "0035_bulletin_automation"
+    assert journal["migrations"][-1]["revision"] == "0036_bulletin_source_updates"
+    assert EXPECTED_MIGRATION == "0036_bulletin_source_updates"
     files = {"app/migrations/journal.json": MIGRATION_JOURNAL.read_bytes()}
     for entry in journal["migrations"]:
         files[f"app/migrations/{entry['file']}"] = (

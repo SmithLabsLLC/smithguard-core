@@ -32,9 +32,17 @@ from smithguard.xai_settings import (
     XAI_THREAT_SEARCH_MODEL,
 )
 
-POLICY_SCHEMA_VERSION = "6.0.0"
+POLICY_SCHEMA_VERSION = "7.0.0"
+GROK_API_SUBSCRIPTION_SCHEMA_VERSION = "6.0.0"
 BOUNDED_SUBSCRIPTION_SCHEMA_VERSION = "5.0.0"
-SUBSCRIPTION_SCHEMA_VERSIONS = {POLICY_SCHEMA_VERSION, BOUNDED_SUBSCRIPTION_SCHEMA_VERSION}
+UNCAPPED_SUBSCRIPTION_SCHEMA_VERSIONS = {
+    POLICY_SCHEMA_VERSION,
+    GROK_API_SUBSCRIPTION_SCHEMA_VERSION,
+}
+SUBSCRIPTION_SCHEMA_VERSIONS = {
+    *UNCAPPED_SUBSCRIPTION_SCHEMA_VERSIONS,
+    BOUNDED_SUBSCRIPTION_SCHEMA_VERSION,
+}
 API_POLICY_SCHEMA_VERSION = "4.0.0"
 POLICY_ID = "gbsec:control:xai-spend-policy"
 # Version 3 remains readable for retained policy and recovery compatibility.
@@ -123,6 +131,7 @@ class SpendPolicy:
     provider_model: str
     subscription_first: bool
     current_request_contract: bool
+    primary_unavailable_reason: str | None = None
 
     @property
     def dispatch_allowed(self) -> bool:
@@ -145,6 +154,8 @@ class SpendPolicy:
             )
 
     def assert_preliminary_warning_recheck_allowed(self) -> None:
+        if self.subscription_first:
+            raise ExternalDispatchDisabled("paid rechecks are disabled by subscription policy")
         if (
             not self.unattended_dispatch_allowed
             or self.unattended_scope != "scheduled_ai_qualified_warning_lane_and_hourly_recheck"
@@ -319,7 +330,7 @@ def _load_policy_stage_limits(root: Mapping[str, Any]) -> dict[str, StageLimits]
     stage_document = _expect_keys(root.get("stage_limits"), set(STAGES), field="stage limits")
     expected = (
         EXPECTED_STAGE_LIMITS
-        if root["schema_version"] == POLICY_SCHEMA_VERSION
+        if root["schema_version"] in UNCAPPED_SUBSCRIPTION_SCHEMA_VERSIONS
         else BOUNDED_STAGE_LIMITS
     )
     stage_limits: dict[str, StageLimits] = {}
@@ -394,7 +405,10 @@ def _load_policy_request_contract(
         field="provider request contract",
     )
     qualification_output_limit = request_contract["qualification_maximum_output_tokens"]
-    if root["schema_version"] == POLICY_SCHEMA_VERSION and qualification_output_limit is not None:
+    if (
+        root["schema_version"] in UNCAPPED_SUBSCRIPTION_SCHEMA_VERSIONS
+        and qualification_output_limit is not None
+    ):
         raise SpendPolicyError("current early-warning policy has no output token cap")
     if qualification_output_limit is not None and (
         isinstance(qualification_output_limit, bool)
@@ -422,7 +436,7 @@ def _load_policy_request_contract(
         "maximum_turns": 3,
         "maximum_output_tokens": (
             None
-            if root["schema_version"] == POLICY_SCHEMA_VERSION
+            if root["schema_version"] in UNCAPPED_SUBSCRIPTION_SCHEMA_VERSIONS
             else XAI_MAX_OUTPUT_TOKENS_PER_REQUEST
         ),
         "qualification_maximum_output_tokens": qualification_output_limit,
@@ -563,6 +577,24 @@ NATIVE_SUBSCRIPTION_CONTRACT = {
     "maximum_qualification_output_tokens": None,
 }
 
+# Version 6 remains readable with its historical paid-fallback contract. Version
+# 7 cannot dispatch an API-key fallback. Route selection is policy-bound and is
+# recorded before dispatch; a timed-out or partly consumed primary is not retried.
+CLAUDE_FALLBACK_CONTRACT = {
+    **NATIVE_SUBSCRIPTION_CONTRACT,
+    "fallback": "claude_code_subscription",
+    "fallback_requires": "policy_bound_primary_unavailability_or_proven_uncharged_receipt",
+    "fallback_model": "claude-opus-5-5",
+    "fallback_reasoning_effort": "high",
+    "fallback_harness_version": "2.1.309",
+    "fallback_tools": ["WebSearch"],
+    "fallback_search_coverage": "public_web_index_only_not_native_x_search",
+    "fallback_usage_basis": "aggregate_modelUsage_including_search_helpers",
+    "fallback_search_helpers": "same_model_required_effort_not_independently_observable",
+    "fallback_certificate_store": "system",
+    "primary_unavailable_reason": "trust_not_qualified",
+}
+
 
 def load_spend_policy(document: dict[str, Any]) -> SpendPolicy:
     if isinstance(document, dict) and document.get("schema_version") == (
@@ -595,10 +627,22 @@ def load_spend_policy(document: dict[str, Any]) -> SpendPolicy:
         raise SpendPolicyError("unsupported spend policy schema")
     if root["schema_version"] in SUBSCRIPTION_SCHEMA_VERSIONS:
         native_contract = (
-            NATIVE_SUBSCRIPTION_CONTRACT
+            CLAUDE_FALLBACK_CONTRACT
             if root["schema_version"] == POLICY_SCHEMA_VERSION
+            else NATIVE_SUBSCRIPTION_CONTRACT
+            if root["schema_version"] == GROK_API_SUBSCRIPTION_SCHEMA_VERSION
             else BOUNDED_NATIVE_SUBSCRIPTION_CONTRACT
         )
+        if root["schema_version"] == POLICY_SCHEMA_VERSION:
+            if not isinstance(root["subscription_contract"], dict):
+                raise SpendPolicyError("native subscription boundary changed")
+            reason = root["subscription_contract"].get("primary_unavailable_reason")
+            if reason is not None and (
+                not isinstance(reason, str)
+                or reason not in {"allowance_exhausted", "trust_not_qualified"}
+            ):
+                raise SpendPolicyError("primary unavailability is not an approved reason")
+            native_contract = {**native_contract, "primary_unavailable_reason": reason}
         if canonical_json_bytes(root["subscription_contract"]) != canonical_json_bytes(
             native_contract
         ):
@@ -639,6 +683,11 @@ def load_spend_policy(document: dict[str, Any]) -> SpendPolicy:
         provider_model=request_contract["model"],
         subscription_first=root["schema_version"] in SUBSCRIPTION_SCHEMA_VERSIONS,
         current_request_contract=root["schema_version"] == POLICY_SCHEMA_VERSION,
+        primary_unavailable_reason=(
+            root["subscription_contract"]["primary_unavailable_reason"]
+            if root["schema_version"] == POLICY_SCHEMA_VERSION
+            else None
+        ),
         policy_state=state,
         maximum_active_discovery_workers=lane_limits["maximum_active_discovery_workers"],
         maximum_provider_requests_per_run=lane_limits["maximum_provider_requests_per_run"],

@@ -279,6 +279,14 @@
       "revision": "0035_bulletin_automation",
       "rollback_mode": "forward_only",
       "source_sha256": "sha256:f96a3b567deade1ad5d5e9bac7c031a00dd2d5f640054315d81c7e2e7b9e3b41"
+    },
+    {
+      "description": "Allow source update events without rewriting historical evidence",
+      "down_revision": "0035_bulletin_automation",
+      "file": "versions/0036_bulletin_source_updates.py",
+      "revision": "0036_bulletin_source_updates",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:127cfa74a0819096e0dd767c604170ee48df04f5dc4629813105612d776de031"
     }
   ],
   "schema_version": "1.0.0"

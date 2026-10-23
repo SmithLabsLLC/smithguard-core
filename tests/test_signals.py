@@ -133,8 +133,11 @@ def _draft(suffix: str = "one") -> PreliminaryWarningDraft:
 
 
 def _active_policy():
+    # Historical paid transport/receipt fixtures; current subscription policies
+    # reject this route, covered separately by the negative production test.
     return replace(
         load_spend_policy_path(POLICY_PATH),
+        subscription_first=False,
         policy_state="active",
         external_calls_allowed=True,
         unattended_collection_allowed=True,
@@ -1245,3 +1248,21 @@ def test_recheck_http_output_overage_preserves_token_failure_before_parsing(malf
     assert error.exact_usage.output_tokens == RECHECK_MAX_OUTPUT_TOKENS + 1
     assert len(requests) == 1
     assert json.loads(requests[0].content)["max_output_tokens"] == RECHECK_MAX_OUTPUT_TOKENS
+
+
+@pytest.mark.usefixtures("enabled_warning_dispatch")
+def test_subscription_policy_refuses_paid_recheck_before_sequence_or_request(database):
+    from smithguard.spend import ExternalDispatchDisabled
+
+    warning_id = _create(database, "subscription-recheck-denied")
+    with pytest.raises(ExternalDispatchDisabled, match="paid rechecks"):
+        recheck_warning(
+            sessionmaker(database.engine),
+            warning_id=warning_id,
+            policy=replace(_active_policy(), subscription_first=True),
+            provider=lambda *_: pytest.fail("paid request must not be sent"),
+            now=NOW + timedelta(hours=1),
+        )
+    with Session(database.engine) as session:
+        current = get_preliminary_warning(session, warning_id)
+        assert current.revision == 1 and current.recheck_count == 0

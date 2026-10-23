@@ -126,9 +126,12 @@ def test_native_policy_rejects_boolean_integer_aliases(field, value) -> None:
         load_spend_policy(document)
 
 
-def test_version_six_policy_removes_early_warning_output_limits() -> None:
+def test_current_policy_preserves_uncapped_output_with_subscription_only_fallback() -> None:
     document = _document()
-    assert document["schema_version"] == POLICY_SCHEMA_VERSION == "6.0.0"
+    assert document["schema_version"] == POLICY_SCHEMA_VERSION == "7.0.0"
+    assert document["subscription_contract"]["fallback"] == "claude_code_subscription"
+    assert document["subscription_contract"]["fallback_model"] == "claude-opus-5-5"
+    assert document["subscription_contract"]["fallback_reasoning_effort"] == "high"
     assert set(document) == {
         "schema_version",
         "policy_id",
@@ -269,7 +272,7 @@ def test_version_five_remains_readable_but_cannot_dispatch_uncapped_work() -> No
     document["provider_request_contract"]["maximum_output_tokens"] = 8192
     document["provider_request_contract"]["qualification_maximum_output_tokens"] = 8192
     document["current_evidence"]["notes"] = document["current_evidence"]["notes"].replace(
-        "Version 6", "Version 5"
+        "Version 7", "Version 5"
     )
     shadow = load_spend_policy(render_spend_policy_state(document, state="shadow"))
     assert shadow.subscription_first and shadow.stage_limits == BOUNDED_STAGE_LIMITS
@@ -467,3 +470,27 @@ def test_legacy_unhashable_control_id_is_policy_error(invalid_id: object) -> Non
     document["activation_contract"]["required_controls"][0]["control_id"] = invalid_id
     with pytest.raises(SpendPolicyError, match="controls"):
         load_spend_policy(document)
+
+
+@pytest.mark.parametrize("reason", [None, "allowance_exhausted", "trust_not_qualified"])
+def test_current_primary_unavailability_is_exactly_policy_bound(reason):
+    doc = _document()
+    doc["subscription_contract"]["primary_unavailable_reason"] = reason
+    assert load_spend_policy(doc).primary_unavailable_reason == reason
+
+
+@pytest.mark.parametrize("reason", ["unknown", 0, True, [], {}, "missing"])
+def test_unrecognized_or_missing_primary_reason_is_rejected(reason):
+    doc = _document()
+    if reason == "missing":
+        del doc["subscription_contract"]["primary_unavailable_reason"]
+    else:
+        doc["subscription_contract"]["primary_unavailable_reason"] = reason
+    with pytest.raises(SpendPolicyError):
+        load_spend_policy(doc)
+
+
+def test_current_policy_cannot_authorize_paid_rechecks():
+    policy = load_spend_policy(_activated_document("active"))
+    with pytest.raises(ExternalDispatchDisabled, match="paid rechecks"):
+        policy.assert_preliminary_warning_recheck_allowed()

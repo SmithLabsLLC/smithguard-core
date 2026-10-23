@@ -128,7 +128,7 @@ class BulletinEvent(Base):
             initially="DEFERRED",
         ),
         CheckConstraint(
-            "kind IN ('published','corrected','disputed','withdrawn','expired',"
+            "kind IN ('published','corrected','source_updated','disputed','withdrawn','expired',"
             "'freshness_stale','freshness_verified','public_tombstoned',"
             "'public_purge_requested','public_purged','public_purge_failed','associated')",
             name="kind",

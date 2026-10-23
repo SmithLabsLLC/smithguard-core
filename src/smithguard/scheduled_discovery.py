@@ -215,6 +215,8 @@ class ProviderUsageSnapshot:
     response_bytes: int = 0
     credential_route: str | None = None
     native_invocations: tuple[NativeInvocationUsage, ...] = ()
+    native_search_requests: int | None = None
+    native_model_turns: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -442,6 +444,8 @@ class ProviderResult:
     credential_route: str | None = None
     native_invocations: tuple[NativeInvocationUsage, ...] = ()
     native_timing: NativeTimingDiagnostic | None = None
+    native_search_requests: int | None = None
+    native_model_turns: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -1711,7 +1715,11 @@ def append_receipt(
     if provider_result is not None:
         provider_usage = ProviderUsage(
             stage=provider_stage or receipt_type,
-            model=DISCOVERY_MODEL,
+            model=(
+                "claude-opus-5-5"
+                if provider_result.credential_route == "claude_code_subscription"
+                else DISCOVERY_MODEL
+            ),
             response_id=provider_result.response_id,
             input_tokens=provider_result.input_tokens,
             output_tokens=provider_result.output_tokens,
@@ -1725,6 +1733,8 @@ def append_receipt(
             response_bytes=provider_result.response_bytes,
             credential_route=provider_result.credential_route,
             native_invocations=provider_result.native_invocations,
+            native_search_requests=provider_result.native_search_requests,
+            native_model_turns=provider_result.native_model_turns,
         )
     try:
         return append_warning_lane_receipt(
@@ -2276,6 +2286,16 @@ def _dispatch_request(
                     "queue": job.queue,
                     "attempt": job.attempts,
                     **({"credential_route": credential_route} if credential_route else {}),
+                    **(
+                        {
+                            "requested_model": "claude-opus-5-5",
+                            "reasoning_effort": "high",
+                            "search_coverage": "public_web_index_only_not_native_x_search",
+                            "primary_unavailable_reason": policy.primary_unavailable_reason,
+                        }
+                        if credential_route == "claude_code_subscription"
+                        else {}
+                    ),
                     "attempt_id": stable_id(
                         "provider-attempt", job.queue, job.job_id, str(job.attempts)
                     ),
@@ -2521,6 +2541,10 @@ def _dead_letter_now(
         )
 
 
+def _allowed_subscription_route(route: str | None) -> bool:
+    return route in {"grok_build_subscription", "claude_code_subscription"}
+
+
 def _run_provider_stage(
     factory: SessionFactory,
     *,
@@ -2531,11 +2555,13 @@ def _run_provider_stage(
     qualification: bool,
     now: datetime,
 ) -> ProviderResult | str:
-    from smithguard.grok_build import SubscriptionFirstProvider
+    from smithguard.subscription_provider import SubscriptionFirstProvider
 
     if isinstance(provider, SubscriptionFirstProvider):
         if not policy.subscription_first:
             raise ScheduledLaneError("native route requires current subscription policy")
+        if provider.primary_unavailable_reason != policy.primary_unavailable_reason:
+            raise ScheduledLaneError("native route selection differs from bound policy")
         with factory() as session, session.begin():
             advisory_xact_lock(session, f"spend-run:{job.payload['run_id']}")
             if _reject_prior_attempt(session, job=job, now=now):
@@ -2565,13 +2591,24 @@ def _run_provider_stage(
             return _provider_failure(factory, job=job, policy=policy, error=error, now=now)
         except ScheduledProviderError as error:
             return _provider_failure(factory, job=job, policy=policy, error=error, now=now)
+    route = getattr(provider, "credential_route", None)
+    if not _allowed_subscription_route(route):
+        return _provider_failure(
+            factory,
+            job=job,
+            policy=policy,
+            error=ScheduledProviderError(
+                "provider_route_not_authorized", retryable=False, usage_uncertain=False
+            ),
+            now=now,
+        )
     try:
         _dispatch_request(
             factory,
             policy=policy,
             job=job,
             now=now,
-            credential_route=getattr(provider, "credential_route", None),
+            credential_route=route,
         )
     except ScheduledLaneError:
         return "dead_letter"
@@ -2582,7 +2619,21 @@ def _run_provider_stage(
             else provider.discover(request_payload)
         )
     except ScheduledProviderError as error:
+        if error.exact_usage is not None and error.exact_usage.credential_route != route:
+            error = ScheduledProviderError(
+                "provider_route_changed", retryable=False, usage_uncertain=True
+            )
         return _provider_failure(factory, job=job, policy=policy, error=error, now=now)
+    if result.credential_route != route:
+        return _provider_failure(
+            factory,
+            job=job,
+            policy=policy,
+            error=ScheduledProviderError(
+                "provider_route_changed", retryable=False, usage_uncertain=True
+            ),
+            now=now,
+        )
     if not _record_response(factory, policy=policy, job=job, provider_result=result, now=now):
         return "dead_letter"
     return result

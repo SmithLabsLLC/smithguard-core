@@ -6,10 +6,10 @@ These are citation boundaries, not new network collectors or article licenses.
 MANUAL_SOURCE_PATHS = {
     "zdi-linux-security-reports": {
         "www.zerodayinitiative.com": r"/advisories/upcoming/",
-        "lists.openwall.net": r"/linux-kernel/2026/10/21/(?:2666|2694)",
+        "lists.openwall.net": r"/linux-kernel/2026/10/21/(?:2666|2694|2711)",
     },
     "linux-kernel-maintainer-facts": {
-        "lists.openwall.net": r"/linux-kernel/2026/10/(?:21/2732|22/1149)",
+        "lists.openwall.net": r"/linux-kernel/2026/10/(?:21/2732|22/(?:297|1149)|23/(?:739|971))",
         "github.com": r"/torvalds/linux/commit/68f410faedaf6ee74d81e574733c50ebcc1bd8ed",
     },
     "aws-security-facts": {

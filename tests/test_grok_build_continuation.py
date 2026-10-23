@@ -22,6 +22,7 @@ from smithguard.scheduled_discovery import (
     enqueue_due_discovery,
     work_one,
 )
+from smithguard.subscription_provider import SubscriptionFirstProvider
 from smithguard.warning_lane_receipts import (
     ProviderUsage,
     WarningLaneReceiptError,
@@ -222,7 +223,7 @@ def test_uncertain_second_step_dead_letters_without_paid_factory(adapter_factory
         [{"events": _events(ordinal=1, boundary=True), "exit": 1}, {"timeout": True}]
     )
     paid_calls = []
-    provider = native.SubscriptionFirstProvider(
+    provider = SubscriptionFirstProvider(
         primary=primary, fallback_factory=lambda: paid_calls.append("forbidden_paid_factory")
     )
     factory = sessionmaker(database.engine)

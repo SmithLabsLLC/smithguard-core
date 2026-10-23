@@ -11,8 +11,6 @@ Type=oneshot
 User=smithguard-signals
 Group=smithguard-signals
 EnvironmentFile=/etc/SmithGuard/env/discovery.env
-Environment=SMITHGUARD_XAI_KEY_FILE=%d/xai.key
-LoadCredential=xai.key:/etc/SmithGuard/credentials/xai.key
 WorkingDirectory=/opt/SmithGuard/current
 ExecCondition=/usr/bin/test ${SMITHGUARD_WARNING_DISPATCH_ENABLED} = 1
 ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-discovery --enqueue-due --limit 1

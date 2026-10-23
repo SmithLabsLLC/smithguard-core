@@ -110,6 +110,16 @@ def atom_feed(session, page, *, now, query):
             )
         )
         SubElement(entry, "category", {"term": event["kind"]})
+        if content:
+            notices = sorted(
+                {
+                    source["license_notice"]
+                    for source in content["sources"]
+                    if "license_notice" in source
+                }
+            )
+            if notices:
+                SubElement(entry, "rights", {"type": "text"}).text = "\n\n".join(notices)
     return tostring(root, encoding="utf-8", xml_declaration=True)
 
 

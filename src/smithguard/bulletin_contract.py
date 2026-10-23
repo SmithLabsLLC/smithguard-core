@@ -46,6 +46,17 @@ SOURCE_REFERENCE = closed(
         "used_fields": {**texts(40, 100), "minItems": 1},
     }
 )
+# Optional for historical and other publishers; CVE projections must carry the
+# complete reproduction notice and the originating CNA container identity.
+SOURCE_REFERENCE["properties"].update(
+    license_notice=text(5000),
+    cna_provider=closed(
+        {
+            "organization_id": {"type": "string", "format": "uuid", "maxLength": 36},
+            "short_name": text(200),
+        }
+    ),
+)
 CONTENT = closed(
     {
         "schema_version": {"const": VERSION, "type": "string"},
@@ -217,6 +228,7 @@ RECORD = closed(
 EVENT_KINDS = [
     "published",
     "corrected",
+    "source_updated",
     "disputed",
     "withdrawn",
     "expired",

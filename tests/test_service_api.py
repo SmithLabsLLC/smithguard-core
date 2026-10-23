@@ -1374,7 +1374,7 @@ def test_public_beta_returns_only_matching_warning_and_retires_warning_catalog(
     with Session(database.engine) as session, session.begin():
         assert (
             session.scalar(text("SELECT version_num FROM public.alembic_version"))
-            == "0035_bulletin_automation"
+            == "0036_bulletin_source_updates"
         )
         append_contract(
             session,

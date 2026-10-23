@@ -321,6 +321,7 @@ def collect_warning_lane_health(
         if stage in {"discovery", "qualification", "recheck"} and route in {
             "subscription",
             "grok_build_subscription",
+            "claude_code_subscription",
             "api_key",
         }:
             credential_routes[stage] = route

@@ -115,6 +115,7 @@ class InvalidDecisionProvider(LeadProvider):
     def qualify(self, payload):
         super().qualify(payload)
         return ProviderResult(
+            credential_route=self.credential_route,
             output_text=json.dumps(self.answer),
             response_id="synthetic-invalid-quality-decision",
             server_side_tool_calls=0,
