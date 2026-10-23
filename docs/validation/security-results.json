@@ -49,5 +49,147 @@
       }
     ],
     "scope": "Unignored working tree; all five redacted matches are non-secret test identifiers. Exact file hashes must match these dispositions."
+  },
+  "gitleaks_history": {
+    "findings": [
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 37,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 53,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 126,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 127,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 130,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 196,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 285,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 303,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 304,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 305,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 310,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "docs/validation/tested-files.json",
+        "line": 384,
+        "rule": "generic-api-key",
+        "commit": "25253f8315fe4f1c2321c6d8e268a26051f48183",
+        "disposition": "non-secret data",
+        "reason": "SHA-256 digest of the named public source file, independently recomputed; not a credential."
+      },
+      {
+        "file": "tests/test_record_accounting_schema.py",
+        "line": 51,
+        "rule": "generic-api-key",
+        "commit": "003a08f70583fe9e5cfb0236b437c15424890098",
+        "disposition": "non-secret data",
+        "reason": "Public GHSA record identifier"
+      },
+      {
+        "file": "tests/test_ingestion.py",
+        "line": 352,
+        "rule": "generic-api-key",
+        "commit": "003a08f70583fe9e5cfb0236b437c15424890098",
+        "disposition": "non-secret data",
+        "reason": "Synthetic idempotency label"
+      },
+      {
+        "file": "tests/test_advisory_catalog.py",
+        "line": 647,
+        "rule": "generic-api-key",
+        "commit": "003a08f70583fe9e5cfb0236b437c15424890098",
+        "disposition": "non-secret data",
+        "reason": "Public GHSA identifier"
+      },
+      {
+        "file": "tests/test_advisory_catalog.py",
+        "line": 726,
+        "rule": "generic-api-key",
+        "commit": "003a08f70583fe9e5cfb0236b437c15424890098",
+        "disposition": "non-secret data",
+        "reason": "Synthetic GHSA identifier"
+      },
+      {
+        "file": "tests/test_collectors.py",
+        "line": 174,
+        "rule": "generic-api-key",
+        "commit": "003a08f70583fe9e5cfb0236b437c15424890098",
+        "disposition": "non-secret data",
+        "reason": "Synthetic pagination cursor"
+      }
+    ],
+    "total": 17,
+    "scope": "Both public preparation commits. Five test identifiers and twelve independently recomputed source-file digests; no private Git history is present."
   }
 }

@@ -30,7 +30,9 @@ service are required. The locked dependency audit uses the public network.
   privacy-guard cases, historical-metadata test removal and pacing repair.
 - The final source scan has zero findings/errors from the four configured Python
   rules. Five redacted secret-scan matches are reviewed public/synthetic test
-  identifiers; their file hashes and reasons are recorded below.
+  identifiers; their file hashes and reasons are recorded below. The subsequent
+  full-history scan also flagged twelve SHA-256 values in the acceptance manifest;
+  each exactly matches the named public source file and is not a credential.
 - All distributed migration files and the journal are byte-identical to the
   maintained service source. Applied migrations were not rewritten for release.
 
