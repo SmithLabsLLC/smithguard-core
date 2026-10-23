@@ -36,9 +36,8 @@ license register with direct and companion dependency changes. Explain the reaso
 for a new dependency and preserve upstream license notices. Do not vendor a package
 without its applicable license and attribution.
 
-Contribute only material you have the right to submit. Once the license is approved
-and the repository is released, contributions are submitted under that repository
-license unless an explicitly agreed alternative says otherwise. Do not add a
+Contribute only material you have the right to submit. Contributions are submitted
+under the Apache-2.0 repository license unless an explicitly agreed alternative says otherwise. Do not add a
 separate license restriction to an ordinary patch. No copyright assignment is
 requested. AI-assisted work is welcome when the contributor has checked its
 correctness, provenance and tests; the contributor remains responsible for the patch.

@@ -1,8 +1,9 @@
 # Preparation validation — October 23, 2026
 
-This is an unpublished source preparation. License approval and public repository
-creation are pending. These results describe local validation, not hosted CI,
-production authorization or a complete security audit.
+Apache-2.0 publication was approved on October 23, 2026. The results below
+describe prepublication local validation, not hosted CI, production authorization
+or a complete security audit. Current hosted checks are available in the public
+repository Actions tab.
 
 ## Reproduce
 

@@ -29,9 +29,11 @@ pipx install uv==0.13.4
 pipx ensurepath
 ```
 
-Open a new shell if uv is not yet on PATH. From a checkout in any directory:
+Open a new shell if uv is not yet on PATH. Clone the repository and run:
 
 ```sh
+git clone https://github.com/SmithLabsLLC/smithguard-core.git
+cd smithguard-core
 uv python install 3.14.7
 uv sync --locked
 uv run --locked pytest -q tests/test_version_order.py
@@ -60,8 +62,7 @@ service-level commitment is offered. The code license governs reuse rights.
 
 ## License and data
 
-The proposed code license is Apache-2.0; this unpublished preparation requires the
-owner's license decision before release. See [LICENSE](LICENSE) for the candidate
+The code is licensed under Apache-2.0. See [LICENSE](LICENSE) for the
 terms and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency and fixture
 attribution. Upstream advisory content and hosted datasets retain their own terms;
 the code license does not relicense them. SmithGuard and Smith Labs names are not a
