@@ -11,7 +11,12 @@ from smithguard import bulletin_intake_store as store
 from smithguard.bulletin_contract import BulletinError, bulletin_id
 from smithguard.bulletin_facts import envelope, semantic_hash
 from smithguard.bulletin_freshness import recheck_due
-from smithguard.bulletin_source_parser import SourceCandidate, parse_index, publisher_detail
+from smithguard.bulletin_source_parser import (
+    CISCO_DATE_BASIS,
+    SourceCandidate,
+    parse_index,
+    publisher_detail,
+)
 from smithguard.bulletin_sources import NETWORK_SOURCES, SOURCE_IDS
 from smithguard.bulletin_store import capacity, lock_stream, mark_stale
 from smithguard.db.bulletin_models import (
@@ -60,6 +65,14 @@ class FetchBudget:
         finally:
             if archive:
                 self.archive_ready_at = time.monotonic() + 5.0
+
+
+def date_requalification(current):
+    """Legacy Cisco feed dates require a bounded authoritative detail recheck."""
+    return (
+        current.source_key == "cisco-advisories"
+        and current.document["document"]["facts"].get("date_basis") != CISCO_DATE_BASIS
+    )
 
 
 def active_known(session, source, *, now):
@@ -117,12 +130,18 @@ def stage(session, source, candidates, *, now, baseline):
         if previous is not None and previous.first_seen_at < now - timedelta(days=ACTIVE_DAYS):
             continue
         doc = candidate.document()
+        repair_dates = previous is not None and date_requalification(previous)
         if previous is not None and candidate.needs_detail:
             previous_doc = previous.document["document"]
             index_same = previous_doc["facts"].get("index_hash") == doc["facts"].get(
                 "index_hash", doc["facts"]["body_hash"]
             )
-            if index_same and not recheck_due(previous, now) and not previous.publication_pending:
+            if (
+                index_same
+                and not repair_dates
+                and not recheck_due(previous, now)
+                and not previous.publication_pending
+            ):
                 continue  # An index does not re-verify a detail page.
         digest = semantic_hash(doc)
         if previous is not None and digest == previous.semantic_hash:
@@ -194,7 +213,7 @@ def stage(session, source, candidates, *, now, baseline):
         pending.qualification_required = candidate.needs_detail
         pending.kind = (
             "recheck"
-            if previous and candidate.needs_detail and index_same
+            if previous and candidate.needs_detail and index_same and not repair_dates
             else "withdrawn"
             if candidate.facts["withdrawn"]
             else "corrected"
@@ -212,7 +231,7 @@ def stage(session, source, candidates, *, now, baseline):
             else:
                 pending.next_attempt_at = None
         count += int(new_slot)
-        if previous is not None and not candidate.needs_detail:
+        if previous is not None and (not candidate.needs_detail or repair_dates):
             mark_stale(
                 session, bulletin_id(source, candidate.url), reason="verification_pending", now=now
             )
@@ -417,7 +436,11 @@ def run_source(
             candidates = list(parse_index(source, fetched.body, now=now))
             seen = {c.url for c in candidates}
             for url, current in known.items():
-                if url not in seen and (recheck_due(current, now) or current.publication_pending):
+                if url not in seen and (
+                    date_requalification(current)
+                    or recheck_due(current, now)
+                    or current.publication_pending
+                ):
                     doc = current.document["document"]
                     candidates.append(
                         SourceCandidate(
@@ -496,7 +519,11 @@ def run_source(
     if error and error != "policy_paused" and enabled() and source in NETWORK_SOURCES:
         corrections = []
         for url, current in known.items():
-            if recheck_due(current, now) or current.publication_pending:
+            if (
+                date_requalification(current)
+                or recheck_due(current, now)
+                or current.publication_pending
+            ):
                 doc = current.document["document"]
                 corrections.append(
                     SourceCandidate(

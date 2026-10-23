@@ -4,6 +4,9 @@ These are citation boundaries, not new network collectors or article licenses.
 """
 
 MANUAL_SOURCE_PATHS = {
+    "php-reviewed-security-facts": {
+        "www.php.net": r"/archive/[12][0-9]{3}\.php",
+    },
     "zdi-linux-security-reports": {
         "www.zerodayinitiative.com": r"/advisories/upcoming/",
         "lists.openwall.net": r"/linux-kernel/2026/10/21/(?:2666|2694|2711)",

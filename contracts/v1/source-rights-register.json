@@ -499,6 +499,15 @@
           "source_sha256": "sha256:c9eb73d1ba4df423f35632fbddff54997bf9595329e80d23109bb3588bb9237a"
         }
       ]
+    },
+    {
+      "source_id": "gbsec:source:php-reviewed-security-facts",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:429d7e4189fb122d3bdbf150bb7354e1e47621809b8b8e03e8f431fc7eb07709"
+        }
+      ]
     }
   ],
   "source_profiles": [
@@ -4153,6 +4162,80 @@
             "description",
             "body",
             "author",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:php-reviewed-security-facts",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "PHP reviewed security facts",
+        "source_class": "primary",
+        "canonical_url": "https://www.php.net/archive/2026.php",
+        "operator": "The PHP Group",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.php.net"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "The PHP Group",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.php.net/copyright.php",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2026-11-05",
+          "notes": "October 23 continuing owner-authorized bulletin maintenance for the already configured PHP source. Individually reviewed, independently worded security facts only, with original dated archive permalink and attribution. PHP website copyright terms permit viewing, download and printing under conditions; no broader prose redistribution license is inferred. No copied headlines, descriptions, article bodies, images, personal data or logos. Raw bodies remain transient. This manual-only profile does not broaden automatic feed projection or authorize a new collector."
+        },
+        "correction_url": "https://www.php.net/archive/2026.php",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
             "personal_fields"
           ],
           "storage": "omit",

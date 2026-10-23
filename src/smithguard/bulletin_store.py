@@ -9,7 +9,7 @@ from __future__ import annotations
 import base64
 import binascii
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
@@ -274,7 +274,7 @@ def publish(session, document, *, grant, registry, now, manual_approval=None):
         )
     row.freshness_reason = None
     row.expires_at = (
-        row.first_seen_at + timedelta(hours=24)
+        row.first_seen_at.astimezone(UTC) + timedelta(hours=24)
         if document["evidence_class"] == "emerging_report"
         else None
     )
@@ -343,7 +343,7 @@ def publish(session, document, *, grant, registry, now, manual_approval=None):
 
     register(session, identity, document, now=now)
     if document["source_key"] in SOURCE_IDS:
-        row.expires_at = row.first_seen_at + timedelta(days=90)
+        row.expires_at = row.first_seen_at.astimezone(UTC) + timedelta(days=90)
     session.flush()
     return {"bulletin_id": identity, "revision": row.revision, "sequence": sequence}
 

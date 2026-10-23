@@ -218,7 +218,10 @@ def publication_rights(document, registry: RightsRegistry, *, now):
             manual_paths.get(parsed.hostname, r"(?!)"), parsed.path
         ):
             raise BulletinError("bulletin_source_url")
-        if reference["source_id"] == FEED_SOURCES["php"]:
+        if reference["source_id"] in {
+            FEED_SOURCES["php"],
+            "gbsec:source:php-reviewed-security-facts",
+        }:
             source_url("php", reference["record_url"])
         elif parsed.fragment:
             raise BulletinError("bulletin_source_fragment")

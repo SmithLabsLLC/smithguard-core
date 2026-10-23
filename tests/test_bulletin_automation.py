@@ -504,7 +504,12 @@ def test_review_resolution_is_exact_once_and_preserves_audit(database):
         (
             "cisco-advisories",
             "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-example",
-            '<div id="advisorycontentcontainer"><h1>Synthetic</h1><p>CVE-2026-12345</p></div>',
+            '<div id="advisorycontentcontainer"><h1>Synthetic</h1>'
+            '<div id="ud-published"><div class="ud-divHeaderLabelSpacing">First Published:</div>'
+            '<div class="divLabelContent">2026 October 21 19:12 GMT</div></div>'
+            '<div id="ud-last-updated"><div class="ud-divHeaderLabelSpacing">Last Updated:</div>'
+            '<div class="divLabelContent">2026 October 22 16:16 GMT</div></div>'
+            "<p>CVE-2026-12345</p></div>",
             "",
             None,
         ),
