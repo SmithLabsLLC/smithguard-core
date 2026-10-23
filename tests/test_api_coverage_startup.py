@@ -187,19 +187,39 @@ def test_cancelled_startup_drains_worker_and_never_publishes_late_report(databas
 def test_build_budget_rejects_late_sql_result_without_publishing(database, monkeypatch):
     _COVERAGE_REPORT_CACHE.clear()
     app, runtime = _app_and_runtime(database, monkeypatch)
-    finished = Event()
-    monkeypatch.setattr(api_module, "COVERAGE_BUILD_SECONDS", 0.05)
+    finished, query_returned, rejected = Event(), Event(), Event()
+    clock = [0.0]
+    monkeypatch.setattr(api_module, "COVERAGE_BUILD_SECONDS", 1.0)
+    monkeypatch.setattr(api_module, "monotonic", lambda: clock[0])
+    original_execute = database.engine.dialect.do_execute
+    statement = "SELECT 1 /* coverage-budget-test */"
+
+    def execute(cursor, sql, parameters, context=None):
+        original_execute(cursor, sql, parameters, context)
+        if sql == statement:
+            # Expire only after real SQL returns, before the runtime's
+            # after-cursor checkpoint. Startup/connection scheduling cannot
+            # consume this test's budget before its intended query is reached.
+            query_returned.set()
+            clock[0] = 2.0
+
+    monkeypatch.setattr(database.engine.dialect, "do_execute", execute)
 
     def slow(session, **arguments):
         try:
-            session.execute(text("SELECT pg_sleep(0.1)"))
+            session.execute(text(statement))
             pytest.fail("expired build continued past its query boundary")
+        except TimeoutError:
+            rejected.set()
+            raise
         finally:
             finished.set()
 
     monkeypatch.setattr(coverage_module, "_build_coverage_report", slow)
     with TestClient(app, base_url="https://security.example") as client:
         assert finished.wait(3)
+        assert query_returned.is_set()
+        assert rejected.is_set()
         assert client.get("/healthz").status_code == 200
         assert client.get("/readyz").status_code == 503
         assert not runtime.coverage_ready.is_set()
