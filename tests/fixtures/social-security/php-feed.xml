@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Reduced PHP fixture</title>
+<entry><title>PHP security release advance notice</title><id>https://www.php.net/archive/2026.php#2026-10-20-1</id><published>2026-10-20T20:32:00Z</published><updated>2026-10-20T20:32:00Z</updated><content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>PHP plans a security release. The notice supplies no affected version ranges.</p></div></content></entry>
+<entry><title>Older security notice</title><id>https://www.php.net/archive/2026.php#2026-09-20-1</id><published>2026-09-20T20:32:00Z</published><updated>2026-09-20T20:32:00Z</updated><content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Synthetic old security notice tests the cutoff.</p></div></content></entry></feed>

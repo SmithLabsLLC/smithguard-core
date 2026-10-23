@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_path": "historical-replay-catalog.json",
+  "replay_mode": "offline_contract_fixture",
+  "selection": "all cases with earliest_evidence_replay=true",
+  "replayed_at": "2026-08-05T00:00:00Z",
+  "result_status": "passed",
+  "internal_measurement": {
+    "source_to_ready": "not_measured",
+    "correction": "not_measured",
+    "reason": "The Phase 0A replay proves deterministic contract expectations only. Product ingestion and correction timing begins after the CP-0B2 engine exists."
+  },
+  "results": [
+    {
+      "case_id": "replay-001",
+      "input_sha256": "sha256:8a0119272040d9e7b3c27de2ca9b898d4cc05c05a9267cfa75c8a0d92a72f26e",
+      "first_source_record_id": "upstream:event-stream-issue-116",
+      "last_source_record_id": "GHSA-mh6f-8j2x-4483",
+      "output": {
+        "incident_group": "event-stream-2018",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-002",
+      "input_sha256": "sha256:f06c2360854def83aa3bb220052833e9eff810bfcc15bfd48d0a1e8ea751ebe2",
+      "first_source_record_id": "upstream:eslint-postmortem-2018-07",
+      "last_source_record_id": "GHSA-hxxf-q3w9-4xgw",
+      "output": {
+        "incident_group": "eslint-scope-2018",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-003",
+      "input_sha256": "sha256:4816dc15c9cb88a64e22b392960d4b126085a59c9b8ea4634b20ed6a24054ad4",
+      "first_source_record_id": "upstream:ua-parser-js-issue-536",
+      "last_source_record_id": "GHSA-pjwm-rvh2-c87w",
+      "output": {
+        "incident_group": "ua-parser-js-2021",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-004",
+      "input_sha256": "sha256:a5dac02ecea120ac93965775ce39d10a93444185423045c1b9879b09be94d170",
+      "first_source_record_id": "upstream:coa-issue-99",
+      "last_source_record_id": "GHSA-73qr-pfmq-6rp8",
+      "output": {
+        "incident_group": "coa-2021",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-009",
+      "input_sha256": "sha256:a67a95ab7725451d41bcbaa4f458a128a5275f8895b682e4a60b6e3558a9ce00",
+      "first_source_record_id": "upstream:colors-issue-285",
+      "last_source_record_id": "GHSA-5rqg-jm4f-cqx7",
+      "output": {
+        "incident_group": "colors-protestware-2022",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-016",
+      "input_sha256": "sha256:f91afec9858a90c58591d6798d12b59eeaddde90f4a95b5f5049dd884b10a7cf",
+      "first_source_record_id": "GHSA-mrrh-fwg8-r2c3",
+      "last_source_record_id": "GHSA-mrrh-fwg8-r2c3",
+      "output": {
+        "incident_group": "tj-actions-changed-files-2025",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-017",
+      "input_sha256": "sha256:d928a63537632c7df4492acf3c74d8fbe1ad60154957327924ccde354826e281",
+      "first_source_record_id": "GHSA-qmg3-hpqr-gqvc",
+      "last_source_record_id": "GHSA-qmg3-hpqr-gqvc",
+      "output": {
+        "incident_group": "reviewdog-action-setup-2025",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-018",
+      "input_sha256": "sha256:c84f39e44db7c3251d966576a42541fcff63cfd1d404723f37e1910bc07d50a3",
+      "first_source_record_id": "GHSA-vxmw-7h4f-hqxh",
+      "last_source_record_id": "GHSA-vxmw-7h4f-hqxh",
+      "output": {
+        "incident_group": "gh-action-pypi-publish-2025",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-019",
+      "input_sha256": "sha256:b75fb1b48faec6235126c35a8f815f621b8d3deeafecee247f30705075379247",
+      "first_source_record_id": "GHSA-5xq9-5g24-4g6f",
+      "last_source_record_id": "GHSA-5xq9-5g24-4g6f",
+      "output": {
+        "incident_group": "sonarqube-scan-action-2025",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    },
+    {
+      "case_id": "replay-020",
+      "input_sha256": "sha256:e91dcbbef859d1e190c38cc0c40f98b46f328ddcd3e5dbd8893ceeabb8ec4915",
+      "first_source_record_id": "GHSA-pwf7-47c3-mfhx",
+      "last_source_record_id": "GHSA-pwf7-47c3-mfhx",
+      "output": {
+        "incident_group": "prek-action-2025",
+        "incident_status": "confirmed",
+        "correction_state": "current",
+        "receipt_result": "approval_required"
+      }
+    }
+  ]
+}

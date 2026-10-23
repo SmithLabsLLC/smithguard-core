@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule bounded SmithGuard warning rechecks hourly
+
+[Timer]
+OnCalendar=*-*-* *:15:00 UTC
+Persistent=yes
+AccuracySec=1min
+Unit=smithguard-warning-recheck.service
+
+[Install]
+WantedBy=timers.target

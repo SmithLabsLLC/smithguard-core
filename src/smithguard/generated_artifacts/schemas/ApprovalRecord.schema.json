@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "Decision1": {
+      "enum": [
+        "approved",
+        "denied"
+      ],
+      "title": "Decision1",
+      "type": "string"
+    },
+    "Scope": {
+      "enum": [
+        "one_assessment",
+        "artifact_version",
+        "project",
+        "time_bounded"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "Timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "decision": {
+      "$ref": "#/$defs/Decision1"
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "approval_record",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "policy_decision_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Policy Decision Id",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "policy_decision_id",
+    "decision",
+    "actor_id",
+    "decided_at",
+    "reason",
+    "scope",
+    "expires_at"
+  ],
+  "title": "ApprovalRecord",
+  "type": "object"
+}

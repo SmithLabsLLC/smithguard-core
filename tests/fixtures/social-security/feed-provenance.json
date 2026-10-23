@@ -1,0 +1,15 @@
+{
+  "scope": "Reduced parser fixtures: short factual paraphrases and synthetic old entry. Dates are fixed test inputs, not evidence for lead-time claims. Original private feed bytes remain immutable.",
+  "source_snapshots": [
+    {
+      "source": "php",
+      "sha256": "febd38828f78d49bf42632c970b13871937c3e89be46da3db225d2b6b3c70e26",
+      "fixture_sha256": "548aecd41907df9e1a89dc69c13dc6449978610fc34c54de7a710c5c3e070608"
+    },
+    {
+      "source": "mozilla",
+      "sha256": "d0056e8df4124cadd3c32b8f11f381602ea4c55fc88d0a6053e02e4fb42cd34f",
+      "fixture_sha256": "3d50bb51ca4d58dac21cdb49cb38b3277c851db388b9dac6f1022130d070ba49"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[Unit]
+Description=SmithGuard bounded scheduled public warning discovery
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/discovery.env
+
+[Service]
+Type=oneshot
+User=smithguard-signals
+Group=smithguard-signals
+EnvironmentFile=/etc/SmithGuard/env/discovery.env
+Environment=SMITHGUARD_XAI_KEY_FILE=%d/xai.key
+LoadCredential=xai.key:/etc/SmithGuard/credentials/xai.key
+WorkingDirectory=/opt/SmithGuard/current
+ExecCondition=/usr/bin/test ${SMITHGUARD_WARNING_DISPATCH_ENABLED} = 1
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-discovery --enqueue-due --limit 1
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-discovery --work --limit 1
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-discovery --work --limit 1
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-discovery --work --limit 1
+TimeoutStartSec=8min
+UMask=0077
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+TemporaryFileSystem=/run/smithguard-grok:rw,noswap,nodev,nosuid,noexec,size=64M,mode=1777
+TemporaryFileSystem=/tmp:rw,noswap,nodev,nosuid,noexec,size=8M,mode=1777
+TemporaryFileSystem=/var/tmp:rw,noswap,nodev,nosuid,noexec,size=8M,mode=1777
+ReadWritePaths=/var/lib/smithguard/grok-auth
+LimitCORE=0
+MemorySwapMax=0
+MemoryMax=1G
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128
+IPAddressDeny=localhost
+IPAddressDeny=10.0.0.0/8
+IPAddressDeny=172.16.0.0/12
+IPAddressDeny=192.168.0.0/16
+IPAddressDeny=100.64.0.0/10
+IPAddressDeny=fc00::/7
+# Exact production VPC resolver, verified September 27. Native fetch SSRF checks
+# still reject private targets, including this DNS-only operational exception.
+IPAddressAllow=172.31.0.2/32

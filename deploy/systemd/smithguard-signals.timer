@@ -1,0 +1,11 @@
+[Unit]
+Description=Expire active SmithGuard warnings and leads every five minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00 UTC
+Persistent=yes
+AccuracySec=1min
+Unit=smithguard-signals.service
+
+[Install]
+WantedBy=timers.target

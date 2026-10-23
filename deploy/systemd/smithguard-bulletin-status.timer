@@ -1,0 +1,11 @@
+[Unit]
+Description=Check SmithGuard bulletin freshness and rights every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00 UTC
+Persistent=yes
+AccuracySec=1s
+Unit=smithguard-bulletin-status.service
+
+[Install]
+WantedBy=timers.target

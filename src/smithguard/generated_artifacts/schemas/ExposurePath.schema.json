@@ -1,0 +1,181 @@
+{
+  "$defs": {
+    "EvidenceState": {
+      "enum": [
+        "present",
+        "missing",
+        "invalid",
+        "stale",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ],
+      "title": "EvidenceState",
+      "type": "string"
+    },
+    "ExposurePathStep": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_state": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "node_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "node_type": {
+          "$ref": "#/$defs/NodeType"
+        },
+        "relationship_type": {
+          "$ref": "#/$defs/RelationshipType1"
+        },
+        "sequence": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sequence",
+        "node_id",
+        "node_type",
+        "relationship_type",
+        "evidence_state"
+      ],
+      "title": "ExposurePathStep",
+      "type": "object"
+    },
+    "NodeType": {
+      "enum": [
+        "project",
+        "workflow",
+        "image",
+        "artifact",
+        "incident",
+        "claim",
+        "evidence"
+      ],
+      "title": "NodeType",
+      "type": "string"
+    },
+    "RelationshipType1": {
+      "enum": [
+        "root",
+        "depends_on",
+        "contains",
+        "uses",
+        "affects",
+        "supports"
+      ],
+      "title": "RelationshipType1",
+      "type": "string"
+    },
+    "State10": {
+      "enum": [
+        "proven",
+        "probable",
+        "possible",
+        "conflicting",
+        "unknown"
+      ],
+      "title": "State10",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "affected_artifact_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Affected Artifact Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "exposure_path",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "project_alias": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Project Alias",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/State10"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/ExposurePathStep"
+      },
+      "maxItems": 101,
+      "minItems": 2,
+      "title": "Steps",
+      "type": "array"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "project_alias",
+    "incident_id",
+    "affected_artifact_id",
+    "steps",
+    "state"
+  ],
+  "title": "ExposurePath",
+  "type": "object"
+}

@@ -1,0 +1,4164 @@
+{
+  "schema_version": "1.0.0",
+  "register_id": "gbsec:rights-register:phase-0a-v1",
+  "reviewed_on": "2026-08-05",
+  "default_review_due_on": "2026-11-05",
+  "policy": {
+    "unknown_rights": "quarantine",
+    "retrieval_does_not_imply_redistribution": true,
+    "raw_and_normalized_outputs_are_separate": true,
+    "source_corrections_and_withdrawals_propagate": true,
+    "social_content_training_allowed": false
+  },
+  "source_revisions": [
+    {
+      "source_id": "gbsec:source:github-advisory-database",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:aee4948e79e935ab11b4ffff4961b6d478f05bbb68ee666084e910d1ce6a1c5b"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:268ea04c36d9d55e3be0995312e4809679ec04cbe86ea91fd6f4e58ef44d1aac"
+        },
+        {
+          "revision": 3,
+          "source_sha256": "sha256:ff36b83aa21ae2118aa6c50bf2cff081112e8e3eb6d1e6866a836a7a7328fbf8"
+        },
+        {
+          "revision": 4,
+          "source_sha256": "sha256:b6d6cd78083042b2b15e6a64c41c628e6d31bd3f57f24f4a82ba25eded375d05"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:openssf-malicious-packages",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:3309a5c433a83f557247ba5af3a4072d2b8b649f08e119fd4b9d32b8d182a5fc"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:aee7bf1c87c45bc86a007fad5de4e00c7e74653c875f7e5ca7c02abea67a9b07"
+        },
+        {
+          "revision": 3,
+          "source_sha256": "sha256:3251a2286d44d4513b602e220d317ec98f9d4a1c5cc06cc4c93abfa3fac6fbcf"
+        },
+        {
+          "revision": 4,
+          "source_sha256": "sha256:524bfeb743614f727af834f92733e834904040addd7f0e29a47a5cda02ca3220"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:osv-dev",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:9b0d3529d373d015afbfcd73f58bcf7e2c86cb7bbd8a342bea89b438561a26b0"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:62b23a7983729f214bd14a4b254ad6d2641b1ed2f7e0323341958f80e3be4d17"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:pypa-advisory-database",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:41ed1583d524186baae553cfe4f413676bc96ffb2a54fe2480536971c251ed74"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:pypi-apis",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:2940d9e016c8a87fe76052f35abe48bf691480217d41dbef60e5a8c1820549b1"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:cve-list-v5",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:e8d3c5b7776fddca954664821c5d64b272462d4a04681ff492d1a3c1c0b6d8af"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:first-epss",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:ac8ad2274bae533f8e600ebb6078e6634886e795597594ab2625ae2f0831549c"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:b6c1a46046103d1adc38ca70ea0b10e511c57d2fa9046ac263fc1f50e427bb9d"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:cisa-kev",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:7536f6a136bd8df3843b9278d96926643bd41433641b1870de1d2eaaadefa281"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:87ea099692a4ebac69729a33fdf613aa4aca7af0342cd991f5f263b74bff9a7a"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:enisa-euvd",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:e582903d3a86995542a9c7a0340f92d6504fca6f50ee117fa207803db5aa982f"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:go-vulnerability-database",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:554465dddcd0ddf0f612539a1d7da1c8b673818bc2c982470224f82f45c4b740"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:cb5f85756ffa98357c0cd7cb777da49d096c7b48bd3b929c70cb1da9bca17771"
+        },
+        {
+          "revision": 3,
+          "source_sha256": "sha256:e79fa5549c67f7aac15991b8baefff04cdbdd0fde8ea107c3854ff02abc01f3e"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:rustsec-advisory-database",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:b8ab6c24408115a1e3f6ef1c5887d2a7aff645dff1fde8a79d0916b453a7d120"
+        },
+        {
+          "revision": 2,
+          "source_sha256": "sha256:ef996cb3b14f23a69be853cdcee749992bfff9cd6db56a97ff411d16d872fc5b"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:xai-search",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:64bbed9c0a89a24af3862c42ee3e7403065246d515c088d2506b7814247a5ca7"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:openssf-package-feeds",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:54f70c7ae799e8ad7eb6d946d68b229da66548c657238649e358d1e00e5fd003"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:php-security-notices",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:1aaa2981236cf44b23565b300dc21f5c3174d4830fbd575b34c919858e93f318"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:mozilla-security-blog",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:deeaa3301319f38e7225922af278656e05cee6b8a13a2d7c5b5f147e16364a17"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:node-security-notices",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:4ebb0c18af9ae02ca26477e40b5ae95c4e85ea7789f096b523b565b14220c1f3"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:maintainer-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:66b973bc3f1cc46acfe35f22c92cd68bf9e53c782764463da62a252f3221af7a"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:aws-security-facts",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:4d398f4e46070ee1d344f80db1fe81cf94dd740b46fa9344912ef36028d30f4b"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:gitlab-security-releases",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:977cba8ed4b8ee8d000fed7402c0117788c785df122f61a577182af5fbc55dfe"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:litellm-security-incidents",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:48a02c25daf796e9bb2f9af91a131619f32ca6c7b55590c1f9b1eeb2458fcdf2"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:railway-security-incidents",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:0fa6cfdb94db98e54771b6e84d5eaf927990ee4f8a4b19605d7a68419d03b0a1"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:ubuntu-security-notices",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:f1d3161d4c28bbd91babb74ee92038003cd1acd035911525afaf5394134e1078"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:siteguard-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:0ab3ef6e5e6645a689e097b26039fcb221784a641243ea31760e14f2aeb2bf95"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:plex-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:12f93a960131e004cf6e72db8ce3516840f243bf564e8a084928a6843645564b"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:siemens-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:5f242a9c94abe90ba3c2cb907c660be6b27e44fce407c2fc1c85cfa4c2acdd61"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:fortinet-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:c790dd1ab58b1b2031bb3fd843373b516477691d765c0982d7b98d380b7e1788"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:beyondtrust-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:0c7490c3264f1fe4e245b28fd67efd220b8761c38156cad963f7cc7dcc004860"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:atlassian-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:f50c4388b32f2011c821766d8982ac34151aa326772924f87fe3bfbb0496f59d"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:ahsay-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:345c107608dc9848aa2534aa644cbbbe2368155aa380822130fcf5e72fc5385e"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:cisco-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:11588410d14b9092cdb3961b3259b884f015fa8815f133222a9eb476652d0c08"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:paloalto-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:236bfb6952cf5c98469b0029880fdbc264e6dcfeccca47398359d5009fab5d84"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:ivanti-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:5428a9338f32e3d56029b4573caef3bfa356e221ee48172198d5696afb5e6710"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:microsoft-security-advisories",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:bbe44b4a16b7651cffc7d527f47fa1f6af37052ce84836a58d87cf95febea720"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:cisa-reviewed-security-facts",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:4b03e4906c3faa606e610f4b96290c989303f41dd8df3b6bce5c75f451dff9af"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:zdi-linux-security-reports",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:2dc58b43d2203258c9a8ef14710955c936bfd701594dd0a74576ad9794f34a94"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:linux-kernel-maintainer-facts",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:57cf4e7cfbeffc883e2171420ce6fa96fcb038d658a875e8ee303a31030f3a5f"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:mozilla-mfsa",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:87e283d24d574d691525b6c01225c8c4187a9945e6f9d6ac1bfb67d3955a98e9"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:ubuntu-usn-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:17f4a302c0b2f9ce1efc2e8b5fa763a551a5094fd3a7238cc9b688bdc0c3ef6f"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:node-security-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:fc91ffda173768ecee200627d6992bed6d19fe894f78dbdecff38cfb524f9fba"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:gitlab-security-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:e4d5d66dd0deebf9b0302715a320e78fc8b2e6ab72549346601a95a21c02f73a"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:zdi-published-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:ae00e2473b591befc6dfee1ab650ad92f4ae1b6f3ef6d0c0ec670c387b00d02a"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:cisco-security-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:1a5c094776e0c17bc689c84bb77d5f5af25dcd13df6e7c452d35bdc53be594b6"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:fortinet-security-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:09b865778566f03d4fd35b8575a003506614d934af4e14d1e168c71e29a88c1a"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:aws-bulletin-feed",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:0dababe176763e27e8ebef0ddf7ad87c8c31d1fbc89dae763d37e1470bf9136d"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:apple-release-index",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:418abbb3fbd17da3ca284017a72ae13b85133da544100f74b2ea933adbe4c3fc"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:paloalto-advisory-index",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:f3de04024a98718739189050f84c445d746e21a34fa2e7cc7080a32b3daaf7c1"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:zdi-upcoming-discovery",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:b256b8a5bda15ba8f1c60bc94c3471ad67611d0c6c8e14ecd44422d97e387e45"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:oss-security-discovery",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:85417aea53b1b67b39e6febc1bfa7c34fe07be0cb5d9a13bbab6868f009674c4"
+        }
+      ]
+    },
+    {
+      "source_id": "gbsec:source:linux-security-discovery",
+      "revisions": [
+        {
+          "revision": 1,
+          "source_sha256": "sha256:c9eb73d1ba4df423f35632fbddff54997bf9595329e80d23109bb3588bb9237a"
+        }
+      ]
+    }
+  ],
+  "source_profiles": [
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:github-advisory-database",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 4,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-31T12:00:00Z",
+        "data_classification": "public",
+        "name": "GitHub Advisory Database",
+        "source_class": "curated",
+        "canonical_url": "https://github.com/github/advisory-database",
+        "operator": "GitHub, Inc.",
+        "acquisition_methods": [
+          "git",
+          "rest_api"
+        ],
+        "allowed_hosts": [
+          "github.com",
+          "api.github.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "GitHub Advisory Database",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC-BY-4.0",
+          "terms_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features",
+          "reviewed_on": "2026-08-07",
+          "review_due_on": "2026-11-07",
+          "notes": "Use the repository or API responsibly and link each used advisory or the database."
+        },
+        "correction_url": "https://github.com/github/advisory-database/blob/main/CONTRIBUTING.md",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly complete malware, reviewed, and unreviewed REST collection with segmented history"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "ghsa_id",
+            "type",
+            "html_url",
+            "identifiers",
+            "published_at",
+            "updated_at",
+            "withdrawn_at",
+            "vulnerabilities.package",
+            "vulnerabilities.first_patched_version",
+            "vulnerabilities.vulnerable_version_range",
+            "cwes.cwe_id",
+            "references"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution"
+        },
+        {
+          "fields": [
+            "summary",
+            "description",
+            "cvss",
+            "cwes.cwe_name"
+          ],
+          "storage": "omit",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "credits",
+            "published_by",
+            "reviewed_by",
+            "contact_or_personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "omit_by_default"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:openssf-malicious-packages",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 4,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-31T12:00:00Z",
+        "data_classification": "public",
+        "name": "OpenSSF Malicious Packages",
+        "source_class": "curated",
+        "canonical_url": "https://github.com/ossf/malicious-packages",
+        "operator": "Open Source Security Foundation",
+        "acquisition_methods": [
+          "git"
+        ],
+        "allowed_hosts": [
+          "github.com",
+          "raw.githubusercontent.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "allowed",
+          "normalized_fact_redistribution": "allowed",
+          "attribution_required": true,
+          "attribution_text": "OpenSSF Malicious Packages",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "Apache-2.0",
+          "terms_url": "https://github.com/ossf/malicious-packages/blob/a37fdcd5094cb2a0df4a253fc117bdf1220112a6/LICENSE",
+          "reviewed_on": "2026-08-16",
+          "review_due_on": "2026-11-16",
+          "notes": "License bytes reverified at commit a37fdcd5094cb2a0df4a253fc117bdf1220112a6. The isolated source-controlled shadow runtime may retain exact Git checkpoints and raw source records. Preserve upstream IDs, source links, withdrawal state, corrections, and Apache notices. Production scheduling and public effects remain separately disabled."
+        },
+        "correction_url": "https://github.com/ossf/malicious-packages/issues",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly complete malicious and withdrawn Git catalog collection; isolated legacy shadow retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "id",
+            "modified",
+            "published",
+            "withdrawn",
+            "affected",
+            "aliases",
+            "references",
+            "database_specific"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_source_link"
+        },
+        {
+          "fields": [
+            "details",
+            "summary"
+          ],
+          "storage": "immutable",
+          "public_output": "derived_summary_preferred"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_query_gateway",
+      "source": {
+        "id": "gbsec:source:osv-dev",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 2,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-11T23:30:36Z",
+        "data_classification": "public",
+        "name": "OSV.dev aggregator",
+        "source_class": "curated",
+        "canonical_url": "https://osv.dev/",
+        "operator": "Google Open Source Security Team",
+        "acquisition_methods": [
+          "rest_api",
+          "download"
+        ],
+        "allowed_hosts": [
+          "api.osv.dev",
+          "osv.dev",
+          "storage.googleapis.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "conditional",
+          "raw_redistribution": "unknown",
+          "normalized_fact_redistribution": "conditional",
+          "attribution_required": true,
+          "attribution_text": "OSV.dev and the identified upstream database",
+          "retention": "until_withdrawn",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": null,
+          "terms_url": "https://google.github.io/osv.dev/faq/",
+          "reviewed_on": "2026-08-11",
+          "review_due_on": "2026-11-11",
+          "notes": "OSV is an aggregator. Apply the upstream record license, preserve alias, upstream, and related semantics, and never use one blanket OSV data license."
+        },
+        "correction_url": "https://google.github.io/osv.dev/faq/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Manual replay queries only until upstream-license dispatch is implemented"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "schema_version",
+            "id",
+            "aliases",
+            "upstream",
+            "related",
+            "affected",
+            "references",
+            "published",
+            "modified",
+            "withdrawn"
+          ],
+          "storage": "source_license_required",
+          "public_output": "source_license_required"
+        },
+        {
+          "fields": [
+            "summary",
+            "details",
+            "database_specific",
+            "ecosystem_specific"
+          ],
+          "storage": "quarantine_until_upstream_rights_resolved",
+          "public_output": "link_only_until_upstream_rights_resolved"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:pypa-advisory-database",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "Python Packaging Advisory Database",
+        "source_class": "curated",
+        "canonical_url": "https://github.com/pypa/advisory-database",
+        "operator": "Python Packaging Authority",
+        "acquisition_methods": [
+          "git"
+        ],
+        "allowed_hosts": [
+          "github.com",
+          "raw.githubusercontent.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Python Packaging Advisory Database",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC-BY-4.0",
+          "terms_url": "https://github.com/pypa/advisory-database/blob/main/LICENSE",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-11-05",
+          "notes": "Preserve attribution and the original advisory link."
+        },
+        "correction_url": "https://github.com/pypa/advisory-database/blob/main/CONTRIBUTING.md",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Manual Git replay in Phase 0A; no unattended collector yet"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "id",
+            "aliases",
+            "affected",
+            "references",
+            "published",
+            "modified",
+            "withdrawn"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution"
+        },
+        {
+          "fields": [
+            "summary",
+            "details"
+          ],
+          "storage": "immutable",
+          "public_output": "short_derived_summary_and_link"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_artifact_enrichment",
+      "source": {
+        "id": "gbsec:source:pypi-apis",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "PyPI RSS, JSON, Index, and Integrity APIs",
+        "source_class": "primary",
+        "canonical_url": "https://docs.pypi.org/api/",
+        "operator": "Python Software Foundation",
+        "acquisition_methods": [
+          "rest_api",
+          "rss"
+        ],
+        "allowed_hosts": [
+          "pypi.org",
+          "docs.pypi.org",
+          "policies.python.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "conditional",
+          "raw_redistribution": "link_only",
+          "normalized_fact_redistribution": "conditional",
+          "attribution_required": true,
+          "attribution_text": "Python Package Index",
+          "retention": "minimal_metadata_only",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": null,
+          "terms_url": "https://policies.python.org/pypi.org/Terms-of-Service/",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-11-05",
+          "notes": "Use ETags, RSS for changes, a descriptive user agent, and no package bodies or personal fields."
+        },
+        "correction_url": "https://pypi.org/help/",
+        "withdrawal_behavior": "remove_raw_keep_minimal_tombstone",
+        "kill_switch": true,
+        "cadence": "Manual exact-artifact lookup only until responsible polling controls exist"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "project_name",
+            "version",
+            "filename",
+            "sha256",
+            "upload_time",
+            "yanked",
+            "provenance_identity"
+          ],
+          "storage": "minimal_metadata",
+          "public_output": "normalized_fact_and_source_link"
+        },
+        {
+          "fields": [
+            "description",
+            "author",
+            "author_email",
+            "maintainer",
+            "maintainer_email",
+            "package_body"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        },
+        {
+          "fields": [
+            "attestation_envelope"
+          ],
+          "storage": "checksum_and_verification_state_preferred",
+          "public_output": "source_link_and_verification_state"
+        }
+      ]
+    },
+    {
+      "activation": "enrichment_only",
+      "source": {
+        "id": "gbsec:source:cve-list-v5",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "CVE List V5",
+        "source_class": "primary",
+        "canonical_url": "https://github.com/CVEProject/cvelistV5",
+        "operator": "CVE Program",
+        "acquisition_methods": [
+          "git",
+          "download"
+        ],
+        "allowed_hosts": [
+          "github.com",
+          "cve.org",
+          "www.cve.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "CVE Program and MITRE",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-CVE-Terms-of-Use",
+          "terms_url": "https://www.cve.org/legal/termsofuse",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-11-05",
+          "notes": "Reproduce the CVE copyright designation and license in copies; preserve CNA container provenance."
+        },
+        "correction_url": "https://www.cve.org/ReportRequest/ReportRequestForNonCNAs",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Deferred enrichment; not a Phase 1 publication dependency"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "cveMetadata.cveId",
+            "state",
+            "datePublished",
+            "dateUpdated",
+            "containers"
+          ],
+          "storage": "immutable_with_container_provenance",
+          "public_output": "allowed_with_cve_notice"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_artifact_enrichment",
+      "source": {
+        "id": "gbsec:source:first-epss",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 2,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-10-06T23:55:00Z",
+        "data_classification": "public",
+        "name": "FIRST Exploit Prediction Scoring System",
+        "source_class": "curated",
+        "canonical_url": "https://www.first.org/epss/",
+        "operator": "FIRST EPSS SIG",
+        "acquisition_methods": [
+          "rest_api",
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.first.org",
+          "api.first.org",
+          "epss.empiricalsecurity.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "FIRST Exploit Prediction Scoring System",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": false,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-FIRST-EPSS-Public-Use",
+          "terms_url": "https://www.first.org/epss/faq",
+          "reviewed_on": "2026-10-06",
+          "review_due_on": "2027-01-06",
+          "notes": "Dated probability and percentile only; neither exploitation proof nor package applicability. FIRST directs bulk use to its public publisher CSV. Attribution retained."
+        },
+        "correction_url": "https://www.first.org/epss/faq",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Daily bounded exact-CVE context"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "cve",
+            "epss",
+            "percentile",
+            "date",
+            "model_version"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_artifact_enrichment",
+      "source": {
+        "id": "gbsec:source:cisa-kev",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 2,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-10-06T23:55:00Z",
+        "data_classification": "public",
+        "name": "CISA Known Exploited Vulnerabilities Catalog",
+        "source_class": "primary",
+        "canonical_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "operator": "Cybersecurity and Infrastructure Security Agency",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.cisa.gov"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "allowed",
+          "normalized_fact_redistribution": "allowed",
+          "attribution_required": true,
+          "attribution_text": "CISA Known Exploited Vulnerabilities Catalog",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC0-1.0",
+          "terms_url": "https://raw.githubusercontent.com/cisagov/kev-data/develop/LICENSE",
+          "reviewed_on": "2026-10-06",
+          "review_due_on": "2027-01-06",
+          "notes": "CISA official kev-data LICENSE explicitly places database under CC0-1.0. Retain exact CVE membership/date only; absence never proves safety; no branding or third-party linked content rights."
+        },
+        "correction_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Daily bounded exact-CVE context"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "cve",
+            "date_added"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        }
+      ]
+    },
+    {
+      "activation": "deferred_link_only",
+      "source": {
+        "id": "gbsec:source:enisa-euvd",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "ENISA European Vulnerability Database",
+        "source_class": "curated",
+        "canonical_url": "https://euvd.enisa.europa.eu/",
+        "operator": "European Union Agency for Cybersecurity",
+        "acquisition_methods": [
+          "rest_api",
+          "download"
+        ],
+        "allowed_hosts": [
+          "euvd.enisa.europa.eu",
+          "euvdservices.enisa.europa.eu"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "link_only",
+          "raw_redistribution": "link_only",
+          "normalized_fact_redistribution": "link_only",
+          "attribution_required": true,
+          "attribution_text": "ENISA EUVD",
+          "retention": "link_only",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_link_only",
+          "license_expression": null,
+          "terms_url": "https://euvd.enisa.europa.eu/apidoc",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-09-05",
+          "notes": "API access is documented but reusable output terms are not settled in this review."
+        },
+        "correction_url": "https://euvd.enisa.europa.eu/",
+        "withdrawal_behavior": "link_only",
+        "kill_switch": true,
+        "cadence": "No collector; link-only discovery after rights review"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "euvd_id",
+            "cve_id"
+          ],
+          "storage": "identifier_and_source_link_only",
+          "public_output": "source_link_only_until_license_settled"
+        },
+        {
+          "fields": [
+            "descriptions",
+            "scores",
+            "products",
+            "advisory_bodies"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited_until_license_settled"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:go-vulnerability-database",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 3,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-10-07T00:08:23Z",
+        "data_classification": "public",
+        "name": "Go Vulnerability Database",
+        "source_class": "curated",
+        "canonical_url": "https://vuln.go.dev/",
+        "operator": "Go Security Team",
+        "acquisition_methods": [
+          "download",
+          "rest_api"
+        ],
+        "allowed_hosts": [
+          "vuln.go.dev",
+          "github.com",
+          "pkg.go.dev"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Go Vulnerability Database",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC-BY-4.0",
+          "terms_url": "https://raw.githubusercontent.com/golang/vulndb/master/LICENSE",
+          "reviewed_on": "2026-10-06",
+          "review_due_on": "2027-01-06",
+          "notes": "Database content CC-BY-4.0, software BSD-3-Clause separately. Retain origin attribution and reviewed status; symbol context is not application reachability."
+        },
+        "correction_url": "https://go.dev/s/vulndb-report-new",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Daily bounded complete origin snapshot for supported coordinates"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "schema_version",
+            "id",
+            "aliases",
+            "affected",
+            "references",
+            "published",
+            "modified",
+            "withdrawn",
+            "database_specific"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:rustsec-advisory-database",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 2,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-10-06T23:55:00Z",
+        "data_classification": "public",
+        "name": "RustSec Advisory Database",
+        "source_class": "curated",
+        "canonical_url": "https://github.com/rustsec/advisory-db",
+        "operator": "RustSec",
+        "acquisition_methods": [
+          "git",
+          "download"
+        ],
+        "allowed_hosts": [
+          "github.com",
+          "rustsec.org",
+          "codeload.github.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "conditional",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "RustSec Advisory Database or identified GitHub advisory",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC0-1.0 OR CC-BY-4.0-per-record",
+          "terms_url": "https://raw.githubusercontent.com/rustsec/advisory-db/main/README.md",
+          "reviewed_on": "2026-10-06",
+          "review_due_on": "2027-01-06",
+          "notes": "CC0 default and CC-BY-4.0 per-record checks; attribute every record and retain original source for CC-BY. Informational notices do not become confirmed vulnerabilities."
+        },
+        "correction_url": "https://github.com/rustsec/advisory-db/issues",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Daily bounded complete origin snapshot for supported coordinates"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "schema_version",
+            "id",
+            "aliases",
+            "affected",
+            "references",
+            "published",
+            "modified",
+            "withdrawn",
+            "database_specific"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        }
+      ]
+    },
+    {
+      "activation": "manual_replay_only",
+      "source": {
+        "id": "gbsec:source:xai-search",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "restricted_source",
+        "name": "xAI X Search and Web Search",
+        "source_class": "discovery",
+        "canonical_url": "https://docs.x.ai/developers/tools/x-search",
+        "operator": "xAI",
+        "acquisition_methods": [
+          "manual_replay"
+        ],
+        "allowed_hosts": [
+          "api.x.ai",
+          "docs.x.ai"
+        ],
+        "rights": {
+          "retrieval": "conditional",
+          "raw_storage": "conditional",
+          "raw_redistribution": "link_only",
+          "normalized_fact_redistribution": "link_only",
+          "attribution_required": true,
+          "attribution_text": "Original linked public source",
+          "retention": "minimal_metadata_only",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": null,
+          "terms_url": "https://x.ai/legal/terms-of-service",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-09-05",
+          "notes": "Internal discovery only; store IDs, URLs, times, minimal permitted excerpt hash, and derived claims. No model training."
+        },
+        "correction_url": "https://x.ai/legal/terms-of-service",
+        "withdrawal_behavior": "remove_raw_keep_minimal_tombstone",
+        "kill_switch": true,
+        "cadence": "Manual capped Phase 0 replay only; no unattended collection"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "post_or_page_id",
+            "canonical_url",
+            "author_or_publisher_id",
+            "published_at",
+            "retrieved_at",
+            "deletion_state"
+          ],
+          "storage": "minimal_metadata",
+          "public_output": "link_only"
+        },
+        {
+          "fields": [
+            "full_post",
+            "full_page",
+            "screenshot",
+            "media",
+            "model_prompt",
+            "model_output"
+          ],
+          "storage": "omit_by_default",
+          "public_output": "prohibited"
+        },
+        {
+          "fields": [
+            "derived_claim",
+            "independence_cluster",
+            "query_version",
+            "model_version"
+          ],
+          "storage": "internal",
+          "public_output": "prohibited_during_first_beta"
+        }
+      ]
+    },
+    {
+      "activation": "deferred_pending_upstream_data_terms",
+      "source": {
+        "id": "gbsec:source:openssf-package-feeds",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "OpenSSF Package Feeds",
+        "source_class": "raw_signal",
+        "canonical_url": "https://github.com/ossf/package-feeds",
+        "operator": "Open Source Security Foundation",
+        "acquisition_methods": [
+          "git"
+        ],
+        "allowed_hosts": [
+          "github.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "conditional",
+          "raw_redistribution": "unknown",
+          "normalized_fact_redistribution": "unknown",
+          "attribution_required": true,
+          "attribution_text": "OpenSSF Package Feeds and the identified package registry",
+          "retention": "minimal_metadata_only",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "quarantined",
+          "license_expression": null,
+          "terms_url": "https://github.com/ossf/package-feeds",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-09-05",
+          "notes": "Adapter code rights do not settle rights to registry-derived feed data. Do not activate until each upstream registry field is resolved."
+        },
+        "correction_url": "https://github.com/ossf/package-feeds/issues",
+        "withdrawal_behavior": "remove_raw_keep_minimal_tombstone",
+        "kill_switch": true,
+        "cadence": "No activation in current first wave"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "adapter_code"
+          ],
+          "storage": "source_code_license_applies",
+          "public_output": "not_evidence_data"
+        },
+        {
+          "fields": [
+            "registry_release_events",
+            "package_metadata",
+            "publisher_metadata"
+          ],
+          "storage": "quarantine_until_registry_terms_resolved",
+          "public_output": "prohibited_until_registry_terms_resolved"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:php-security-notices",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "PHP security notices",
+        "source_class": "primary",
+        "canonical_url": "https://www.php.net/feed.atom",
+        "operator": "The PHP Group",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.php.net"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "The PHP Group",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Factual-Notice-Metadata-Only",
+          "terms_url": "https://www.php.net/copyright.php",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "Owner-approved official bulletin scope. Only source identity, canonical permalink, publication/update time, explicit withdrawal and existence of a security-related notice are public. Fixed SmithGuard wording; no copied headline, article, excerpt, image or logo. This is a narrow factual-metadata decision, not a claim of permission to republish publisher prose. Private accepted snippets support integrity and correction checks. Release-bound activation and measured source qualification are separate gates."
+        },
+        "correction_url": "https://www.php.net/feed.atom",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded complete feed; activation requires qualified bulletin grant"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "withdrawn",
+            "security_notice"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "context",
+            "entry_sha256",
+            "content_sha256"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:mozilla-security-blog",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Mozilla security blog",
+        "source_class": "primary",
+        "canonical_url": "https://blog.mozilla.org/security/feed/",
+        "operator": "Mozilla",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "blog.mozilla.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Mozilla",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Factual-Notice-Metadata-Only",
+          "terms_url": "https://www.mozilla.org/en-US/foundation/licensing/website-content/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "Owner-approved official bulletin scope. Only source identity, canonical permalink, publication/update time, explicit withdrawal and existence of a security-related notice are public. Fixed SmithGuard wording; no copied headline, article, excerpt, image or logo. This is a narrow factual-metadata decision, not a claim of permission to republish publisher prose. Private accepted snippets support integrity and correction checks. Release-bound activation and measured source qualification are separate gates."
+        },
+        "correction_url": "https://blog.mozilla.org/security/feed/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded complete feed; activation requires qualified bulletin grant"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "withdrawn",
+            "security_notice"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "context",
+            "entry_sha256",
+            "content_sha256"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:node-security-notices",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Node.js security announcements",
+        "source_class": "primary",
+        "canonical_url": "https://nodejs.org/en/blog/vulnerability/",
+        "operator": "The Node.js Project",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "nodejs.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "The Node.js Project",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://github.com/nodejs/nodejs.org/blob/main/LICENSE",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 21 owner-approved reviewed bulletin scope. Individually verified factual identifiers, dates, affected/fixed versions, publisher severity, issue mechanisms and conditions may be summarized in original SmithGuard wording with attribution and source links. No copied headline, description, excerpt, article, exploit payload, image, personal data or branding; no claim to republish publisher prose. This manual-only profile does not broaden the existing GitHub Advisory Database collector's field rules or enable a new source schedule."
+        },
+        "correction_url": "https://nodejs.org/en/blog/vulnerability/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:maintainer-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Maintainer security advisories on GitHub",
+        "source_class": "primary",
+        "canonical_url": "https://github.com/advisories",
+        "operator": "The linked project maintainers (advisories hosted on GitHub)",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "github.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "The linked project maintainers (advisories hosted on GitHub)",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 21 owner-approved reviewed bulletin scope. Individually verified factual identifiers, dates, affected/fixed versions, publisher severity, issue mechanisms and conditions may be summarized in original SmithGuard wording with attribution and source links. No copied headline, description, excerpt, article, exploit payload, image, personal data or branding; no claim to republish publisher prose. This manual-only profile does not broaden the existing GitHub Advisory Database collector's field rules or enable a new source schedule."
+        },
+        "correction_url": "https://github.com/advisories",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:aws-security-facts",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Amazon Web Services",
+        "source_class": "primary",
+        "canonical_url": "https://aws.amazon.com/security/",
+        "operator": "Amazon Web Services",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "aws.amazon.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Amazon Web Services",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://aws.amazon.com/terms/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Site content is proprietary; no article or logo copying is approved."
+        },
+        "correction_url": "https://aws.amazon.com/security/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:gitlab-security-releases",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "GitLab",
+        "source_class": "primary",
+        "canonical_url": "https://docs.gitlab.com/releases/patches/",
+        "operator": "GitLab",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "docs.gitlab.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "GitLab",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://handbook.gitlab.com/handbook/legal/policies/website-terms-of-use/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Website access is limited; no transfer of content ownership or prose license is inferred."
+        },
+        "correction_url": "https://docs.gitlab.com/releases/patches/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:litellm-security-incidents",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "BerriAI / LiteLLM",
+        "source_class": "primary",
+        "canonical_url": "https://docs.litellm.ai/blog/",
+        "operator": "BerriAI / LiteLLM",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "docs.litellm.ai"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "BerriAI / LiteLLM",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://github.com/BerriAI/litellm/blob/main/LICENSE",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Repository license distinguishes MIT material from enterprise restrictions. No assumption that every hosted article is MIT; only manually checked facts approved."
+        },
+        "correction_url": "https://docs.litellm.ai/blog/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:railway-security-incidents",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Railway",
+        "source_class": "primary",
+        "canonical_url": "https://blog.railway.com/",
+        "operator": "Railway",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "blog.railway.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Railway",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://railway.com/legal/terms",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Service terms restrict content redistribution. No content reproduction, automated scraping or customer records approved; original incident fact reporting only."
+        },
+        "correction_url": "https://blog.railway.com/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:ubuntu-security-notices",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Canonical / Ubuntu",
+        "source_class": "primary",
+        "canonical_url": "https://ubuntu.com/security/notices",
+        "operator": "Canonical / Ubuntu",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "ubuntu.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Canonical / Ubuntu",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://canonical.com/legal/intellectual-property-policy",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. No Canonical endorsement, branding, package redistribution or copied advisory prose."
+        },
+        "correction_url": "https://ubuntu.com/security/notices",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:siteguard-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "EG Secure Solutions",
+        "source_class": "primary",
+        "canonical_url": "https://www.eg-secure.co.jp/siteguard/news/alert-202610-1",
+        "operator": "EG Secure Solutions",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.eg-secure.co.jp"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "EG Secure Solutions",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.eg-secure.co.jp/siteguard/news/alert-202610-1",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Reviewed public advisory copyright notice; no broader redistribution terms located. Only original factual reporting, never copied notice text."
+        },
+        "correction_url": "https://www.eg-secure.co.jp/siteguard/news/alert-202610-1",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:plex-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Plex",
+        "source_class": "primary",
+        "canonical_url": "https://forums.plex.tv/t/important-security-update-for-plex-media-server-v1-43-2-and-earlier/942319",
+        "operator": "Plex",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "forums.plex.tv"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Plex",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.plex.tv/about/privacy-legal/plex-terms-of-service/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Terms endpoint was unavailable during review; public vendor advisory checked. No general content license inferred; only original factual reporting, no forum-user data or prose."
+        },
+        "correction_url": "https://forums.plex.tv/t/important-security-update-for-plex-media-server-v1-43-2-and-earlier/942319",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:siemens-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Siemens ProductCERT",
+        "source_class": "primary",
+        "canonical_url": "https://productcert.siemens.com/",
+        "operator": "Siemens ProductCERT",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "productcert.siemens.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Siemens ProductCERT",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://productcert.siemens.com/terms-of-use/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Special advisory provisions require technical correctness, consistency with recommendations and link to original. Retain attribution and correction/withdrawal handling; our narrower facts-only scope applies."
+        },
+        "correction_url": "https://productcert.siemens.com/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:fortinet-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Fortinet PSIRT",
+        "source_class": "primary",
+        "canonical_url": "https://fortiguard.fortinet.com/psirt",
+        "operator": "Fortinet PSIRT",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "fortiguard.fortinet.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Fortinet PSIRT",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.fortinet.com/legal",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. No public/commercial reproduction license for site materials. This profile permits only the cited advisory URL: factual content in this batch comes from separately attributed CISA data; vendor matrix remains unverified."
+        },
+        "correction_url": "https://fortiguard.fortinet.com/psirt",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:beyondtrust-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "BeyondTrust",
+        "source_class": "primary",
+        "canonical_url": "https://www.beyondtrust.com/trust-center/security-advisories/bt26-05",
+        "operator": "BeyondTrust",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.beyondtrust.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "BeyondTrust",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.beyondtrust.com/trust-center/security-advisories/bt26-05",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Reviewed public advisory copyright notice. No broad article redistribution license inferred from product subscription terms."
+        },
+        "correction_url": "https://www.beyondtrust.com/trust-center/security-advisories/bt26-05",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:atlassian-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Atlassian",
+        "source_class": "primary",
+        "canonical_url": "https://confluence.atlassian.com/security/",
+        "operator": "Atlassian",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "confluence.atlassian.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Atlassian",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.atlassian.com/legal",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Reviewed publisher legal directory and advisory; no blanket documentation or article redistribution license asserted."
+        },
+        "correction_url": "https://confluence.atlassian.com/security/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:ahsay-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Ahsay",
+        "source_class": "primary",
+        "canonical_url": "https://www.ahsay.com/en/company/announcements/patch-cve-105133-105134-update",
+        "operator": "Ahsay",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.ahsay.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Ahsay",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.ahsay.com/en/company/terms-and-conditions",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Product license restrictions do not supply a public prose redistribution grant. Only original factual bulletin reporting."
+        },
+        "correction_url": "https://www.ahsay.com/en/company/announcements/patch-cve-105133-105134-update",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:cisco-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Cisco PSIRT",
+        "source_class": "primary",
+        "canonical_url": "https://sec.cloudapps.cisco.com/security/center/publicationListing.x",
+        "operator": "Cisco PSIRT",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "sec.cloudapps.cisco.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Cisco PSIRT",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Cisco reserves website rights; preserve attribution, original wording and link to advisory. No article or branding reproduction."
+        },
+        "correction_url": "https://sec.cloudapps.cisco.com/security/center/publicationListing.x",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:paloalto-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Palo Alto Networks / Unit 42",
+        "source_class": "primary",
+        "canonical_url": "https://security.paloaltonetworks.com/",
+        "operator": "Palo Alto Networks / Unit 42",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "security.paloaltonetworks.com",
+          "unit42.paloaltonetworks.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Palo Alto Networks / Unit 42",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.paloaltonetworks.com/legal-notices/terms-of-use",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Site material reproduction is restricted. Only original factual reporting with source links; no copied articles, telemetry, indicators, payloads, figures or branding."
+        },
+        "correction_url": "https://security.paloaltonetworks.com/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:ivanti-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Ivanti",
+        "source_class": "primary",
+        "canonical_url": "https://www.ivanti.com/blog/october-2026-patch-tuesday",
+        "operator": "Ivanti",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.ivanti.com",
+          "hub.ivanti.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Ivanti",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.ivanti.com/company/legal/terms-of-use",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. Informational use with reserved rights; only original factual reporting. An inaccessible linked matrix remains unknown, not reconstructed from secondary reports."
+        },
+        "correction_url": "https://www.ivanti.com/blog/october-2026-patch-tuesday",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "affected_versions",
+            "fixed_versions",
+            "publisher_severity",
+            "security_mechanism",
+            "prerequisites",
+            "withdrawn",
+            "exploitation_observations",
+            "affected_artifacts",
+            "exposure_windows",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:microsoft-security-advisories",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Microsoft Security Response Center",
+        "source_class": "primary",
+        "canonical_url": "https://msrc.microsoft.com/update-guide/",
+        "operator": "Microsoft Security Response Center",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "msrc.microsoft.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Microsoft Security Response Center",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.microsoft.com/en-us/legal/terms-of-use",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. No broad redistribution grant. This profile permits only the linked advisory URL; batch facts come from separately attributed CISA data. Unread JavaScript content and edition/KB matrix remain unknown."
+        },
+        "correction_url": "https://msrc.microsoft.com/update-guide/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:cisa-reviewed-security-facts",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "CISA Known Exploited Vulnerabilities Catalog",
+        "source_class": "primary",
+        "canonical_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "operator": "CISA Known Exploited Vulnerabilities Catalog",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "raw.githubusercontent.com",
+          "www.cisa.gov"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "CISA Known Exploited Vulnerabilities Catalog",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC0-1.0",
+          "terms_url": "https://raw.githubusercontent.com/cisagov/kev-data/main/LICENSE",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized, individual manual factual bulletin review. Facts are independently worded and attributed; raw storage and raw redistribution prohibited. No copied headlines, descriptions, articles, payloads, images, personal data or logos. This is a narrow factual-reporting policy decision, not a publisher license or legal warranty. KEV data is CC0-1.0; linked third-party content retains separate rights. No CISA/DHS logo or endorsement. This separate manual profile does not broaden the automatic membership/date-only projection."
+        },
+        "correction_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "cve",
+            "date_added",
+            "product",
+            "security_mechanism",
+            "prerequisites",
+            "exploitation_observations",
+            "remediation_guidance"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:zdi-linux-security-reports",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Trend Micro Zero Day Initiative Linux reports",
+        "source_class": "primary",
+        "canonical_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+        "operator": "Trend Micro Zero Day Initiative (original public Linux-kernel reports; archived by Openwall)",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.zerodayinitiative.com",
+          "lists.openwall.net"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Trend Micro Zero Day Initiative (original public Linux-kernel reports; archived by Openwall)",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized individual factual bulletin review. Original wording and attribution only; no copied message bodies, headlines, descriptions, raw source retention, exploit payloads, attachments, personal fields, images or branding. ZDI register carries an all-rights-reserved notice; public archive access and GitHub terms do not grant a general article license. This is a narrow factual-reporting policy decision, not a publisher license or warranty. No automated connector, schedule or social publication is enabled."
+        },
+        "correction_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "publisher_severity",
+            "security_mechanism",
+            "affected_artifacts",
+            "remediation_guidance",
+            "withdrawn",
+            "affected_versions",
+            "prerequisites"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "bulletin_manual_facts_only",
+      "source": {
+        "id": "gbsec:source:linux-kernel-maintainer-facts",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-22T00:00:00Z",
+        "updated_at": "2026-10-22T00:00:00Z",
+        "data_classification": "public",
+        "name": "Linux kernel maintainer security facts",
+        "source_class": "primary",
+        "canonical_url": "https://lists.openwall.net/linux-kernel/2026/10/22/1149",
+        "operator": "Linux kernel maintainers (original public replies and linked fix metadata)",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "lists.openwall.net",
+          "github.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Linux kernel maintainers (original public replies and linked fix metadata)",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Reviewed-Security-Facts-Only",
+          "terms_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+          "reviewed_on": "2026-10-22",
+          "review_due_on": "2026-11-05",
+          "notes": "October 22 owner-authorized individual factual bulletin review. Original wording and attribution only; no copied message bodies, headlines, descriptions, raw source retention, exploit payloads, attachments, personal fields, images or branding. ZDI register carries an all-rights-reserved notice; public archive access and GitHub terms do not grant a general article license. This is a narrow factual-reporting policy decision, not a publisher license or warranty. No automated connector, schedule or social publication is enabled."
+        },
+        "correction_url": "https://lists.openwall.net/linux-kernel/2026/10/22/1149",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Individual reviewed bulletin only; no automatic collector or publication"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "advisory_ids",
+            "publisher_severity",
+            "security_mechanism",
+            "affected_artifacts",
+            "remediation_guidance",
+            "withdrawn"
+          ],
+          "storage": "reviewed_facts_only",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "exploit_payload",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:mozilla-mfsa",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Mozilla automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://www.mozilla.org/en-US/security/advisories/",
+        "operator": "Mozilla",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.mozilla.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Mozilla",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.mozilla.org/en-US/foundation/licensing/website-content/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://www.mozilla.org/en-US/security/advisories/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:ubuntu-usn-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Canonical / Ubuntu automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://ubuntu.com/security/notices/rss.xml",
+        "operator": "Canonical / Ubuntu",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "ubuntu.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Canonical / Ubuntu",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://canonical.com/legal/intellectual-property-policy",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://ubuntu.com/security/notices/rss.xml",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:node-security-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "The Node.js Project automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://nodejs.org/en/feed/blog.xml",
+        "operator": "The Node.js Project",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "nodejs.org"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "The Node.js Project",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://github.com/nodejs/nodejs.org/blob/main/LICENSE",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://nodejs.org/en/feed/blog.xml",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:gitlab-security-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "GitLab automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://docs.gitlab.com/releases/patch-releases.xml",
+        "operator": "GitLab",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "docs.gitlab.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "GitLab",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://handbook.gitlab.com/handbook/legal/policies/website-terms-of-use/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://docs.gitlab.com/releases/patch-releases.xml",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:zdi-published-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Trend Micro Zero Day Initiative automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://www.zerodayinitiative.com/rss/published/",
+        "operator": "Trend Micro Zero Day Initiative",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.zerodayinitiative.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Trend Micro Zero Day Initiative",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://www.zerodayinitiative.com/rss/published/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:cisco-security-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Cisco automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml",
+        "operator": "Cisco",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "sec.cloudapps.cisco.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Cisco",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:fortinet-security-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Fortinet automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://filestore.fortinet.com/fortiguard/rss/ir.xml",
+        "operator": "Fortinet",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "filestore.fortinet.com",
+          "fortiguard.fortinet.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Fortinet",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.fortinet.com/legal",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized ongoing official bulletin facts. Store only identifiers, URLs, dates, explicit severity, product/package names, source-listed fixes and content commitments. Do not store or reproduce publisher headlines, article bodies, people, images or logos. This narrow factual-use decision is not a license to republish the site. Keep source attribution and public correction/takedown controls. Reassess terms and scope on change and at the review deadline; do not automatically approve changed terms."
+        },
+        "correction_url": "https://filestore.fortinet.com/fortiguard/rss/ir.xml",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "allowed_with_attribution_and_source_date"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:aws-bulletin-feed",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Amazon Web Services automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://aws.amazon.com/security/security-bulletins/rss/feed/",
+        "operator": "Amazon Web Services",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "aws.amazon.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Amazon Web Services",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://aws.amazon.com/terms/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner direction October 22 America/New_York: include every supported source in the free public service, superseding the proposed exclusion based on general website terms. This records owner-approved automatic acquisition and narrow factual output, not a publisher license or a claim that free access changes publisher terms. Keep attribution and primary-source links; omit headlines, article prose, author/contact information and raw bodies. Security, factual validation, correction and freshness controls remain."
+        },
+        "correction_url": "https://aws.amazon.com/security/security-bulletins/rss/feed/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "normalized_fact_only"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:apple-release-index",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Apple automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://support.apple.com/en-us/100100",
+        "operator": "Apple",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "support.apple.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Apple",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.apple.com/legal/internet-services/terms/site.html",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner direction October 22 America/New_York: include every supported source in the free public service, superseding the proposed exclusion based on general website terms. This records owner-approved automatic acquisition and narrow factual output, not a publisher license or a claim that free access changes publisher terms. Keep attribution and primary-source links; omit headlines, article prose, author/contact information and raw bodies. Security, factual validation, correction and freshness controls remain."
+        },
+        "correction_url": "https://support.apple.com/en-us/100100",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "normalized_fact_only"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:paloalto-advisory-index",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Palo Alto Networks automatic advisory facts",
+        "source_class": "primary",
+        "canonical_url": "https://security.paloaltonetworks.com/",
+        "operator": "Palo Alto Networks",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "security.paloaltonetworks.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "Palo Alto Networks",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.paloaltonetworks.com/legal-notices/terms-of-use",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner direction October 22 America/New_York: include every supported source in the free public service, superseding the proposed exclusion based on general website terms. This records owner-approved automatic acquisition and narrow factual output, not a publisher license or a claim that free access changes publisher terms. Keep attribution and primary-source links; omit headlines, article prose, author/contact information and raw bodies. Security, factual validation, correction and freshness controls remain."
+        },
+        "correction_url": "https://security.paloaltonetworks.com/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded official source check; 90-day active recheck window; immutable history retained"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "published_at",
+            "modified_at",
+            "record_id",
+            "aliases",
+            "severity",
+            "subjects",
+            "fixed_versions",
+            "withdrawn",
+            "time_precision"
+          ],
+          "storage": "immutable",
+          "public_output": "normalized_fact_only"
+        },
+        {
+          "fields": [
+            "body_hash",
+            "index_hash",
+            "parser"
+          ],
+          "storage": "immutable",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "article_body",
+            "images",
+            "logos",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:zdi-upcoming-discovery",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Trend Micro Zero Day Initiative discovery",
+        "source_class": "primary",
+        "canonical_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+        "operator": "Trend Micro Zero Day Initiative",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.zerodayinitiative.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "prohibited",
+          "attribution_required": true,
+          "attribution_text": "Trend Micro Zero Day Initiative",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://www.zerodayinitiative.com/advisories/disclosure_policy/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized public disclosure discovery. Retain only source URL, identifier, publication date, factual vendor name, subject commitment and queue disposition. Omit source prose, author/contact and personal fields. No automatic publication or confirmation. Changes require reviewed factual evidence and a separate publication decision."
+        },
+        "correction_url": "https://www.zerodayinitiative.com/advisories/upcoming/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded discovery; analyst review required; no automatic public output"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "record_id",
+            "source_published_at",
+            "time_precision",
+            "vendor",
+            "aliases",
+            "subject_hash",
+            "basis",
+            "verification"
+          ],
+          "storage": "minimal_metadata",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "body",
+            "author",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:oss-security-discovery",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Openwall oss-security archive discovery",
+        "source_class": "primary",
+        "canonical_url": "https://www.openwall.com/lists/oss-security/",
+        "operator": "Openwall oss-security archive",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "www.openwall.com"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "prohibited",
+          "attribution_required": true,
+          "attribution_text": "Openwall oss-security archive",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://oss-security.openwall.org/wiki/mailing-lists/oss-security",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized public disclosure discovery. Retain only source URL, identifier, publication date, factual vendor name, subject commitment and queue disposition. Omit source prose, author/contact and personal fields. No automatic publication or confirmation. Changes require reviewed factual evidence and a separate publication decision."
+        },
+        "correction_url": "https://www.openwall.com/lists/oss-security/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded discovery; analyst review required; no automatic public output"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "record_id",
+            "source_published_at",
+            "time_precision",
+            "vendor",
+            "aliases",
+            "subject_hash",
+            "basis",
+            "verification"
+          ],
+          "storage": "minimal_metadata",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "body",
+            "author",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    },
+    {
+      "activation": "phase1_planned_collector",
+      "source": {
+        "id": "gbsec:source:linux-security-discovery",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-10-23T00:00:00Z",
+        "updated_at": "2026-10-23T00:00:00Z",
+        "data_classification": "public",
+        "name": "Public Linux kernel archive discovery",
+        "source_class": "primary",
+        "canonical_url": "https://lists.openwall.net/linux-kernel/",
+        "operator": "Public Linux kernel archive",
+        "acquisition_methods": [
+          "download"
+        ],
+        "allowed_hosts": [
+          "lists.openwall.net"
+        ],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "prohibited",
+          "raw_redistribution": "prohibited",
+          "normalized_fact_redistribution": "prohibited",
+          "attribution_required": true,
+          "attribution_text": "Public Linux kernel archive",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_internal",
+          "license_expression": "LicenseRef-SmithGuard-Official-Advisory-Facts-Only",
+          "terms_url": "https://lists.openwall.net/linux-kernel/",
+          "reviewed_on": "2026-10-23",
+          "review_due_on": "2027-01-21",
+          "notes": "Owner-authorized public disclosure discovery. Retain only source URL, identifier, publication date, factual vendor name, subject commitment and queue disposition. Omit source prose, author/contact and personal fields. No automatic publication or confirmation. Changes require reviewed factual evidence and a separate publication decision."
+        },
+        "correction_url": "https://lists.openwall.net/linux-kernel/",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Hourly bounded discovery; analyst review required; no automatic public output"
+      },
+      "field_rules": [
+        {
+          "fields": [
+            "url",
+            "record_id",
+            "source_published_at",
+            "time_precision",
+            "vendor",
+            "aliases",
+            "subject_hash",
+            "basis",
+            "verification"
+          ],
+          "storage": "minimal_metadata",
+          "public_output": "omit"
+        },
+        {
+          "fields": [
+            "title",
+            "description",
+            "body",
+            "author",
+            "personal_fields"
+          ],
+          "storage": "omit",
+          "public_output": "prohibited"
+        }
+      ]
+    }
+  ]
+}

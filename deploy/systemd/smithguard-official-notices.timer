@@ -1,0 +1,12 @@
+[Unit]
+Description=SmithGuard hourly official security notice intake
+
+[Timer]
+OnCalendar=*-*-* *:17:00 UTC
+AccuracySec=10s
+RandomizedDelaySec=30s
+Persistent=false
+Unit=smithguard-official-notices.service
+
+[Install]
+WantedBy=timers.target

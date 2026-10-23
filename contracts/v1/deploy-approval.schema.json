@@ -1,0 +1,300 @@
+{
+  "$id": "https://schemas.smithlabs.ai/smithguard/v1/deploy-approval.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "timer_name"
+              ]
+            },
+            {
+              "required": [
+                "timer_stamp_epoch"
+              ]
+            }
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "timer-change"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "required": [
+          "timer_name",
+          "timer_stamp_epoch"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "runtime-only"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "activate",
+                "rollback"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "migration"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "activate",
+                "migrate",
+                "policy_change",
+                "rollback",
+                "unit_change"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "infra"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "credential_change",
+                "policy_change",
+                "rollback",
+                "timer_change",
+                "unit_change"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "timer-change"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "rollback",
+                "timer_change"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "unit-change"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "rollback",
+                "unit_change"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "policy-change"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "policy_change",
+                "rollback"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tier": {
+            "const": "credential-change"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "credential_change",
+                "rollback"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "allowed_actions": {
+      "items": {
+        "enum": [
+          "activate",
+          "migrate",
+          "timer_change",
+          "unit_change",
+          "policy_change",
+          "credential_change",
+          "rollback"
+        ]
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "approved_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "approved_by": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "artifact_commit": {
+      "pattern": "^[a-f0-9]{40}$",
+      "type": "string"
+    },
+    "artifact_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "note": {
+      "maxLength": 2000,
+      "type": "string"
+    },
+    "operation_id": {
+      "pattern": "^[0-9]{8}-[a-f0-9]{32}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "tier": {
+      "enum": [
+        "runtime-only",
+        "migration",
+        "infra",
+        "timer-change",
+        "unit-change",
+        "policy-change",
+        "credential-change"
+      ]
+    },
+    "timer_name": {
+      "enum": [
+        "discovery",
+        "recheck"
+      ]
+    },
+    "timer_stamp_epoch": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "operation_id",
+    "tier",
+    "artifact_sha256",
+    "artifact_commit",
+    "allowed_actions",
+    "approved_by",
+    "approved_at",
+    "expires_at",
+    "note"
+  ],
+  "title": "SmithGuard deploy approval",
+  "type": "object"
+}

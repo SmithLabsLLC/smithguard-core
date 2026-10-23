@@ -1,0 +1,364 @@
+{
+  "$defs": {
+    "AffectedExpression": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "AffectedExpression",
+      "type": "string"
+    },
+    "Ecosystem6": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "composer",
+        "erlang",
+        "git",
+        "maven",
+        "nuget",
+        "open-vsx",
+        "pub",
+        "rubygems",
+        "swift",
+        "vscode"
+      ],
+      "title": "Ecosystem6",
+      "type": "string"
+    },
+    "Ecosystem7": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker"
+      ],
+      "title": "Ecosystem7",
+      "type": "string"
+    },
+    "EventType2": {
+      "enum": [
+        "first_public_evidence",
+        "advisory_published",
+        "artifact_removed",
+        "corrected",
+        "disputed",
+        "withdrawn"
+      ],
+      "title": "EventType2",
+      "type": "string"
+    },
+    "ExpectedCorrectionState": {
+      "enum": [
+        "current",
+        "corrected",
+        "disputed",
+        "withdrawn",
+        "unknown"
+      ],
+      "title": "ExpectedCorrectionState",
+      "type": "string"
+    },
+    "ExpectedIncidentStatus": {
+      "enum": [
+        "investigating",
+        "reported",
+        "corroborated",
+        "confirmed",
+        "resolved",
+        "disputed",
+        "withdrawn",
+        "expired"
+      ],
+      "title": "ExpectedIncidentStatus",
+      "type": "string"
+    },
+    "ExpectedReceiptResult": {
+      "enum": [
+        "allow",
+        "allow_with_notice",
+        "acknowledgement_required",
+        "approval_required",
+        "deny",
+        "unknown"
+      ],
+      "title": "ExpectedReceiptResult",
+      "type": "string"
+    },
+    "FixtureOrigin": {
+      "enum": [
+        "public_fact",
+        "synthetic_derived"
+      ],
+      "title": "FixtureOrigin",
+      "type": "string"
+    },
+    "ReplayArtifactInput": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem6"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "name",
+        "version",
+        "digest"
+      ],
+      "title": "ReplayArtifactInput",
+      "type": "object"
+    },
+    "ReplayExpectedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_type": {
+          "$ref": "#/$defs/EventType2"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "sequence": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "source_record_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Source Record Id",
+          "type": "string"
+        },
+        "timestamp_precision": {
+          "$ref": "#/$defs/TimestampPrecision"
+        }
+      },
+      "required": [
+        "sequence",
+        "event_type",
+        "recorded_at",
+        "timestamp_precision",
+        "source_record_id"
+      ],
+      "title": "ReplayExpectedEvent",
+      "type": "object"
+    },
+    "RightsDecision2": {
+      "enum": [
+        "approved_public",
+        "approved_link_only",
+        "quarantined"
+      ],
+      "title": "RightsDecision2",
+      "type": "string"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "SourceRecordId": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "SourceRecordId",
+      "type": "string"
+    },
+    "TimestampPrecision": {
+      "enum": [
+        "exact",
+        "minute",
+        "day"
+      ],
+      "title": "TimestampPrecision",
+      "type": "string"
+    },
+    "Uri": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Uri",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "affected_expressions": {
+      "items": {
+        "$ref": "#/$defs/AffectedExpression"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Affected Expressions",
+      "type": "array"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/ReplayArtifactInput"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "case_id": {
+      "pattern": "^replay-[0-9]{3}$",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "earliest_evidence_replay": {
+      "title": "Earliest Evidence Replay",
+      "type": "boolean"
+    },
+    "ecosystem": {
+      "$ref": "#/$defs/Ecosystem7"
+    },
+    "expected_correction_state": {
+      "$ref": "#/$defs/ExpectedCorrectionState"
+    },
+    "expected_events": {
+      "items": {
+        "$ref": "#/$defs/ReplayExpectedEvent"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Expected Events",
+      "type": "array"
+    },
+    "expected_incident_status": {
+      "$ref": "#/$defs/ExpectedIncidentStatus"
+    },
+    "expected_receipt_result": {
+      "$ref": "#/$defs/ExpectedReceiptResult"
+    },
+    "fixture_origin": {
+      "$ref": "#/$defs/FixtureOrigin"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_group": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "Incident Group",
+      "type": "string"
+    },
+    "kind": {
+      "const": "replay_case",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "rights_decision": {
+      "$ref": "#/$defs/RightsDecision2"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_record_ids": {
+      "items": {
+        "$ref": "#/$defs/SourceRecordId"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Source Record Ids",
+      "type": "array"
+    },
+    "source_urls": {
+      "items": {
+        "$ref": "#/$defs/Uri"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Source Urls",
+      "type": "array"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "case_id",
+    "incident_group",
+    "ecosystem",
+    "source_record_ids",
+    "source_urls",
+    "artifacts",
+    "affected_expressions",
+    "expected_events",
+    "expected_incident_status",
+    "expected_correction_state",
+    "expected_receipt_result",
+    "earliest_evidence_replay",
+    "rights_decision",
+    "fixture_origin"
+  ],
+  "title": "ReplayCase",
+  "type": "object"
+}

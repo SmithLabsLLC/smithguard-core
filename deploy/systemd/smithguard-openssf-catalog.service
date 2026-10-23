@@ -1,0 +1,60 @@
+[Unit]
+# One four-minute retry lets short upstream ID-assignment transactions settle.
+# The 50-minute limit expires before the shortest natural hourly gap (54 minutes),
+# so persistent incomplete snapshots cannot suppress the next scheduled recovery.
+# Even two full start/stop timeouts plus restart delays exhaust the burst within
+# this interval. Exit 75 remains a failure, with no SuccessExitStatus exception.
+StartLimitIntervalSec=50min
+StartLimitBurst=2
+Description=SmithGuard complete OpenSSF public advisory catalog collection
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/collector.env
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=4min
+User=smithguard-collector
+Group=smithguard-collector
+SupplementaryGroups=smithguard-evidence
+EnvironmentFile=/etc/SmithGuard/env/collector.env
+Environment=SMITHGUARD_OPENSSF_TIMEOUT_SECONDS=600
+Environment=SMITHGUARD_OPENSSF_CATALOG_RECEIPT_PATH=/var/lib/smithguard/catalog-health/openssf.json
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-openssf-catalog
+TimeoutStartSec=600s
+TimeoutStopSec=300s
+MemoryHigh=1664M
+MemoryMax=2048M
+MemorySwapMax=0
+OOMPolicy=kill
+UMask=0027
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+ReadOnlyPaths=/opt/SmithGuard
+ReadWritePaths=/var/lib/smithguard/evidence /var/lib/smithguard/advisory-catalog /var/lib/smithguard/catalog-health
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

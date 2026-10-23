@@ -1,0 +1,40 @@
+[Unit]
+Description=SmithGuard isolated OpenSSF Malicious Packages shadow collection
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=smithguard-openssf
+Group=smithguard-openssf
+EnvironmentFile=/etc/SmithGuard/env/openssf-shadow.env
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-openssf-shadow
+TimeoutStartSec=30min
+UMask=0077
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+ReadOnlyPaths=/opt/SmithGuard
+ReadWritePaths=/var/lib/smithguard/openssf-shadow /var/lib/smithguard/openssf-health
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

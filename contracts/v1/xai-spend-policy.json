@@ -1,0 +1,152 @@
+{
+  "schema_version": "6.0.0",
+  "policy_id": "gbsec:control:xai-spend-policy",
+  "policy_state": "ready",
+  "stage_limits": {
+    "discovery": {
+      "maximum_input_tokens_per_turn": 500000,
+      "maximum_turns": 3,
+      "maximum_output_tokens": null,
+      "maximum_tool_calls": 4
+    },
+    "qualification": {
+      "maximum_input_tokens_per_turn": 500000,
+      "maximum_turns": 1,
+      "maximum_output_tokens": null,
+      "maximum_tool_calls": 0
+    },
+    "recheck": {
+      "maximum_input_tokens_per_turn": 500000,
+      "maximum_turns": 3,
+      "maximum_output_tokens": 8192,
+      "maximum_tool_calls": 4
+    }
+  },
+  "lane_limits": {
+    "maximum_active_discovery_workers": 1,
+    "maximum_provider_requests_per_run": 4,
+    "maximum_discovery_requests_per_run": 2,
+    "maximum_validated_candidates_per_run": 4,
+    "maximum_qualification_requests_per_run": 2,
+    "maximum_new_warnings_per_run": 2,
+    "maximum_new_warnings_per_origin_and_package_per_run": 1,
+    "maximum_new_warnings_per_ecosystem_per_run": 2,
+    "maximum_new_warnings_per_utc_day": 4,
+    "maximum_provider_attempts": 2
+  },
+  "schedule_contract": {
+    "timezone": "UTC",
+    "minute_offsets": [
+      27,
+      57
+    ],
+    "grace_minutes": 20,
+    "downtime_behavior": "latest_eligible_window_only",
+    "overlap_behavior": "skip_and_record"
+  },
+  "provider_request_contract": {
+    "model": "grok-4.7",
+    "service_tier": "default",
+    "priority_processing_allowed": false,
+    "store": false,
+    "parallel_tool_calls": false,
+    "maximum_request_bytes": 65536,
+    "maximum_response_bytes": 1048576,
+    "maximum_elapsed_seconds": 120,
+    "maximum_tool_calls": 4,
+    "maximum_turns": 3,
+    "maximum_output_tokens": null,
+    "qualification_maximum_output_tokens": null,
+    "discovery_tools": [
+      "web_search",
+      "x_search"
+    ],
+    "qualification_tools": [],
+    "reasoning_effort": "high"
+  },
+  "activation_contract": {
+    "collector_present": true,
+    "unattended_collection_allowed": false,
+    "unattended_scope": "scheduled_ai_qualified_warning_lane_and_hourly_recheck",
+    "maximum_warning_lifetime_hours": 12,
+    "recheck_interval_minutes": 60,
+    "maximum_rechecks_per_warning": 12,
+    "automatic_publication_allowed": false,
+    "automatic_publication_approval_id": null,
+    "automatic_confirmation_allowed": false,
+    "external_calls_allowed": false,
+    "all_required_controls_must_pass": true,
+    "required_controls": [
+      {
+        "control_id": "no-provider-billing-settings-access",
+        "required_for": "dispatch",
+        "status": "passed"
+      },
+      {
+        "control_id": "concurrency-and-idempotency",
+        "required_for": "dispatch",
+        "status": "passed"
+      },
+      {
+        "control_id": "exact-activation-artifact",
+        "required_for": "dispatch",
+        "status": "pending"
+      },
+      {
+        "control_id": "four-consecutive-shadow-windows",
+        "required_for": "publication",
+        "status": "pending"
+      },
+      {
+        "control_id": "exact-public-activation-approval",
+        "required_for": "publication",
+        "status": "pending"
+      }
+    ]
+  },
+  "required_test_scenarios": [
+    "concurrent request admission stays within the run limit",
+    "idempotent retry",
+    "known uncharged finite retry",
+    "unavailable provider usage does not stop dispatch",
+    "technical envelope breach records then dead-letters the request",
+    "single latest schedule window after downtime",
+    "shadow dispatch without publication",
+    "active publication requires exact approval",
+    "unknown policy field fails closed"
+  ],
+  "current_evidence": {
+    "contract_only": false,
+    "executable_enforcement_present": true,
+    "checklist_item_may_be_closed": false,
+    "notes": "Version 6 carries request, schedule and activation limits only; provider cost is monitored through billing. Source state remains ready, so external calls and publication stay prohibited until the exact shadow and public-activation gates pass."
+  },
+  "subscription_contract": {
+    "primary": "grok_build_subscription",
+    "fallback": "api_key",
+    "fallback_requires": "proven_uncharged_primary_receipt",
+    "model": "grok-4.7",
+    "actual_model": "grok-4.7-build",
+    "reasoning_effort": "high",
+    "harness_version": "1.0.41",
+    "maximum_elapsed_seconds": 120,
+    "maximum_model_turns": 3,
+    "maximum_qualification_turns": 1,
+    "maximum_output_tokens_per_discovery_turn": null,
+    "maximum_observed_tool_calls": 4,
+    "tool_bound_enforcement": "stop_and_reject_over_limit",
+    "provider_internal_parallel_searches": "owner_approved_native_limitation",
+    "discovery_tools": [
+      "web_search",
+      "x_search",
+      "web_fetch"
+    ],
+    "qualification_tools": [],
+    "local_state": "ephemeral_64MiB_noswap_tmpfs",
+    "session_upload": false,
+    "retained_reasoning": false,
+    "automatic_retries": 0,
+    "maximum_output_tokens_per_attempt": null,
+    "maximum_qualification_output_tokens": null
+  }
+}

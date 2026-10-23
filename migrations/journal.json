@@ -1,0 +1,285 @@
+{
+  "migrations": [
+    {
+      "description": "Create CP-0B1 ledger foundation",
+      "down_revision": null,
+      "file": "versions/0001_cp0b1_create_cp_0b1_ledger_foundation.py",
+      "revision": "0001_cp0b1",
+      "rollback_mode": "safe_to_zero",
+      "source_sha256": "sha256:96634e3eff4ccab6895bca6eced1ced16762dab751304dd19986307b8fca014f"
+    },
+    {
+      "description": "Create CP-0B2 ingestion, lifecycle, and audit state",
+      "down_revision": "0001_cp0b1",
+      "file": "versions/0002_cp0b2_create_ingestion_lifecycle_audit.py",
+      "revision": "0002_cp0b2",
+      "rollback_mode": "safe_to_zero",
+      "source_sha256": "sha256:ec5f8589026f9b031ae869e59b325eb9514f3b2ef7c139ba7cc025d1c0c76647"
+    },
+    {
+      "description": "Create CP-1 feed, review, source, and spend state",
+      "down_revision": "0002_cp0b2",
+      "file": "versions/0003_cp1_create_feed_review_spend.py",
+      "revision": "0003_cp1",
+      "rollback_mode": "safe_to_zero",
+      "source_sha256": "sha256:7c8241f3d95d4b9d72a8470dce27d85297c91d3d76848fb6bcfacb1d539b0f5b"
+    },
+    {
+      "description": "Allow the CP-2B signed public-knowledge snapshot version",
+      "down_revision": "0003_cp1",
+      "file": "versions/0004_cp2b_expand_snapshot_manifest_version.py",
+      "revision": "0004_cp2b",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:5264108b91b151eb3717743a20333100f1d0707e35a2df98799172741afc3fce"
+    },
+    {
+      "description": "Create CP-3A event and disabled delivery foundation",
+      "down_revision": "0004_cp2b",
+      "file": "versions/0005_cp3a_create_delivery_foundation.py",
+      "revision": "0005_cp3a",
+      "rollback_mode": "safe_to_zero",
+      "source_sha256": "sha256:e186728b37330716fd72da328079211025e08d5d5b30e39e17e584210e1aed02"
+    },
+    {
+      "description": "Create disabled synthetic Hosted Watch boundary",
+      "down_revision": "0005_cp3a",
+      "file": "versions/0006_cphw_create_synthetic_hosted_watch.py",
+      "revision": "0006_cphw",
+      "rollback_mode": "safe_to_zero",
+      "source_sha256": "sha256:cb6e8ec263dd98fc3ac4786ac9eaecaf7d0b3b399e71f480a5d444f7620a7ac3"
+    },
+    {
+      "description": "Create append-only collection progress, source linkage, and warning archives",
+      "down_revision": "0006_cphw",
+      "file": "versions/0007_cpbeta1_create_preliminary_warning_archive.py",
+      "revision": "0007_cpbeta1",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:949b9f75a05706874be6cd9d487ed3af644da941d567208156c35418b821f802"
+    },
+    {
+      "description": "Create append-only malware authority decisions and incident lineage",
+      "down_revision": "0007_cpbeta1",
+      "file": "versions/0008_mx002_create_malware_authority.py",
+      "revision": "0008_mx002",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:5773c6a2af0f9850949f70d947c38ca36207640d50202447df12f110467299c6"
+    },
+    {
+      "description": "Generalize disabled Hosted Watch rows into Watch Targets",
+      "down_revision": "0008_mx002",
+      "file": "versions/0009_mx003_generalize_watch_targets.py",
+      "revision": "0009_mx003",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:b6e581c4a768c187e291e1393203c561e8e90dd5df1b42f58990da78df00c908"
+    },
+    {
+      "description": "Create append-only source governance, publication lifecycle, and reconciliation state",
+      "down_revision": "0009_mx003",
+      "file": "versions/0010_mx005_create_source_governance_lifecycle.py",
+      "revision": "0010_mx005",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:ea09ef6ddd560e09cece74e99709031d930acf730f85087f727f1e690b2ca321"
+    },
+    {
+      "description": "Create recoverable evidence finalization and bounded ingestion retry state",
+      "down_revision": "0010_mx005",
+      "file": "versions/0011_mx006_create_recoverable_ingestion.py",
+      "revision": "0011_mx006",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:f2824421b8d92b0e579c93a15e30f915c4848f16c1ed003df051d4854c87d260"
+    },
+    {
+      "description": "Index bounded public incident artifact correlation",
+      "down_revision": "0011_mx006",
+      "file": "versions/0012_mx014_index_public_incident_artifacts.py",
+      "revision": "0012_mx014",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:854c9a53485374b8f064b156b3347dccc934ac2a84c7d8dffe53c424873f4e5b"
+    },
+    {
+      "description": "Rename live schemas and disabled watchlist contract values",
+      "down_revision": "0012_mx014",
+      "file": "versions/0013_watch_rebrand_runtime_names.py",
+      "revision": "0013_watch_rebrand",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:b09d30fa67112c87d488baaa78866b7e39b00f8d756a8ab80e770815006e094c"
+    },
+    {
+      "description": "Create append-only cross-source correlation shadow state",
+      "down_revision": "0013_watch_rebrand",
+      "file": "versions/0014_next001_create_correlation_foundation.py",
+      "revision": "0014_next001",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:1c42680595b1b7a35955e422e8b5648db34df7e223bdba966363faf4f4c19eda"
+    },
+    {
+      "description": "Create append-only gateway governance and correlation rehearsal state",
+      "down_revision": "0014_next001",
+      "file": "versions/0015_next004_shadow_transport_governance.py",
+      "revision": "0015_next004_shadow",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:8941b18cb46ea7ace4d3f68522ba88a5a43c9af823c6f53073f171dc91c81472"
+    },
+    {
+      "description": "Accept owner-authorized model review in private shadow samples",
+      "down_revision": "0015_next004_shadow",
+      "file": "versions/0016_next004_owner_review_basis_compatibility.py",
+      "revision": "0016_next004_owner_basis",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:d3bc5cc6933c1dd7ea393814da329497c20a6dc1ceb6eea51f40519161ac14af"
+    },
+    {
+      "description": "Bind private public-fixture rehearsals to finalized review provenance",
+      "down_revision": "0016_next004_owner_basis",
+      "file": "versions/0017_next004_rehearsal_provenance.py",
+      "revision": "0017_next004_provenance",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:30dfe6148ac81d2df1038d85a3d4747bd3c9992b834f5723bc37a20f189517b6"
+    },
+    {
+      "description": "Allow one-origin Emerging/Unverified warning qualification and schema 1.1",
+      "down_revision": "0017_next004_provenance",
+      "file": "versions/0018_grok_audit_warning_origins.py",
+      "revision": "0018_grok_audit_warning_origins",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:16e147ebe6a02f837cf6c78580bd2a744557668fd9083c633b83377b5962c50c"
+    },
+    {
+      "description": "Rename the live GoodBoy Watch schemas for SmithGuard",
+      "down_revision": "0018_grok_audit_warning_origins",
+      "file": "versions/0019_smithguard_rebrand.py",
+      "revision": "0019_smithguard_rebrand",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:ad647036d4316f3a5596f448f812c06f1216e38574920520996154cb34a4259a"
+    },
+    {
+      "description": "Add complete GitHub and OpenSSF advisory catalog storage",
+      "down_revision": "0019_smithguard_rebrand",
+      "file": "versions/0020_full_advisory_catalog.py",
+      "revision": "0020_full_advisory_catalog",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:33cf21023ff91f7e28656e6d822c05a6bc2cf854c35592d08f0cf60344876abd"
+    },
+    {
+      "description": "Protect complete advisory catalog history and migration evidence",
+      "down_revision": "0020_full_advisory_catalog",
+      "file": "versions/0021_advisory_catalog_append_only.py",
+      "revision": "0021_catalog_append_only",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:be72443bce0db770cc92c7096d520cfb8378dd86fab05788a7e47031c7e676d8"
+    },
+    {
+      "description": "Index claim provenance and serialize checkpoint identities",
+      "down_revision": "0021_catalog_append_only",
+      "file": "versions/0022_claims_source_index.py",
+      "revision": "0022_claims_source_index",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:453403c18f3cb6d6bd1775705e9e8cfe365abb1f7d3fe07191c27b6320dfefcf"
+    },
+    {
+      "description": "Bound warning receipts and acknowledge dead letters",
+      "down_revision": "0022_claims_source_index",
+      "file": "versions/0023_warning_lane_receipt_indexes.py",
+      "revision": "0023_warning_receipt_indexes",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:14d05a89dc12cbd2878e1557aa3e9441ebe3271a8ca3c7d130a919ad30b48717"
+    },
+    {
+      "description": "Index compatible NuGet package lookup preserving retained identities",
+      "down_revision": "0023_warning_receipt_indexes",
+      "file": "versions/0024_nuget_lookup_indexes.py",
+      "revision": "0024_nuget_lookup_indexes",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:954d6eba168757d79db9129333fd440ef0c0e1d50f9b8605355dce0b8e220589"
+    },
+    {
+      "description": "Index coverage presence and retained source ecosystem membership",
+      "down_revision": "0024_nuget_lookup_indexes",
+      "file": "versions/0025_coverage_presence_indexes.py",
+      "revision": "0025_coverage_presence_indexes",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:30c445b8de18a09222c5e63d2b3c1db84869eebdfc94fec57aadb69eb4dacb60"
+    },
+    {
+      "description": "Retire the spend ledger and the recheck exact-cost column",
+      "down_revision": "0025_coverage_presence_indexes",
+      "file": "versions/0026_retire_spend_ledger.py",
+      "revision": "0026_retire_spend_ledger",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:5074160fc0e79e7fc48fd5c9cdd3f0cc5f08caf8d1ff0bdd02ffe3b228a70906"
+    },
+    {
+      "description": "Add append-only emerging lead lifecycle and bounded public projection",
+      "down_revision": "0026_retire_spend_ledger",
+      "file": "versions/0027_emerging_leads.py",
+      "revision": "0027_emerging_leads",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:805b2813d68aee56d0e2f34d5f232b1b8794f6e6bce3210e835e106f2f3aa4fd"
+    },
+    {
+      "description": "Index case-insensitive package lookup for extension, Composer and crate names",
+      "down_revision": "0027_emerging_leads",
+      "file": "versions/0028_casefold_lookup_indexes.py",
+      "revision": "0028_casefold_lookup_indexes",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:895caf93dfd73934fa3c4eb07a3f7c09a4eea3f8bd8fc99c584af17984622718"
+    },
+    {
+      "description": "Keep final warning-lane provider output privately for 30 days",
+      "down_revision": "0028_casefold_lookup_indexes",
+      "file": "versions/0029_warning_lane_outputs.py",
+      "revision": "0029_warning_lane_outputs",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:9abb15524f2918f67f9d04f88df48ad71b20f5ebd976811b9145154af747f52d"
+    },
+    {
+      "description": "Drop eighteen empty tables of retired features",
+      "down_revision": "0029_warning_lane_outputs",
+      "file": "versions/0030_drop_unused_tables.py",
+      "revision": "0030_drop_unused_tables",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:934fe84fd9d69e4979f9cf2f45398950d01e892242f01d2931b5a79f8ee53ced"
+    },
+    {
+      "description": "Add immutable exact-CVE context and direct Rust/Go source snapshots",
+      "down_revision": "0030_drop_unused_tables",
+      "file": "versions/0031_supplemental_feeds.py",
+      "revision": "0031_supplemental_feeds",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:226e8f39aad360732d1897230871140252e34be60cc3c15ef11522bdef930853"
+    },
+    {
+      "description": "Add immutable collection record accounting and resolutions",
+      "down_revision": "0031_supplemental_feeds",
+      "file": "versions/0032_record_accounting.py",
+      "revision": "0032_record_accounting",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:a99cec4b106eead1c388f5c750e9aad908eb71ef4f5717ebe22c6a99b11fc7ef"
+    },
+    {
+      "description": "Share future supplemental payloads without rewriting historical receipts",
+      "down_revision": "0032_record_accounting",
+      "file": "versions/0033_supplemental_payloads.py",
+      "revision": "0033_supplemental_payloads",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:82e40c3849f1e699ef817753c6fc334aa58829fc27d1cc0bce019af16de7a47c"
+    },
+    {
+      "description": "Add bounded bulletin projections and immutable intake/publication evidence",
+      "down_revision": "0033_supplemental_payloads",
+      "file": "versions/0034_public_bulletins.py",
+      "revision": "0034_public_bulletins",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:4550b69492ce661b7a7c0c0cd3f33139e6b0fb0d3f78caacadfbfd58effb8fad"
+    },
+    {
+      "description": "Add private bulletin automation evidence and identity protection",
+      "down_revision": "0034_public_bulletins",
+      "file": "versions/0035_bulletin_automation.py",
+      "revision": "0035_bulletin_automation",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:f96a3b567deade1ad5d5e9bac7c031a00dd2d5f640054315d81c7e2e7b9e3b41"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

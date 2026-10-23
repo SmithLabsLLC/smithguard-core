@@ -1,0 +1,44 @@
+[Unit]
+Description=Dedicated Cloudflare Tunnel for SmithGuard
+After=network-online.target nginx.service
+Wants=network-online.target
+Requires=nginx.service
+ConditionPathExists=/etc/SmithGuard/credentials/cloudflare/tunnel.token
+
+[Service]
+Type=simple
+User=cloudflared
+Group=cloudflared
+SupplementaryGroups=smithguard-origin
+LoadCredential=tunnel.token:/etc/SmithGuard/credentials/cloudflare/tunnel.token
+ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel --metrics 127.0.0.1:20342 run --token-file %d/tunnel.token
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=20s
+UMask=0077
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

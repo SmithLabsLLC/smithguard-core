@@ -1,0 +1,878 @@
+{
+  "schema_version": "1.0.0",
+  "examples": [
+    {
+      "definition": "Source",
+      "value": {
+        "id": "gbsec:source:github-advisory-database",
+        "kind": "source",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "name": "GitHub Advisory Database",
+        "source_class": "curated",
+        "canonical_url": "https://github.com/github/advisory-database",
+        "operator": "GitHub, Inc.",
+        "acquisition_methods": ["git", "rest_api"],
+        "allowed_hosts": ["github.com", "api.github.com"],
+        "rights": {
+          "retrieval": "allowed",
+          "raw_storage": "allowed",
+          "raw_redistribution": "attribution",
+          "normalized_fact_redistribution": "attribution",
+          "attribution_required": true,
+          "attribution_text": "GitHub Advisory Database",
+          "retention": "immutable_permitted",
+          "correction_required": true,
+          "withdrawal_required": true,
+          "decision": "approved_public",
+          "license_expression": "CC-BY-4.0",
+          "terms_url": "https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features",
+          "reviewed_on": "2026-08-05",
+          "review_due_on": "2026-11-05",
+          "notes": "Link to each used advisory or the database for attribution."
+        },
+        "correction_url": "https://github.com/github/advisory-database/blob/main/CONTRIBUTING.md",
+        "withdrawal_behavior": "retain_mark_withdrawn",
+        "kill_switch": true,
+        "cadence": "Manual replay only in Phase 0A"
+      }
+    },
+    {
+      "definition": "RawEvidence",
+      "value": {
+        "id": "gbsec:evidence:synthetic-ghsa-record-001",
+        "kind": "raw_evidence",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "restricted_source",
+        "source_id": "gbsec:source:github-advisory-database",
+        "source_record_id": "GHSA-example-0001",
+        "canonical_url": "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+        "retrieved_at": "2026-08-05T00:00:00Z",
+        "source_published_at": "2018-11-26T23:58:21Z",
+        "source_modified_at": "2018-11-26T23:58:21Z",
+        "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+        "byte_count": 512,
+        "media_type": "application/json",
+        "storage_state": "stored_immutable",
+        "rights_decision": "approved_public",
+        "quarantine_reasons": []
+      }
+    },
+    {
+      "definition": "AuthorityDecision",
+      "value": {
+        "id": "gbsec:authority-decision:synthetic-event-stream",
+        "kind": "authority_decision",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "incident_id": "gbsec:incident:event-stream-2018",
+        "claim_id": "gbsec:claim:synthetic-event-stream-malicious",
+        "artifact_id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "evidence_ids": ["gbsec:evidence:synthetic-ghsa-record-001"],
+        "public_status": "confirmed",
+        "confirmation_method": "automated_source_policy",
+        "transport_source_id": "gbsec:source:github-advisory-database",
+        "assertion_source_id": "gbsec:source:github-advisory-database",
+        "confirming_authority_id": "gbsec:source:github-advisory-database",
+        "authority_policy_id": "gbsec:authority-policy:malware-v1",
+        "authority_policy_version": "2026-08-06.1",
+        "authority_rule_id": "gbsec:authority-rule:github-legacy-npm-exact-malware-v1",
+        "source_rights_register_id": "gbsec:rights-register:phase-0a-v1",
+        "attribution_policy_version": "2026-08-06.1",
+        "reason_code": "github_legacy_npm_exact_malware",
+        "automated": true,
+        "independent_goodboy_analysis": false,
+        "upstream_ids": ["GHSA-mh6f-8j2x-4483"],
+        "source_references": [
+          "https://github.com/advisories/GHSA-mh6f-8j2x-4483"
+        ],
+        "exception_required": false,
+        "exception_reason_code": null,
+        "decided_at": "2026-08-05T00:00:00Z"
+      }
+    },
+    {
+      "definition": "Claim",
+      "value": {
+        "id": "gbsec:claim:synthetic-event-stream-malicious",
+        "kind": "claim",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "claim_type": "malicious",
+        "subject_id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "predicate": "is_affected_by",
+        "object_value": "gbsec:incident:event-stream-2018",
+        "confidence": "confirmed",
+        "state": "active",
+        "valid_from": "2018-09-09T00:00:00Z",
+        "valid_until": null,
+        "supersedes_claim_id": null,
+        "provenance": {
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_record_id": "GHSA-mh6f-8j2x-4483",
+          "source_url": "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+          "evidence_id": "gbsec:evidence:synthetic-ghsa-record-001",
+          "retrieved_at": "2026-08-05T00:00:00Z",
+          "source_published_at": "2018-11-26T23:58:21Z",
+          "source_modified_at": null,
+          "collection_method": "manual_replay",
+          "assertion_origin": "declared_by_source",
+          "identity_verification": "verified",
+          "signature_state": "unsupported",
+          "claim_lineage": null
+        }
+      }
+    },
+    {
+      "definition": "Artifact",
+      "value": {
+        "id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "kind": "artifact",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "coordinate": "pkg:npm/event-stream@3.3.6",
+        "version": "3.3.6",
+        "digest": null,
+        "identity_state": "exact"
+      }
+    },
+    {
+      "definition": "AffectedRange",
+      "value": {
+        "id": "gbsec:range:event-stream-3.3.6",
+        "kind": "affected_range",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "artifact_id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "range_type": "EXACT",
+        "expression": "= 3.3.6",
+        "introduced": "3.3.6",
+        "fixed": null,
+        "last_affected": "3.3.6",
+        "evaluation_state": "supported",
+        "provenance": {
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_record_id": "GHSA-mh6f-8j2x-4483",
+          "source_url": "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+          "evidence_id": "gbsec:evidence:synthetic-ghsa-record-001",
+          "retrieved_at": "2026-08-05T00:00:00Z",
+          "source_published_at": "2018-11-26T23:58:21Z",
+          "source_modified_at": null,
+          "collection_method": "manual_replay",
+          "assertion_origin": "declared_by_source",
+          "identity_verification": "verified",
+          "signature_state": "unsupported",
+          "claim_lineage": null
+        }
+      }
+    },
+    {
+      "definition": "Relationship",
+      "value": {
+        "id": "gbsec:relationship:event-stream-affects",
+        "kind": "relationship",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "subject_id": "gbsec:incident:event-stream-2018",
+        "object_id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "relationship_type": "affects",
+        "assertion_origin": "declared_by_source",
+        "confidence": "confirmed",
+        "valid_from": "2018-11-26T23:58:21Z",
+        "valid_until": null,
+        "state": "active",
+        "provenance": {
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_record_id": "GHSA-mh6f-8j2x-4483",
+          "source_url": "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+          "evidence_id": "gbsec:evidence:synthetic-ghsa-record-001",
+          "retrieved_at": "2026-08-05T00:00:00Z",
+          "source_published_at": "2018-11-26T23:58:21Z",
+          "source_modified_at": null,
+          "collection_method": "manual_replay",
+          "assertion_origin": "declared_by_source",
+          "identity_verification": "verified",
+          "signature_state": "unsupported",
+          "claim_lineage": null
+        }
+      }
+    },
+    {
+      "definition": "Incident",
+      "value": {
+        "id": "gbsec:incident:event-stream-2018",
+        "kind": "incident",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "title": "Malicious event-stream release",
+        "status": "confirmed",
+        "confidence": "confirmed",
+        "claim_ids": ["gbsec:claim:synthetic-event-stream-malicious"],
+        "artifact_ids": ["gbsec:artifact:npm:event-stream:3.3.6"],
+        "affected_range_ids": ["gbsec:range:event-stream-3.3.6"],
+        "relationship_ids": ["gbsec:relationship:event-stream-affects"],
+        "event_ids": ["gbsec:event:event-stream-created"],
+        "authority_decision_ids": null,
+        "authority": null,
+        "alias_ids": ["gbsec:alias:ghsa-mh6f-8j2x-4483"],
+        "redirect_to": null,
+        "first_observed_at": "2018-11-26T23:58:21Z",
+        "last_changed_at": "2018-11-26T23:58:21Z",
+        "coverage": [
+          {
+            "ecosystem": "npm",
+            "stage": "matched",
+            "result": "supported",
+            "as_of": "2026-08-05T00:00:00Z"
+          }
+        ],
+        "unknowns": ["Earliest registry-removal time is not represented in this example."]
+      }
+    },
+    {
+      "definition": "IncidentEvent",
+      "value": {
+        "id": "gbsec:event:event-stream-created",
+        "kind": "incident_event",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "incident_id": "gbsec:incident:event-stream-2018",
+        "event_type": "created",
+        "old_status": null,
+        "new_status": "confirmed",
+        "actor_type": "reviewer",
+        "actor_id": "public-reviewer",
+        "reason_code": "primary_advisory_reviewed",
+        "evidence_ids": ["gbsec:evidence:synthetic-ghsa-record-001"],
+        "occurred_at": "2018-11-26T23:58:21Z",
+        "confidence": "confirmed",
+        "superseded_revision": null
+      }
+    },
+    {
+      "definition": "RecommendedAction",
+      "value": {
+        "id": "gbsec:action:event-stream-check",
+        "kind": "recommended_action",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "action_type": "check",
+        "risk_level": 0,
+        "approval_required": false,
+        "preconditions": ["Use a customer-local inventory source."],
+        "expected_result": "Determine whether the exact affected artifact is present.",
+        "validation": ["Record the local inventory fingerprint and matcher version."],
+        "rollback": ["No state change occurs."],
+        "evidence_ids": ["gbsec:evidence:synthetic-ghsa-record-001"],
+        "automation_allowed": true
+      }
+    },
+    {
+      "definition": "PublicArtifactAssessmentRequest",
+      "value": {
+        "id": "gbsec:request:public-artifact-001",
+        "kind": "public_artifact_assessment_request",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "artifact": {
+          "ecosystem": "npm",
+          "registry_host": "registry.npmjs.org",
+          "name": "event-stream",
+          "version": "3.3.6",
+          "digest": null,
+          "public_visibility": "asserted_public"
+        }
+      }
+    },
+    {
+      "definition": "PublicArtifactAssessment",
+      "value": {
+        "id": "gbsec:assessment:public-artifact-001",
+        "kind": "public_artifact_assessment",
+        "schema_version": "2.2.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "artifact": {
+          "ecosystem": "npm",
+          "registry_host": "registry.npmjs.org",
+          "name": "event-stream",
+          "version": "3.3.6",
+          "digest": null,
+          "public_visibility": "asserted_public"
+        },
+        "result": "affected",
+        "relationship_state": "single_incident_record",
+        "incidents": [
+          {
+            "incident_id": "gbsec:incident:event-stream-2018",
+            "revision": 1,
+            "status": "confirmed",
+            "confidence": "confirmed",
+            "title": "Malicious event-stream package release",
+            "last_changed_at": "2026-08-05T00:00:00Z",
+            "report_relationship": "single_report",
+            "relationship_basis": "catalog_assignment",
+            "source_reports": [
+              {
+                "source_id": "gbsec:source:github-advisory-database",
+                "source_name": "GitHub Advisory Database",
+                "upstream_record_id": "GHSA-2345-6789-cfgh",
+                "state": "active",
+                "source_updated_at": "2026-08-05T00:00:00Z",
+                "observed_at": "2026-08-05T00:00:00Z"
+              }
+            ],
+            "source_reports_truncated": false,
+            "applies_to_version": true,
+            "affected_range_ids": ["gbsec:range:event-stream-3.3.6"],
+            "fixed_versions": [],
+            "aliases": ["GHSA-2345-6789-cfgh"],
+            "upstream_urls": ["https://github.com/advisories/GHSA-2345-6789-cfgh"]
+          }
+        ],
+        "cve_context": [],
+        "preliminary_warnings": [],
+        "preliminary_warnings_truncated": false,
+        "incident_ids": ["gbsec:incident:event-stream-2018"],
+        "affected_range_ids": ["gbsec:range:event-stream-3.3.6"],
+        "recommended_action_ids": ["gbsec:action:event-stream-check"],
+        "evidence_maturity": {
+          "composition": "present",
+          "provenance": "present",
+          "signature": "unsupported",
+          "vex": "missing",
+          "deployment": "unknown",
+          "runtime": "unknown"
+        },
+        "coverage": {
+          "ecosystem": "npm",
+          "stage": "matched",
+          "result": "supported",
+          "as_of": "2026-08-05T00:00:00Z"
+        },
+        "registry_state": "removed",
+        "unknowns": ["Deployment and runtime use are customer-local questions."],
+        "feed_revision": "feed-2026-08-05-001",
+        "not_applicable_incident_count": 0,
+        "incidents_truncated": false,
+        "source_freshness": [
+          {
+            "source_id": "gbsec:source:github-advisory-database",
+            "record_type": "malware_advisory",
+            "freshness_state": "fresh",
+            "last_success_at": "2026-08-05T00:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "definition": "InventorySnapshot",
+      "value": {
+        "id": "gbsec:inventory:synthetic-before",
+        "kind": "inventory_snapshot",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "project_alias": "synthetic-project-a",
+        "inventory_fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000002",
+        "captured_at": "2026-08-05T00:00:00Z",
+        "format": "package_list",
+        "entries": [
+          {
+            "local_entry_id": "gbsec:local-entry:event-stream-3.3.6",
+            "artifact": {
+              "ecosystem": "npm",
+              "registry_host": "registry.npmjs.org",
+              "name": "event-stream",
+              "version": "3.3.6",
+              "digest": null,
+              "visibility": "verified_public"
+            },
+            "directness": "transitive",
+            "inventory_stage": "build_input",
+            "dependency_path_ids": [
+              "gbsec:local-entry:root",
+              "gbsec:local-entry:event-stream-3.3.6"
+            ]
+          }
+        ],
+        "parser_unknowns": [],
+        "sbom_quality": null
+      }
+    },
+    {
+      "definition": "DependencyDelta",
+      "value": {
+        "id": "gbsec:delta:synthetic-001",
+        "kind": "dependency_delta",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "before_snapshot_id": "gbsec:inventory:synthetic-before",
+        "after_snapshot_id": "gbsec:inventory:synthetic-after",
+        "added_entry_ids": ["gbsec:local-entry:event-stream-3.3.6"],
+        "removed_entry_ids": [],
+        "changed_entry_ids": [],
+        "material_transitive_expansion": true
+      }
+    },
+    {
+      "definition": "ExposurePath",
+      "value": {
+        "id": "gbsec:exposure-path:synthetic-001",
+        "kind": "exposure_path",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "project_alias": "synthetic-project-a",
+        "incident_id": "gbsec:incident:event-stream-2018",
+        "affected_artifact_id": "gbsec:artifact:npm:event-stream:3.3.6",
+        "steps": [
+          {
+            "sequence": 0,
+            "node_id": "gbsec:project:synthetic-project-a",
+            "node_type": "project",
+            "relationship_type": "root",
+            "evidence_state": "present"
+          },
+          {
+            "sequence": 1,
+            "node_id": "gbsec:artifact:npm:event-stream:3.3.6",
+            "node_type": "artifact",
+            "relationship_type": "depends_on",
+            "evidence_state": "present"
+          },
+          {
+            "sequence": 2,
+            "node_id": "gbsec:incident:event-stream-2018",
+            "node_type": "incident",
+            "relationship_type": "affects",
+            "evidence_state": "present"
+          }
+        ],
+        "state": "proven"
+      }
+    },
+    {
+      "definition": "RemediationFrontier",
+      "value": {
+        "id": "gbsec:frontier:synthetic-remove-event-stream",
+        "kind": "remediation_frontier",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "exposure_path_id": "gbsec:exposure-path:synthetic-001",
+        "owner_scope": "project",
+        "change_type": "remove",
+        "target_artifact": {
+          "ecosystem": "npm",
+          "registry_host": "registry.npmjs.org",
+          "name": "event-stream",
+          "version": "3.3.6",
+          "digest": null,
+          "visibility": "verified_public"
+        },
+        "expected_effect": "Remove the affected exact artifact from the next local inventory.",
+        "compatibility_unknowns": ["The replacement dependency is not selected."],
+        "validation": ["Regenerate the local inventory and confirm the exact version is absent."],
+        "rollback": ["Restore the prior customer-controlled dependency file if validation fails."],
+        "support_state": "supported"
+      }
+    },
+    {
+      "definition": "PolicyDecision",
+      "value": {
+        "id": "gbsec:policy-decision:synthetic-001",
+        "kind": "policy_decision",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "policy_version": "synthetic-policy-1",
+        "rule_id": "gbsec:policy-rule:known-malware",
+        "artifact": {
+          "ecosystem": "npm",
+          "registry_host": "registry.npmjs.org",
+          "name": "event-stream",
+          "version": "3.3.6",
+          "digest": null,
+          "visibility": "verified_public"
+        },
+        "project_alias": "synthetic-project-a",
+        "disposition": "require_approval",
+        "reason_codes": ["known_malicious_exact_version"],
+        "exception_id": null,
+        "approval_id": "gbsec:approval:synthetic-001",
+        "decision_at": "2026-08-05T00:00:00Z",
+        "recheck_triggers": [
+          "correction",
+          "withdrawal",
+          "new_evidence",
+          "policy_change",
+          "dependency_change",
+          "exception_expiry"
+        ]
+      }
+    },
+    {
+      "definition": "ApprovalRecord",
+      "value": {
+        "id": "gbsec:approval:synthetic-001",
+        "kind": "approval_record",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "policy_decision_id": "gbsec:policy-decision:synthetic-001",
+        "decision": "denied",
+        "actor_id": "synthetic-security-owner",
+        "decided_at": "2026-08-05T00:00:00Z",
+        "reason": "Synthetic fixture denies adding a known malicious exact version.",
+        "scope": "one_assessment",
+        "expires_at": null
+      }
+    },
+    {
+      "definition": "PolicyException",
+      "value": {
+        "id": "gbsec:exception:synthetic-observation-only",
+        "kind": "policy_exception",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "actor_id": "synthetic-security-owner",
+        "created_for_rule_id": "gbsec:policy-rule:known-malware",
+        "project_alias": "synthetic-project-a",
+        "artifact": {
+          "ecosystem": "npm",
+          "registry_host": "registry.npmjs.org",
+          "name": "event-stream",
+          "version": "3.3.6",
+          "digest": null,
+          "visibility": "verified_public"
+        },
+        "reason": "Synthetic fixture for exception-expiry and correction-recheck tests.",
+        "customer_ticket": "SYNTHETIC-1",
+        "incident_id": "gbsec:incident:event-stream-2018",
+        "evidence_revision": 1,
+        "expires_at": "2026-08-06T00:00:00Z",
+        "recheck_triggers": [
+          "correction",
+          "withdrawal",
+          "new_evidence",
+          "policy_change",
+          "dependency_change",
+          "exception_expiry"
+        ],
+        "state": "active"
+      }
+    },
+    {
+      "definition": "AssessmentReceipt",
+      "value": {
+        "id": "gbsec:receipt:synthetic-001",
+        "kind": "assessment_receipt",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "customer_local",
+        "assessed_at": "2026-08-05T00:00:00Z",
+        "feed_revision": "feed-2026-08-05-001",
+        "feed_snapshot_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000003",
+        "matcher_version": "0.0.0-contract-fixture",
+        "policy_version": "synthetic-policy-1",
+        "inventory_fingerprint": "sha256:0000000000000000000000000000000000000000000000000000000000000002",
+        "dependency_delta_id": null,
+        "coverage": [
+          {
+            "ecosystem": "npm",
+            "stage": "matched",
+            "result": "supported",
+            "as_of": "2026-08-05T00:00:00Z"
+          }
+        ],
+        "evidence_maturity": {
+          "composition": "present",
+          "provenance": "present",
+          "signature": "unsupported",
+          "vex": "missing",
+          "deployment": "unknown",
+          "runtime": "unknown"
+        },
+        "exposure_path_ids": ["gbsec:exposure-path:synthetic-001"],
+        "remediation_frontier_ids": ["gbsec:frontier:synthetic-remove-event-stream"],
+        "policy_decision_id": "gbsec:policy-decision:synthetic-001",
+        "exception_id": null,
+        "result": "approval_required",
+        "unknowns": ["Runtime execution is not observed by this build-time inventory."]
+      }
+    },
+    {
+      "definition": "DeliveryEvent",
+      "value": {
+        "id": "gbsec:delivery-event:event-stream-revision-1",
+        "kind": "delivery_event",
+        "schema_version": "2.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "event_id": "gbsec:delivery-event:event-stream-revision-1",
+        "event_type": "incident_created",
+        "occurred_at": "2026-08-05T00:00:00Z",
+        "incident_id": "gbsec:incident:event-stream-2018",
+        "incident_revision": 1,
+        "incident_state": "confirmed",
+        "severity": "unknown",
+        "evidence_state": "confirmed",
+        "correction_state": "current",
+        "recommended_action_level": 0,
+        "published_at": "2026-08-05T00:00:00Z",
+        "incident_updated_at": "2026-08-05T00:00:00Z",
+        "public_incident_url": "https://guard.smithlabs.ai/incidents/gbsec:incident:event-stream-2018",
+        "project_alias": null,
+        "deduplication_key": "gbsec:delivery-event:event-stream-revision-1"
+      }
+    },
+    {
+      "definition": "RestOperation",
+      "value": {
+        "id": "gbsec:rest-operation:assess-public-artifact",
+        "kind": "rest_operation",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "operation": "assess_public_artifact",
+        "method": "POST",
+        "path": "/v1/artifacts/assess",
+        "read_only": true,
+        "public_service_allowed": true,
+        "max_input_bytes": 8192,
+        "max_output_bytes": 1048576,
+        "timeout_seconds": 10,
+        "request_definition": "PublicArtifactAssessmentRequest",
+        "response_definition": "PublicArtifactAssessment"
+      }
+    },
+    {
+      "definition": "McpOperation",
+      "value": {
+        "id": "gbsec:mcp-operation:assess-public-artifact",
+        "kind": "mcp_operation",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "tool_name": "assess_public_artifact",
+        "service_operation": "assess_public_artifact",
+        "read_only": true,
+        "destructive": false,
+        "public_service_allowed": true,
+        "input_definition": "PublicArtifactAssessmentRequest",
+        "output_definition": "PublicArtifactAssessment",
+        "max_input_bytes": 8192,
+        "max_output_bytes": 1048576,
+        "timeout_seconds": 10
+      }
+    },
+    {
+      "definition": "PrivateWatchlistSet",
+      "value": {
+        "id": "gbsec:private-watchlist-set:synthetic-001",
+        "kind": "private_watchlist_set",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "private_watchlists_minimized",
+        "feature_state": "disabled",
+        "synthetic_only": true,
+        "tenant_id": "synthetic_tenant_0001",
+        "replace_current": true,
+        "inventory_revision": "synthetic-revision-0001",
+        "entries": [
+          {
+            "project_alias": "synthetic-project-a",
+            "target_type": "software_dependency",
+            "artifact": {
+              "ecosystem": "npm",
+              "registry_host": "registry.npmjs.org",
+              "name": "event-stream",
+              "version": "3.3.6",
+              "digest": null
+            },
+            "public_visibility": "verified_public",
+            "visibility_verified_at": "2026-08-05T00:00:00Z",
+            "visibility_source_url": "https://www.npmjs.com/package/event-stream/v/3.3.6",
+            "directness": "transitive",
+            "usage": "production",
+            "importance": "critical",
+            "inventory_revision": "synthetic-revision-0001",
+            "first_seen_at": "2026-08-05T00:00:00Z",
+            "last_confirmed_at": "2026-08-05T00:00:00Z"
+          }
+        ],
+        "expires_unconfirmed_after_days": 45
+      }
+    },
+    {
+      "definition": "PrivateWatchlistRejection",
+      "value": {
+        "id": "gbsec:private-watchlist-rejection:synthetic-001",
+        "kind": "private_watchlist_rejection",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "internal_control",
+        "request_id": "synthetic-request-0001",
+        "accepted": false,
+        "reason_codes": ["feature_disabled", "repository_name"],
+        "field_paths": ["/feature_state", "/entries/0/repository_name"],
+        "payload_logged": false
+      }
+    },
+    {
+      "definition": "PreliminaryWarning",
+      "value": {
+        "id": "gbsec:preliminary-warning:synthetic-001",
+        "kind": "preliminary_warning",
+        "schema_version": "1.1.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "title": "Synthetic preliminary package warning",
+        "state": "active",
+        "claim": "Independent public reports describe a possible compromise affecting the listed synthetic package.",
+        "affected_artifacts": ["synthetic-package@1.0.0"],
+        "source_urls": [
+          "https://example.com/security-report-a",
+          "https://example.org/security-report-b"
+        ],
+        "evidence_class": "web_only",
+        "independent_source_clusters": 2,
+        "confirmation_status": "unverified",
+        "awaiting_authoritative_confirmation": true,
+        "automation_allowed": false,
+        "max_action_level": 0,
+        "human_reviewed": true,
+        "qualification_basis": "human_review",
+        "qualification_actor_id": "reviewer:example",
+        "qualification_reason": "Named human review of independently derived public origins.",
+        "qualification_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source_origins": [
+          "example.com",
+          "example.org"
+        ],
+        "warning_text": "Emerging and unverified. SmithGuard has not independently confirmed this warning and is awaiting authoritative or non-social confirmation. Use it to investigate, not as proof or authorization for a disruptive action.",
+        "observed_at": "2026-08-05T00:00:00Z",
+        "last_checked_at": "2026-08-05T00:00:00Z",
+        "next_check_at": "2026-08-05T01:00:00Z",
+        "expires_at": "2026-08-05T12:00:00Z",
+        "recheck_count": 0,
+        "latest_recheck_outcome": "not_checked",
+        "latest_recheck_reason": null,
+        "latest_recheck_source_urls": [],
+        "final_reason": null,
+        "terminal_actor_id": null,
+        "terminal_evidence_urls": [],
+        "terminal_expected_revision": null
+      }
+    },
+    {
+      "definition": "ReplayCase",
+      "value": {
+        "id": "gbsec:replay-case:001",
+        "kind": "replay_case",
+        "schema_version": "1.0.0",
+        "revision": 1,
+        "created_at": "2026-08-05T00:00:00Z",
+        "updated_at": "2026-08-05T00:00:00Z",
+        "data_classification": "public",
+        "case_id": "replay-001",
+        "incident_group": "event-stream-2018",
+        "ecosystem": "npm",
+        "source_record_ids": ["GHSA-mh6f-8j2x-4483"],
+        "source_urls": ["https://github.com/advisories/GHSA-mh6f-8j2x-4483"],
+        "artifacts": [
+          {
+            "ecosystem": "npm",
+            "name": "event-stream",
+            "version": "3.3.6",
+            "digest": null
+          }
+        ],
+        "affected_expressions": ["= 3.3.6"],
+        "expected_events": [
+          {
+            "sequence": 1,
+            "event_type": "advisory_published",
+            "recorded_at": "2018-11-26T23:58:21Z",
+            "timestamp_precision": "exact",
+            "source_record_id": "GHSA-mh6f-8j2x-4483"
+          }
+        ],
+        "expected_incident_status": "confirmed",
+        "expected_correction_state": "current",
+        "expected_receipt_result": "approval_required",
+        "earliest_evidence_replay": true,
+        "rights_decision": "approved_public",
+        "fixture_origin": "public_fact"
+      }
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "added_entry_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Added Entry Ids",
+      "type": "array"
+    },
+    "after_snapshot_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "After Snapshot Id",
+      "type": "string"
+    },
+    "before_snapshot_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Before Snapshot Id",
+      "type": "string"
+    },
+    "changed_entry_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Changed Entry Ids",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "dependency_delta",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "material_transitive_expansion": {
+      "title": "Material Transitive Expansion",
+      "type": "boolean"
+    },
+    "removed_entry_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Removed Entry Ids",
+      "type": "array"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "before_snapshot_id",
+    "after_snapshot_id",
+    "added_entry_ids",
+    "removed_entry_ids",
+    "changed_entry_ids",
+    "material_transitive_expansion"
+  ],
+  "title": "DependencyDelta",
+  "type": "object"
+}

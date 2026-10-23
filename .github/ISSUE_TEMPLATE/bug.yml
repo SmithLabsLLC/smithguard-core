@@ -1,0 +1,24 @@
+name: Bug report
+description: Report a reproducible problem in the service core.
+body:
+  - type: markdown
+    attributes:
+      value: "For security vulnerabilities, follow SECURITY.md instead. Do not post private data or credentials."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Small synthetic reproduction
+      description: Include the commit/version and environment. Use public or synthetic inputs.
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Checks and relevant output
+      description: Remove secrets and private paths before posting output.

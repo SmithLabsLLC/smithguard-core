@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "records": [
+    {
+      "url": "https://api.github.com/advisories/GHSA-6q48-6c7w-9gw2",
+      "fetched_at": "2026-10-21T04:26:41.027007+00:00",
+      "upstream_sha256": "744e6f07692b60127a7de335386ad71a2b6e27a27f6879d969ec6fc81a9705b7",
+      "document": {
+        "ghsa_id": "GHSA-6q48-6c7w-9gw2",
+        "type": "reviewed",
+        "published_at": "2026-10-20T19:35:05Z",
+        "updated_at": "2026-10-20T19:35:06Z",
+        "withdrawn_at": null,
+        "html_url": "https://github.com/advisories/GHSA-6q48-6c7w-9gw2",
+        "cwes": [
+          {
+            "cwe_id": "CWE-295",
+            "name": "Improper Certificate Validation"
+          }
+        ],
+        "identifiers": [
+          {
+            "value": "GHSA-6q48-6c7w-9gw2",
+            "type": "GHSA"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "pip",
+              "name": "certifi"
+            },
+            "vulnerable_version_range": ">= 2019.03.09, < 2026.10.19",
+            "first_patched_version": "2026.10.19",
+            "vulnerable_functions": []
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://api.github.com/advisories/GHSA-hq85-5cpj-mr62",
+      "fetched_at": "2026-10-21T04:26:41.332283+00:00",
+      "upstream_sha256": "dd491d967c9bf60f7a277c57cf0dd7638155645163ee0e6565966d26baaedcd4",
+      "document": {
+        "ghsa_id": "GHSA-hq85-5cpj-mr62",
+        "type": "reviewed",
+        "published_at": "2026-10-20T19:37:52Z",
+        "updated_at": "2026-10-20T19:37:54Z",
+        "withdrawn_at": null,
+        "html_url": "https://github.com/advisories/GHSA-hq85-5cpj-mr62",
+        "cwes": [
+          {
+            "cwe_id": "CWE-295",
+            "name": "Improper Certificate Validation"
+          }
+        ],
+        "identifiers": [
+          {
+            "value": "GHSA-hq85-5cpj-mr62",
+            "type": "GHSA"
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "pip",
+              "name": "uv"
+            },
+            "vulnerable_version_range": "< 0.13.4",
+            "first_patched_version": "0.13.4",
+            "vulnerable_functions": []
+          }
+        ]
+      }
+    }
+  ],
+  "evidence_cutoff": "2026-10-21T04:27:00Z",
+  "scope": "Reduced upstream metadata; record hashes name the full original responses retained privately. Withdrawal/range corrections in tests are synthetic."
+}

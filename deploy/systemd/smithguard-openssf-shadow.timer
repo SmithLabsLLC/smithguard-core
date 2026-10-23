@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the disabled-by-default OpenSSF shadow lane hourly
+
+[Timer]
+OnCalendar=*-*-* *:10:00
+RandomizedDelaySec=2min
+Persistent=yes
+AccuracySec=1min
+Unit=smithguard-openssf-shadow.service
+
+[Install]
+WantedBy=timers.target

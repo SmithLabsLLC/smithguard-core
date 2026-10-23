@@ -1,0 +1,316 @@
+{
+  "$defs": {
+    "CoverageState": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem"
+        },
+        "result": {
+          "$ref": "#/$defs/Result"
+        },
+        "stage": {
+          "$ref": "#/$defs/Stage"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "stage",
+        "result",
+        "as_of"
+      ],
+      "title": "CoverageState",
+      "type": "object"
+    },
+    "Ecosystem": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "composer",
+        "erlang",
+        "git",
+        "maven",
+        "nuget",
+        "open-vsx",
+        "pub",
+        "rubygems",
+        "swift",
+        "vscode",
+        "unknown"
+      ],
+      "title": "Ecosystem",
+      "type": "string"
+    },
+    "EvidenceMaturity": {
+      "additionalProperties": false,
+      "properties": {
+        "composition": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "deployment": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "provenance": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "runtime": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "signature": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "vex": {
+          "$ref": "#/$defs/EvidenceState"
+        }
+      },
+      "required": [
+        "composition",
+        "provenance",
+        "signature",
+        "vex",
+        "deployment",
+        "runtime"
+      ],
+      "title": "EvidenceMaturity",
+      "type": "object"
+    },
+    "EvidenceState": {
+      "enum": [
+        "present",
+        "missing",
+        "invalid",
+        "stale",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ],
+      "title": "EvidenceState",
+      "type": "string"
+    },
+    "Result": {
+      "enum": [
+        "supported",
+        "partial",
+        "unsupported",
+        "stale",
+        "unknown"
+      ],
+      "title": "Result",
+      "type": "string"
+    },
+    "Result3": {
+      "enum": [
+        "allow",
+        "allow_with_notice",
+        "acknowledgement_required",
+        "approval_required",
+        "deny",
+        "unknown"
+      ],
+      "title": "Result3",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    },
+    "Stage": {
+      "enum": [
+        "research",
+        "intake",
+        "normalized",
+        "matched",
+        "response-tested"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "UnknownListItem": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "UnknownListItem",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "assessed_at": {
+      "format": "date-time",
+      "title": "Assessed At",
+      "type": "string"
+    },
+    "coverage": {
+      "items": {
+        "$ref": "#/$defs/CoverageState"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Coverage",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "dependency_delta_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StableId"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence_maturity": {
+      "$ref": "#/$defs/EvidenceMaturity"
+    },
+    "exception_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StableId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "exposure_path_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Exposure Path Ids",
+      "type": "array"
+    },
+    "feed_revision": {
+      "maxLength": 160,
+      "minLength": 8,
+      "title": "Feed Revision",
+      "type": "string"
+    },
+    "feed_snapshot_hash": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Feed Snapshot Hash",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "inventory_fingerprint": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Inventory Fingerprint",
+      "type": "string"
+    },
+    "kind": {
+      "const": "assessment_receipt",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "matcher_version": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Matcher Version",
+      "type": "string"
+    },
+    "policy_decision_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Policy Decision Id",
+      "type": "string"
+    },
+    "policy_version": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "remediation_frontier_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Remediation Frontier Ids",
+      "type": "array"
+    },
+    "result": {
+      "$ref": "#/$defs/Result3"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "unknowns": {
+      "items": {
+        "$ref": "#/$defs/UnknownListItem"
+      },
+      "maxItems": 100,
+      "title": "Unknowns",
+      "type": "array"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "assessed_at",
+    "feed_revision",
+    "feed_snapshot_hash",
+    "matcher_version",
+    "policy_version",
+    "inventory_fingerprint",
+    "coverage",
+    "evidence_maturity",
+    "exposure_path_ids",
+    "remediation_frontier_ids",
+    "policy_decision_id",
+    "exception_id",
+    "result",
+    "unknowns"
+  ],
+  "title": "AssessmentReceipt",
+  "type": "object"
+}

@@ -1,0 +1,260 @@
+# INACTIVE DOMAIN-04 candidate. Replace, never include alongside smithguard.conf.
+# See docs/operations/site-hosting-20260914.md for coupled activation gates.
+limit_req_zone $binary_remote_addr zone=smithguard_public:1m rate=10r/s;
+# A high safety fuse for all callers together; per-address limits do the rationing.
+limit_req_zone $server_name zone=smithguard_assess_global:1m rate=100r/s;
+limit_conn_zone $binary_remote_addr zone=smithguard_connections:1m;
+
+map "$request_method:$uri" $smithguard_method_allowed {
+    default 0;
+    ~^GET: 1;
+    ~^HEAD: 1;
+    "POST:/v1/artifacts/assess" 1;
+    "POST:/mcp" 1;
+    "GET:/mcp" 0;
+    "HEAD:/mcp" 0;
+}
+
+server {
+    listen unix:/run/smithguard-origin/nginx.sock default_server;
+    server_name _;
+    access_log off;
+    server_tokens off;
+    default_type application/json;
+    return 421 '{"error":{"code":"misdirected_request","message":"unknown host","retryable":false}}';
+}
+
+server {
+    listen unix:/run/smithguard-origin/nginx.sock;
+    server_name api.smithguard.io guard.smithlabs.ai guard-staging.smithlabs.ai;
+    access_log off;
+    server_tokens off;
+    set_real_ip_from unix:;
+    real_ip_header CF-Connecting-IP;
+    client_max_body_size 16k;
+    proxy_read_timeout 15s;
+    proxy_connect_timeout 5s;
+    client_body_timeout 10s;
+    client_header_timeout 10s;
+
+    if ($smithguard_method_allowed = 0) {
+        return 405;
+    }
+
+    limit_req zone=smithguard_public burst=20 nodelay;
+    limit_req_status 429;
+    limit_conn smithguard_connections 20;
+    limit_conn_status 429;
+    error_page 429 = @smithguard_rate_limited;
+    error_page 405 = @smithguard_method_rejected;
+    error_page 413 = @smithguard_too_large;
+    error_page 502 503 504 = @smithguard_upstream_unavailable;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" always;
+
+    location = /v1/artifacts/assess {
+        limit_req zone=smithguard_public burst=20 nodelay;
+        limit_req zone=smithguard_assess_global burst=200 nodelay;
+        proxy_http_version 1.1;
+        proxy_set_header Host api.smithguard.io;
+        proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host api.smithguard.io;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_hide_header Server;
+        proxy_pass http://unix:/run/smithguard-api/api.sock:;
+    }
+
+    location = /mcp {
+        limit_req zone=smithguard_public burst=20 nodelay;
+        limit_req zone=smithguard_assess_global burst=200 nodelay;
+        proxy_http_version 1.1;
+        proxy_set_header Host api.smithguard.io;
+        proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host api.smithguard.io;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_hide_header Server;
+        proxy_pass http://unix:/run/smithguard-api/api.sock:;
+    }
+
+    location / {
+        proxy_http_version 1.1;
+        proxy_set_header Host api.smithguard.io;
+        proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host api.smithguard.io;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_hide_header Server;
+        proxy_pass http://unix:/run/smithguard-api/api.sock:;
+    }
+
+    location @smithguard_rate_limited {
+        default_type application/json;
+        return 429 '{"error":{"code":"rate_limit_exceeded","message":"public request limit exceeded","retryable":true}}';
+    }
+
+    location @smithguard_too_large {
+        default_type application/json;
+        return 413 '{"error":{"code":"request_limit_exceeded","message":"request exceeds its fixed byte limit","retryable":false}}';
+    }
+
+    location @smithguard_upstream_unavailable {
+        default_type application/json;
+        return 503 '{"error":{"code":"service_unavailable","message":"The service is temporarily unavailable.","retryable":true}}';
+    }
+
+    location @smithguard_method_rejected {
+        default_type application/json;
+        return 405 '{"error":{"code":"method_not_allowed","message":"request method is not allowed","retryable":false}}';
+    }
+}
+# Keep static browsing outside the established API client/connection budgets.
+limit_req_zone $binary_remote_addr zone=smithguard_site:1m rate=10r/s;
+limit_conn_zone $binary_remote_addr zone=smithguard_site_connections:1m;
+
+map $host $smithguard_site_robots {
+    default "";
+    site-staging.smithguard.io "noindex";
+}
+
+map $uri $smithguard_site_file {
+    default "";
+    "/.well-known/security.txt" "/.well-known/security.txt";
+    "/agents/" "/agents/index.html";
+    "/agents/index.json" "/agents/index.json";
+    "/agents/smithguard-openapi.json" "/agents/smithguard-openapi.json";
+    "/apple-touch-icon.png" "/apple-touch-icon.png";
+    "/artifact-manifest.json" "/artifact-manifest.json";
+    "/assets/brand/smithguard-wordmark-dark.svg" "/assets/brand/smithguard-wordmark-dark.svg";
+    "/assets/brand/smithguard-wordmark-light.svg" "/assets/brand/smithguard-wordmark-light.svg";
+    "/assets/brand/smithlabs-favicon.svg" "/assets/brand/smithlabs-favicon.svg";
+    "/assets/brand/smithlabs-mark-dark.svg" "/assets/brand/smithlabs-mark-dark.svg";
+    "/assets/brand/smithlabs-mark-light.svg" "/assets/brand/smithlabs-mark-light.svg";
+    "/assets/brand/smithlabs-wordmark-dark.svg" "/assets/brand/smithlabs-wordmark-dark.svg";
+    "/assets/brand/smithlabs-wordmark-light.svg" "/assets/brand/smithlabs-wordmark-light.svg";
+    "/assets/fonts/Cantarell-Bold.otf" "/assets/fonts/Cantarell-Bold.otf";
+    "/assets/fonts/Cantarell-Regular.otf" "/assets/fonts/Cantarell-Regular.otf";
+    "/assets/fonts/OFL-1.1.txt" "/assets/fonts/OFL-1.1.txt";
+    "/assets/site.css" "/assets/site.css";
+    "/assets/bulletins.js" "/assets/bulletins.js";
+    "/assets/social/smithguard-og-1200x630.png" "/assets/social/smithguard-og-1200x630.png";
+    "/assets/social/smithlabs-og-1200x630.png" "/assets/social/smithlabs-og-1200x630.png";
+    "/favicon.ico" "/favicon.ico";
+    "/icon-192.png" "/icon-192.png";
+    "/icon-512.png" "/icon-512.png";
+    "/" "/index.html";
+    "/llms.txt" "/llms.txt";
+    "/llms-full.txt" "/llms-full.txt";
+    "/privacy/" "/privacy/index.html";
+    "/robots.txt" "/robots.txt";
+    "/security.txt" "/security.txt";
+    "/site.webmanifest" "/site.webmanifest";
+    "/sitemap.xml" "/sitemap.xml";
+    "/terms/" "/terms/index.html";
+    "/threats/" "/threats/index.html";
+    "/trust/" "/trust/index.html";
+}
+
+map $request_method $smithguard_site_method_allowed {
+    default 0;
+    GET 1;
+    HEAD 1;
+}
+
+map $uri $smithguard_site_csp {
+    default "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+    "/threats/" "default-src 'none'; script-src 'self'; connect-src https://api.smithguard.io; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests";
+    "/threats/index.html" "default-src 'none'; script-src 'self'; connect-src https://api.smithguard.io; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests";
+    ~(/$|\.html$) "default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests";
+}
+
+map "$status:$uri" $smithguard_site_cache {
+    default "no-store";
+    ~^(200|206|304):/assets/ "public, max-age=300, must-revalidate";
+    ~^(200|206|304):/agents/(index|smithguard-openapi)\.json$ "public, max-age=300";
+    ~^(200|206|304): "public, max-age=0, must-revalidate, no-transform";
+}
+
+server {
+    listen unix:/run/smithguard-origin/nginx.sock;
+    server_name smithguard.io site-staging.smithguard.io;
+    access_log off;
+    server_tokens off;
+    set_real_ip_from unix:;
+    real_ip_header CF-Connecting-IP;
+    root /opt/SmithGuard/current/site;
+    # Only the verified atomic current link is exempt; site and descendants are checked.
+    disable_symlinks on from=/opt/SmithGuard/current;
+    autoindex off;
+    absolute_redirect off;
+    client_max_body_size 16k;
+    client_body_timeout 10s;
+    client_header_timeout 10s;
+    limit_req zone=smithguard_site burst=20 nodelay;
+    limit_req_status 429;
+    limit_conn smithguard_site_connections 20;
+    limit_conn_status 429;
+
+    types {
+        text/html html;
+        text/css css;
+        text/javascript js;
+        text/plain txt;
+        application/json json;
+        application/manifest+json webmanifest;
+        application/xml xml;
+        image/svg+xml svg;
+        image/png png;
+        image/x-icon ico;
+        font/otf otf;
+        font/woff2 woff2;
+    }
+    default_type application/octet-stream;
+    charset utf-8;
+    charset_types text/css text/plain application/manifest+json;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Permissions-Policy "accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Content-Security-Policy $smithguard_site_csp always;
+    add_header Cache-Control $smithguard_site_cache always;
+    add_header X-Robots-Tag $smithguard_site_robots always;
+
+    if ($smithguard_site_method_allowed = 0) {
+        return 405;
+    }
+    error_page 404 /404.html;
+
+    location = /index.html { return 308 /$is_args$args; }
+    location = /agents/index.html { return 308 /agents/$is_args$args; }
+    location = /trust/index.html { return 308 /trust/$is_args$args; }
+    location = /privacy/index.html { return 308 /privacy/$is_args$args; }
+    location = /terms/index.html { return 308 /terms/$is_args$args; }
+    location = /threats/index.html { return 308 /threats/$is_args$args; }
+
+    location = /security { return 308 /trust/$is_args$args; }
+    location = /security/ { return 308 /trust/$is_args$args; }
+    location = /agents { return 308 /agents/$is_args$args; }
+    location = /trust { return 308 /trust/$is_args$args; }
+    location = /privacy { return 308 /privacy/$is_args$args; }
+    location = /terms { return 308 /terms/$is_args$args; }
+    location = /threats { return 308 /threats/$is_args$args; }
+
+    location = /404.html {
+        internal;
+    }
+    location / {
+        if ($smithguard_site_file = "") {
+            return 404;
+        }
+        try_files $smithguard_site_file =404;
+    }
+}

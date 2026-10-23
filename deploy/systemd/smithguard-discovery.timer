@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule bounded SmithGuard public warning discovery every 30 minutes
+
+[Timer]
+OnCalendar=*-*-* *:27:00 UTC
+OnCalendar=*-*-* *:57:00 UTC
+Persistent=yes
+AccuracySec=1min
+Unit=smithguard-discovery.service
+
+[Install]
+WantedBy=timers.target

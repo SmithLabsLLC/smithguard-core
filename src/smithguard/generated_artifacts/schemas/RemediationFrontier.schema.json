@@ -1,0 +1,255 @@
+{
+  "$defs": {
+    "BoundedTextListItem": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "BoundedTextListItem",
+      "type": "string"
+    },
+    "ChangeType": {
+      "enum": [
+        "upgrade",
+        "remove",
+        "pin_digest",
+        "replace",
+        "contain",
+        "monitor",
+        "unknown"
+      ],
+      "title": "ChangeType",
+      "type": "string"
+    },
+    "Ecosystem5": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "unknown"
+      ],
+      "title": "Ecosystem5",
+      "type": "string"
+    },
+    "LocalArtifactInput": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem5"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "registry_host": {
+          "anyOf": [
+            {
+              "maxLength": 259,
+              "pattern": "^[A-Za-z0-9.-]+(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registry Host"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "visibility"
+      ],
+      "title": "LocalArtifactInput",
+      "type": "object"
+    },
+    "OwnerScope": {
+      "enum": [
+        "project",
+        "platform",
+        "base_image",
+        "dependency",
+        "workflow",
+        "vendor",
+        "unknown"
+      ],
+      "title": "OwnerScope",
+      "type": "string"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "SupportState": {
+      "enum": [
+        "supported",
+        "plausible",
+        "unverified",
+        "conflicting",
+        "unknown"
+      ],
+      "title": "SupportState",
+      "type": "string"
+    },
+    "UnknownListItem": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "UnknownListItem",
+      "type": "string"
+    },
+    "Visibility": {
+      "enum": [
+        "verified_public",
+        "private",
+        "unknown"
+      ],
+      "title": "Visibility",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "change_type": {
+      "$ref": "#/$defs/ChangeType"
+    },
+    "compatibility_unknowns": {
+      "items": {
+        "$ref": "#/$defs/UnknownListItem"
+      },
+      "maxItems": 100,
+      "title": "Compatibility Unknowns",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "expected_effect": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Expected Effect",
+      "type": "string"
+    },
+    "exposure_path_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Exposure Path Id",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "remediation_frontier",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "owner_scope": {
+      "$ref": "#/$defs/OwnerScope"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "rollback": {
+      "items": {
+        "$ref": "#/$defs/BoundedTextListItem"
+      },
+      "maxItems": 50,
+      "title": "Rollback",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "support_state": {
+      "$ref": "#/$defs/SupportState"
+    },
+    "target_artifact": {
+      "$ref": "#/$defs/LocalArtifactInput"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "validation": {
+      "items": {
+        "$ref": "#/$defs/BoundedTextListItem"
+      },
+      "maxItems": 50,
+      "title": "Validation",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "exposure_path_id",
+    "owner_scope",
+    "change_type",
+    "target_artifact",
+    "expected_effect",
+    "compatibility_unknowns",
+    "validation",
+    "rollback",
+    "support_state"
+  ],
+  "title": "RemediationFrontier",
+  "type": "object"
+}

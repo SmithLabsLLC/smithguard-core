@@ -1,0 +1,1 @@
+"""Focused SmithGuard foundation tests."""

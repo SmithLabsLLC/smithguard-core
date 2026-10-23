@@ -1,0 +1,14 @@
+[Unit]
+Description=Run complete SmithGuard OpenSSF catalog collection hourly
+
+[Timer]
+# Half past the hour, away from collection (:00) and signals (:05); Persistent catches
+# up one missed run after downtime or a deploy.
+OnCalendar=*-*-* *:35:00
+RandomizedDelaySec=5min
+AccuracySec=1min
+Persistent=true
+Unit=smithguard-openssf-catalog.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "gbsec:source-governance-policy:mx-007-v1",
+  "policy_version": "1.2.0",
+  "rights_register_id": "gbsec:rights-register:phase-0a-v1",
+  "publication_decision": {
+    "state": "active",
+    "decision_id": "gbsec:qualified-publication-decision:authoritative-feeds-20261006-v1",
+    "decided_at": "2026-10-06T23:42:00Z",
+    "source_ids": [
+      "gbsec:source:github-advisory-database",
+      "gbsec:source:openssf-malicious-packages",
+      "gbsec:source:first-epss",
+      "gbsec:source:cisa-kev",
+      "gbsec:source:go-vulnerability-database",
+      "gbsec:source:rustsec-advisory-database"
+    ]
+  },
+  "evidence_disposition": {
+    "authorized_adapter_ids": []
+  },
+  "gateway_shadow_field_policies": [
+    {
+      "field_policy_id": "gbsec:field-policy:osv-shadow-projection-v1",
+      "transport_source_id": "gbsec:source:osv-dev",
+      "origin_source_ids": [
+        "gbsec:source:github-advisory-database",
+        "gbsec:source:openssf-malicious-packages"
+      ],
+      "accepted_field_paths": [
+        "affected",
+        "aliases",
+        "id",
+        "modified",
+        "published",
+        "references",
+        "related",
+        "schema_version",
+        "upstream",
+        "withdrawn"
+      ],
+      "storage_scope": "isolated_shadow",
+      "public_output_authorized": false
+    }
+  ],
+  "rights_evidence_history": [
+    {
+      "evidence_id": "gbsec:rights-evidence:osv-faq-20260805",
+      "url": "https://google.github.io/osv.dev/faq/",
+      "captured_on": "2026-08-05",
+      "content_sha256": null,
+      "state": "upstream_dispatch_unresolved",
+      "superseded_by": "gbsec:rights-evidence:osv-faq-20260811"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "gbsec:source:github-advisory-database",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:github-advisory-rest-v1",
+          "acquisition_methods": [
+            "rest_api"
+          ],
+          "operating_modes": [
+            "historical",
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:github-advisory-catalog-v3",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "ghsa_id",
+        "html_url",
+        "identifiers",
+        "published_at",
+        "references",
+        "type",
+        "updated_at",
+        "vulnerabilities.package",
+        "vulnerabilities.first_patched_version",
+        "vulnerabilities.vulnerable_version_range",
+        "cwes.cwe_id",
+        "withdrawn_at"
+      ],
+      "attribution_text": "GitHub Advisory Database",
+      "license_expression": "CC-BY-4.0",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:github-advisory-terms-20260807",
+          "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features",
+          "captured_on": "2026-08-07",
+          "content_sha256": "sha256:72383843617395065d0c0322d7fc04239da6dfb6d7009f8d0d1dd85aa46fa4b3",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "confirmed",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:openssf-malicious-packages",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:openssf-git-v1",
+          "acquisition_methods": [
+            "git"
+          ],
+          "operating_modes": [
+            "historical",
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:openssf-full-catalog-v2",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "affected",
+        "aliases",
+        "database_specific",
+        "id",
+        "modified",
+        "published",
+        "references",
+        "withdrawn"
+      ],
+      "attribution_text": "OpenSSF Malicious Packages",
+      "license_expression": "Apache-2.0",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:openssf-license-20260816",
+          "url": "https://github.com/ossf/malicious-packages/blob/a37fdcd5094cb2a0df4a253fc117bdf1220112a6/LICENSE",
+          "captured_on": "2026-08-16",
+          "content_sha256": "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "confirmed",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:osv-dev",
+      "enabled": false,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:osv-gateway-v1",
+          "acquisition_methods": [
+            "rest_api"
+          ],
+          "operating_modes": [
+            "exact_lookup",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:osv-upstream-dispatch-v1",
+      "authenticated_upstream_source_ids": [
+        "gbsec:source:github-advisory-database",
+        "gbsec:source:openssf-malicious-packages",
+        "gbsec:source:pypa-advisory-database",
+        "gbsec:source:go-vulnerability-database"
+      ],
+      "accepted_field_paths": [],
+      "attribution_text": "OSV.dev and the identified upstream database",
+      "license_expression": null,
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:osv-faq-20260811",
+          "url": "https://google.github.io/osv.dev/faq/",
+          "captured_on": "2026-08-11",
+          "content_sha256": "sha256:69d0337e897cc36ac22a558c8b3e848b440f5d55f0df0f93344b2bd8a83d055e",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "until_withdrawn",
+      "public_status_ceiling": "reported",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:first-epss",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:epss-direct-v1",
+          "acquisition_methods": [
+            "rest_api",
+            "download"
+          ],
+          "operating_modes": [
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:epss-minimal-v1",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "cve",
+        "epss",
+        "percentile",
+        "date",
+        "model_version"
+      ],
+      "attribution_text": "FIRST Exploit Prediction Scoring System",
+      "license_expression": "LicenseRef-FIRST-EPSS-Public-Use",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:epss-20261006",
+          "url": "https://www.first.org/epss/faq",
+          "captured_on": "2026-10-06",
+          "content_sha256": "sha256:717f0388809f6e9cef2c92657be1380dfdce224a4b47be3a8dc9e44113aeadf3",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "reported",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:cisa-kev",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:kev-direct-v1",
+          "acquisition_methods": [
+            "download"
+          ],
+          "operating_modes": [
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:kev-minimal-v1",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "cve",
+        "date_added"
+      ],
+      "attribution_text": "CISA Known Exploited Vulnerabilities Catalog",
+      "license_expression": "CC0-1.0",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:kev-20261006",
+          "url": "https://raw.githubusercontent.com/cisagov/kev-data/develop/LICENSE",
+          "captured_on": "2026-10-06",
+          "content_sha256": "sha256:8dfcf2d0cba33bede386eb470daf2ac08caf6540fc2516baab10dd546f90938a",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "reported",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:go-vulnerability-database",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:go-direct-v1",
+          "acquisition_methods": [
+            "download",
+            "rest_api"
+          ],
+          "operating_modes": [
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:go-minimal-v1",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "schema_version",
+        "id",
+        "aliases",
+        "affected",
+        "references",
+        "published",
+        "modified",
+        "withdrawn",
+        "database_specific"
+      ],
+      "attribution_text": "Go Vulnerability Database",
+      "license_expression": "CC-BY-4.0",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:go-20261006",
+          "url": "https://raw.githubusercontent.com/golang/vulndb/master/LICENSE",
+          "captured_on": "2026-10-06",
+          "content_sha256": "sha256:79c7317f4757f42cc3539abe8955d2021215a8510ffdbf71494dad051939cdaf",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "confirmed",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    },
+    {
+      "source_id": "gbsec:source:rustsec-advisory-database",
+      "enabled": true,
+      "connectors": [
+        {
+          "connector_id": "gbsec:connector:rustsec-direct-v1",
+          "acquisition_methods": [
+            "git",
+            "download"
+          ],
+          "operating_modes": [
+            "updates",
+            "reconciliation"
+          ]
+        }
+      ],
+      "field_policy_id": "gbsec:field-policy:rustsec-minimal-v1",
+      "authenticated_upstream_source_ids": [],
+      "accepted_field_paths": [
+        "schema_version",
+        "id",
+        "aliases",
+        "affected",
+        "references",
+        "published",
+        "modified",
+        "withdrawn",
+        "database_specific"
+      ],
+      "attribution_text": "RustSec Advisory Database or identified GitHub advisory",
+      "license_expression": "CC0-1.0 OR CC-BY-4.0-per-record",
+      "rights_evidence": [
+        {
+          "evidence_id": "gbsec:rights-evidence:rustsec-20261006",
+          "url": "https://raw.githubusercontent.com/rustsec/advisory-db/main/README.md",
+          "captured_on": "2026-10-06",
+          "content_sha256": "sha256:ef4d4e4d2b55b98ea8479caef59907ca64b912e6d7a1423957f394dd0d86b1c4",
+          "state": "verified_snapshot"
+        }
+      ],
+      "retention_behavior": "immutable_permitted",
+      "public_status_ceiling": "confirmed",
+      "correction_behavior": "append_corrected_revision",
+      "withdrawal_behavior": "retain_mark_withdrawn",
+      "rights_drift_behavior": "fail_closed_and_reconcile"
+    }
+  ]
+}

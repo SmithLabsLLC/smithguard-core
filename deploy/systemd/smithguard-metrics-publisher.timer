@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish SmithGuard operational metrics every five minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00
+Persistent=yes
+AccuracySec=1s
+Unit=smithguard-metrics-publisher.service
+
+[Install]
+WantedBy=timers.target

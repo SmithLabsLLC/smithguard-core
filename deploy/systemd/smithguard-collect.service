@@ -1,0 +1,49 @@
+[Unit]
+# A transient failure retries itself; three failures in an hour leave the unit failed.
+StartLimitIntervalSec=1h
+StartLimitBurst=3
+Description=SmithGuard bounded public advisory collection
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/collector.env
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=2min
+MemoryHigh=1536M
+User=smithguard-collector
+Group=smithguard-collector
+SupplementaryGroups=smithguard-evidence
+EnvironmentFile=/etc/SmithGuard/env/collector.env
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-collect
+TimeoutStartSec=30min
+UMask=0027
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+ReadWritePaths=/var/lib/smithguard/evidence
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

@@ -1,0 +1,277 @@
+{
+  "$defs": {
+    "ConfirmationMethod": {
+      "enum": [
+        "reported_source",
+        "automated_source_policy",
+        "automated_corroboration",
+        "human_review",
+        "withdrawal",
+        "dispute"
+      ],
+      "title": "ConfirmationMethod",
+      "type": "string"
+    },
+    "PublicStatus": {
+      "enum": [
+        "reported",
+        "corroborated",
+        "confirmed",
+        "disputed",
+        "withdrawn"
+      ],
+      "title": "PublicStatus",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    },
+    "UpstreamId": {
+      "maxLength": 160,
+      "minLength": 2,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+      "title": "UpstreamId",
+      "type": "string"
+    },
+    "Uri": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Uri",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "artifact_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Artifact Id",
+      "type": "string"
+    },
+    "assertion_source_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StableId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attribution_policy_version": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Attribution Policy Version",
+      "type": "string"
+    },
+    "authority_policy_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Authority Policy Id",
+      "type": "string"
+    },
+    "authority_policy_version": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Authority Policy Version",
+      "type": "string"
+    },
+    "authority_rule_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Authority Rule Id",
+      "type": "string"
+    },
+    "automated": {
+      "title": "Automated",
+      "type": "boolean"
+    },
+    "claim_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Claim Id",
+      "type": "string"
+    },
+    "confirmation_method": {
+      "$ref": "#/$defs/ConfirmationMethod"
+    },
+    "confirming_authority_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StableId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "evidence_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "exception_reason_code": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "minLength": 2,
+          "pattern": "^[a-z0-9_]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Exception Reason Code"
+    },
+    "exception_required": {
+      "title": "Exception Required",
+      "type": "boolean"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "independent_goodboy_analysis": {
+      "title": "Independent Goodboy Analysis",
+      "type": "boolean"
+    },
+    "kind": {
+      "const": "authority_decision",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "public_status": {
+      "$ref": "#/$defs/PublicStatus"
+    },
+    "reason_code": {
+      "maxLength": 120,
+      "minLength": 2,
+      "pattern": "^[a-z0-9_]+$",
+      "title": "Reason Code",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_references": {
+      "items": {
+        "$ref": "#/$defs/Uri"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Source References",
+      "type": "array"
+    },
+    "source_rights_register_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Source Rights Register Id",
+      "type": "string"
+    },
+    "transport_source_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Transport Source Id",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "upstream_ids": {
+      "items": {
+        "$ref": "#/$defs/UpstreamId"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Upstream Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "incident_id",
+    "claim_id",
+    "artifact_id",
+    "evidence_ids",
+    "public_status",
+    "confirmation_method",
+    "transport_source_id",
+    "assertion_source_id",
+    "confirming_authority_id",
+    "authority_policy_id",
+    "authority_policy_version",
+    "authority_rule_id",
+    "source_rights_register_id",
+    "attribution_policy_version",
+    "reason_code",
+    "automated",
+    "independent_goodboy_analysis",
+    "upstream_ids",
+    "source_references",
+    "exception_required",
+    "exception_reason_code",
+    "decided_at"
+  ],
+  "title": "AuthorityDecision",
+  "type": "object"
+}

@@ -1,0 +1,44 @@
+[Unit]
+Description=SmithGuard bounded preliminary-warning public recheck
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/warning-recheck.env
+
+[Service]
+Type=oneshot
+User=smithguard-signals
+Group=smithguard-signals
+EnvironmentFile=/etc/SmithGuard/env/warning-recheck.env
+Environment=SMITHGUARD_XAI_KEY_FILE=%d/xai.key
+LoadCredential=xai.key:/etc/SmithGuard/credentials/xai.key
+WorkingDirectory=/opt/SmithGuard/current
+ExecCondition=/usr/bin/test ${SMITHGUARD_WARNING_DISPATCH_ENABLED} = 1
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-signals --recheck-due --limit 2
+TimeoutStartSec=5min
+UMask=0077
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

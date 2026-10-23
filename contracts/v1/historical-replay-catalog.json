@@ -1,0 +1,770 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "gbsec:replay-catalog:phase-0a-v1",
+  "created_at": "2026-08-05T00:00:00Z",
+  "source_cutoff_at": "2026-08-05T15:00:00Z",
+  "source_verification": {
+    "checked_on": "2026-08-05",
+    "public_urls_checked": [
+      "https://eslint.org/blog/2018/07/postmortem-for-malicious-package-publishes/",
+      "https://github.com/Marak/colors.js/issues/285",
+      "https://github.com/advisories/GHSA-3crg-h67f-c6r9",
+      "https://github.com/advisories/GHSA-3mpp-xfvh-qh37",
+      "https://github.com/advisories/GHSA-46g3-37rh-v698",
+      "https://github.com/advisories/GHSA-4g82-3jcr-q52w",
+      "https://github.com/advisories/GHSA-5rqg-jm4f-cqx7",
+      "https://github.com/advisories/GHSA-5wxr-w449-57cm",
+      "https://github.com/advisories/GHSA-5xq9-5g24-4g6f",
+      "https://github.com/advisories/GHSA-67r3-h899-9w95",
+      "https://github.com/advisories/GHSA-73qr-pfmq-6rp8",
+      "https://github.com/advisories/GHSA-7929-ff6q-qmmh",
+      "https://github.com/advisories/GHSA-8gr3-2gjw-jj7g",
+      "https://github.com/advisories/GHSA-8m32-rjxc-vw3m",
+      "https://github.com/advisories/GHSA-8q5r-mmjf-575q",
+      "https://github.com/advisories/GHSA-8vw6-pp4v-8j32",
+      "https://github.com/advisories/GHSA-97m3-w2cp-4xx6",
+      "https://github.com/advisories/GHSA-g2q5-5433-rhrf",
+      "https://github.com/advisories/GHSA-g699-3x6g-wm3g",
+      "https://github.com/advisories/GHSA-hxq7-5438-cm4f",
+      "https://github.com/advisories/GHSA-hxxf-q3w9-4xgw",
+      "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+      "https://github.com/advisories/GHSA-mrrh-fwg8-r2c3",
+      "https://github.com/advisories/GHSA-pjwm-rvh2-c87w",
+      "https://github.com/advisories/GHSA-pwf7-47c3-mfhx",
+      "https://github.com/advisories/GHSA-qmg3-hpqr-gqvc",
+      "https://github.com/advisories/GHSA-r79c-pqj3-577x",
+      "https://github.com/advisories/GHSA-vxmw-7h4f-hqxh",
+      "https://github.com/dominictarr/event-stream/issues/116",
+      "https://github.com/faisalman/ua-parser-js/issues/536",
+      "https://github.com/veged/coa/issues/99"
+    ],
+    "public_urls_reachable": [
+      "https://eslint.org/blog/2018/07/postmortem-for-malicious-package-publishes/",
+      "https://github.com/Marak/colors.js/issues/285",
+      "https://github.com/advisories/GHSA-3crg-h67f-c6r9",
+      "https://github.com/advisories/GHSA-3mpp-xfvh-qh37",
+      "https://github.com/advisories/GHSA-46g3-37rh-v698",
+      "https://github.com/advisories/GHSA-4g82-3jcr-q52w",
+      "https://github.com/advisories/GHSA-5rqg-jm4f-cqx7",
+      "https://github.com/advisories/GHSA-5wxr-w449-57cm",
+      "https://github.com/advisories/GHSA-5xq9-5g24-4g6f",
+      "https://github.com/advisories/GHSA-67r3-h899-9w95",
+      "https://github.com/advisories/GHSA-73qr-pfmq-6rp8",
+      "https://github.com/advisories/GHSA-7929-ff6q-qmmh",
+      "https://github.com/advisories/GHSA-8gr3-2gjw-jj7g",
+      "https://github.com/advisories/GHSA-8m32-rjxc-vw3m",
+      "https://github.com/advisories/GHSA-8q5r-mmjf-575q",
+      "https://github.com/advisories/GHSA-8vw6-pp4v-8j32",
+      "https://github.com/advisories/GHSA-97m3-w2cp-4xx6",
+      "https://github.com/advisories/GHSA-g2q5-5433-rhrf",
+      "https://github.com/advisories/GHSA-g699-3x6g-wm3g",
+      "https://github.com/advisories/GHSA-hxq7-5438-cm4f",
+      "https://github.com/advisories/GHSA-hxxf-q3w9-4xgw",
+      "https://github.com/advisories/GHSA-mh6f-8j2x-4483",
+      "https://github.com/advisories/GHSA-mrrh-fwg8-r2c3",
+      "https://github.com/advisories/GHSA-pjwm-rvh2-c87w",
+      "https://github.com/advisories/GHSA-pwf7-47c3-mfhx",
+      "https://github.com/advisories/GHSA-qmg3-hpqr-gqvc",
+      "https://github.com/advisories/GHSA-r79c-pqj3-577x",
+      "https://github.com/advisories/GHSA-vxmw-7h4f-hqxh",
+      "https://github.com/dominictarr/event-stream/issues/116",
+      "https://github.com/faisalman/ua-parser-js/issues/536",
+      "https://github.com/veged/coa/issues/99"
+    ],
+    "public_urls_unreachable": [],
+    "github_advisories_api_checked": [
+      "GHSA-3crg-h67f-c6r9",
+      "GHSA-3mpp-xfvh-qh37",
+      "GHSA-46g3-37rh-v698",
+      "GHSA-4g82-3jcr-q52w",
+      "GHSA-5rqg-jm4f-cqx7",
+      "GHSA-5wxr-w449-57cm",
+      "GHSA-5xq9-5g24-4g6f",
+      "GHSA-67r3-h899-9w95",
+      "GHSA-73qr-pfmq-6rp8",
+      "GHSA-7929-ff6q-qmmh",
+      "GHSA-8gr3-2gjw-jj7g",
+      "GHSA-8m32-rjxc-vw3m",
+      "GHSA-8q5r-mmjf-575q",
+      "GHSA-8vw6-pp4v-8j32",
+      "GHSA-97m3-w2cp-4xx6",
+      "GHSA-g2q5-5433-rhrf",
+      "GHSA-g699-3x6g-wm3g",
+      "GHSA-hxq7-5438-cm4f",
+      "GHSA-hxxf-q3w9-4xgw",
+      "GHSA-mh6f-8j2x-4483",
+      "GHSA-mrrh-fwg8-r2c3",
+      "GHSA-pjwm-rvh2-c87w",
+      "GHSA-pwf7-47c3-mfhx",
+      "GHSA-qmg3-hpqr-gqvc",
+      "GHSA-r79c-pqj3-577x",
+      "GHSA-vxmw-7h4f-hqxh"
+    ],
+    "github_advisory_mismatches": [],
+    "synthetic_urls_excluded": [
+      "https://example.invalid/goodboy/oci-digest-affected",
+      "https://example.invalid/goodboy/oci-tag-unknown"
+    ],
+    "method": "Read-only HTTP reachability and GitHub global-advisory metadata check; no package content was downloaded or executed"
+  },
+  "defaults": {
+    "expected_incident_status": "confirmed",
+    "expected_correction_state": "current",
+    "expected_receipt_result": "approval_required",
+    "rights_decision": "approved_public",
+    "fixture_origin": "public_fact"
+  },
+  "measurement_rules": {
+    "earliest_evidence_meaning": "Earliest public source recorded in this fixture after a targeted source review, not a claim that no earlier report exists.",
+    "day_precision_rule": "A day-only source date is normalized to 00:00:00Z and must retain timestamp_precision=day.",
+    "source_to_ready_start": "First expected event with event_type=first_public_evidence or advisory_published.",
+    "source_to_ready_end": "Future deterministic replay completion; no measured result is claimed in Phase 0A fixtures.",
+    "correction_start": "The source correction or withdrawal event time.",
+    "correction_end": "Future corrected deterministic replay completion; no external SLO is claimed."
+  },
+  "cases": [
+    {
+      "case_id": "replay-001",
+      "incident_group": "event-stream-2018",
+      "ecosystem": "npm",
+      "source_record_ids": ["upstream:event-stream-issue-116", "GHSA-mh6f-8j2x-4483"],
+      "source_urls": [
+        "https://github.com/dominictarr/event-stream/issues/116",
+        "https://github.com/advisories/GHSA-mh6f-8j2x-4483"
+      ],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "event-stream", "version": "3.3.6", "digest": null},
+        {"ecosystem": "npm", "name": "flatmap-stream", "version": "0.1.1", "digest": null}
+      ],
+      "affected_expressions": ["event-stream = 3.3.6", "flatmap-stream >= 0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2018-11-26T00:00:00Z",
+          "timestamp_precision": "day",
+          "source_record_id": "upstream:event-stream-issue-116"
+        },
+        {
+          "sequence": 2,
+          "event_type": "advisory_published",
+          "recorded_at": "2018-11-26T23:58:21Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-mh6f-8j2x-4483"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-002",
+      "incident_group": "eslint-scope-2018",
+      "ecosystem": "npm",
+      "source_record_ids": ["upstream:eslint-postmortem-2018-07", "GHSA-hxxf-q3w9-4xgw"],
+      "source_urls": [
+        "https://eslint.org/blog/2018/07/postmortem-for-malicious-package-publishes/",
+        "https://github.com/advisories/GHSA-hxxf-q3w9-4xgw"
+      ],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "eslint-scope", "version": "3.7.2", "digest": null},
+        {"ecosystem": "npm", "name": "eslint-scope", "version": "5.0.2", "digest": null}
+      ],
+      "affected_expressions": ["= 3.7.2", "= 5.0.2"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2018-07-12T00:00:00Z",
+          "timestamp_precision": "day",
+          "source_record_id": "upstream:eslint-postmortem-2018-07"
+        },
+        {
+          "sequence": 2,
+          "event_type": "advisory_published",
+          "recorded_at": "2018-07-12T19:52:02Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-hxxf-q3w9-4xgw"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-003",
+      "incident_group": "ua-parser-js-2021",
+      "ecosystem": "npm",
+      "source_record_ids": ["upstream:ua-parser-js-issue-536", "GHSA-pjwm-rvh2-c87w"],
+      "source_urls": [
+        "https://github.com/faisalman/ua-parser-js/issues/536",
+        "https://github.com/advisories/GHSA-pjwm-rvh2-c87w"
+      ],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "ua-parser-js", "version": "0.7.29", "digest": null},
+        {"ecosystem": "npm", "name": "ua-parser-js", "version": "0.8.0", "digest": null},
+        {"ecosystem": "npm", "name": "ua-parser-js", "version": "1.0.0", "digest": null}
+      ],
+      "affected_expressions": ["= 0.7.29", "= 0.8.0", "= 1.0.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2021-10-22T00:00:00Z",
+          "timestamp_precision": "day",
+          "source_record_id": "upstream:ua-parser-js-issue-536"
+        },
+        {
+          "sequence": 2,
+          "event_type": "advisory_published",
+          "recorded_at": "2021-10-22T20:38:14Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-pjwm-rvh2-c87w"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-004",
+      "incident_group": "coa-2021",
+      "ecosystem": "npm",
+      "source_record_ids": ["upstream:coa-issue-99", "GHSA-73qr-pfmq-6rp8"],
+      "source_urls": [
+        "https://github.com/veged/coa/issues/99",
+        "https://github.com/advisories/GHSA-73qr-pfmq-6rp8"
+      ],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "coa", "version": "2.0.3", "digest": null},
+        {"ecosystem": "npm", "name": "coa", "version": "3.1.3", "digest": null}
+      ],
+      "affected_expressions": ["= 2.0.3", "= 2.0.4", "= 2.1.1", "= 2.1.3", "= 3.0.1", "= 3.1.3"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2021-11-04T00:00:00Z",
+          "timestamp_precision": "day",
+          "source_record_id": "upstream:coa-issue-99"
+        },
+        {
+          "sequence": 2,
+          "event_type": "advisory_published",
+          "recorded_at": "2021-11-04T16:22:28Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-73qr-pfmq-6rp8"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-005",
+      "incident_group": "rc-2021",
+      "ecosystem": "npm",
+      "source_record_ids": ["GHSA-g2q5-5433-rhrf"],
+      "source_urls": ["https://github.com/advisories/GHSA-g2q5-5433-rhrf"],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "rc", "version": "1.2.9", "digest": null},
+        {"ecosystem": "npm", "name": "rc", "version": "1.3.9", "digest": null},
+        {"ecosystem": "npm", "name": "rc", "version": "2.3.9", "digest": null}
+      ],
+      "affected_expressions": ["= 1.2.9", "= 1.3.9", "= 2.3.9"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2021-11-04T16:24:44Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-g2q5-5433-rhrf"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-006",
+      "incident_group": "node-ipc-protestware-2022",
+      "ecosystem": "npm",
+      "source_record_ids": ["GHSA-8gr3-2gjw-jj7g"],
+      "source_urls": ["https://github.com/advisories/GHSA-8gr3-2gjw-jj7g"],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "node-ipc", "version": "9.2.2", "digest": null}
+      ],
+      "affected_expressions": ["= 9.2.2"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2022-03-16T23:54:33Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-8gr3-2gjw-jj7g"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-007",
+      "incident_group": "node-ipc-protestware-2022",
+      "ecosystem": "npm",
+      "source_record_ids": ["GHSA-97m3-w2cp-4xx6"],
+      "source_urls": ["https://github.com/advisories/GHSA-97m3-w2cp-4xx6"],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "node-ipc", "version": "10.1.1", "digest": null}
+      ],
+      "affected_expressions": [">= 10.1.1, < 10.1.3"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2022-03-16T23:54:32Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-97m3-w2cp-4xx6"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-008",
+      "incident_group": "node-ipc-protestware-2022",
+      "ecosystem": "npm",
+      "source_record_ids": ["GHSA-3mpp-xfvh-qh37"],
+      "source_urls": ["https://github.com/advisories/GHSA-3mpp-xfvh-qh37"],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "node-ipc", "version": "11.0.0", "digest": null}
+      ],
+      "affected_expressions": [">= 11.0.0, < 12.0.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2022-03-16T23:54:35Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-3mpp-xfvh-qh37"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-009",
+      "incident_group": "colors-protestware-2022",
+      "ecosystem": "npm",
+      "source_record_ids": ["upstream:colors-issue-285", "GHSA-5rqg-jm4f-cqx7"],
+      "source_urls": [
+        "https://github.com/Marak/colors.js/issues/285",
+        "https://github.com/advisories/GHSA-5rqg-jm4f-cqx7"
+      ],
+      "artifacts": [
+        {"ecosystem": "npm", "name": "colors", "version": "1.4.1", "digest": null},
+        {"ecosystem": "npm", "name": "colors", "version": "1.4.44-liberty-2", "digest": null}
+      ],
+      "affected_expressions": [">= 1.4.1, <= 1.4.2", "= 1.4.44-liberty-2"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2022-01-08T00:00:00Z",
+          "timestamp_precision": "day",
+          "source_record_id": "upstream:colors-issue-285"
+        },
+        {
+          "sequence": 2,
+          "event_type": "advisory_published",
+          "recorded_at": "2022-01-10T17:29:53Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-5rqg-jm4f-cqx7"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-010",
+      "incident_group": "ctx-pypi-2022",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-4g82-3jcr-q52w", "GHSA-67r3-h899-9w95"],
+      "source_urls": [
+        "https://github.com/advisories/GHSA-4g82-3jcr-q52w",
+        "https://github.com/advisories/GHSA-67r3-h899-9w95"
+      ],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "ctx", "version": "0.1.2", "digest": null},
+        {"ecosystem": "pypi", "name": "ctx", "version": "0.1.4", "digest": null}
+      ],
+      "affected_expressions": ["<= 0.1.4", ">= 0.1.2-1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2022-05-25T23:09:55Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-4g82-3jcr-q52w"
+        },
+        {
+          "sequence": 2,
+          "event_type": "corrected",
+          "recorded_at": "2022-06-02T15:46:06Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-67r3-h899-9w95"
+        }
+      ],
+      "expected_correction_state": "corrected",
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-011",
+      "incident_group": "psbt-helpers-pypi-2026",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-hxq7-5438-cm4f"],
+      "source_urls": ["https://github.com/advisories/GHSA-hxq7-5438-cm4f"],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "psbt-helpers", "version": "1.0.0", "digest": null}
+      ],
+      "affected_expressions": ["= 1.0.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-04T12:31:15Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-hxq7-5438-cm4f"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-012",
+      "incident_group": "psbt-utils-pypi-2026",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-3crg-h67f-c6r9"],
+      "source_urls": ["https://github.com/advisories/GHSA-3crg-h67f-c6r9"],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "psbt-utils", "version": "1.0.0", "digest": null}
+      ],
+      "affected_expressions": ["= 1.0.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-04T11:17:13Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-3crg-h67f-c6r9"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-013",
+      "incident_group": "launchdarkly-ai-server-sdk-pypi-2026",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-8m32-rjxc-vw3m"],
+      "source_urls": ["https://github.com/advisories/GHSA-8m32-rjxc-vw3m"],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "launchdarkly-ai-server-sdk", "version": "1.0.1", "digest": null},
+        {"ecosystem": "pypi", "name": "launchdarkly-ai-server-sdk", "version": "1.9.9", "digest": null}
+      ],
+      "affected_expressions": ["= 1.0.1", "= 1.9.9"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-04T11:17:12Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-8m32-rjxc-vw3m"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-014",
+      "incident_group": "coldcard-helpers-pypi-2026",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-8vw6-pp4v-8j32"],
+      "source_urls": ["https://github.com/advisories/GHSA-8vw6-pp4v-8j32"],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "coldcard-helpers", "version": "1.4.2", "digest": null}
+      ],
+      "affected_expressions": ["= 1.4.2"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-04T06:31:34Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-8vw6-pp4v-8j32"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-015",
+      "incident_group": "instalogin1234-pypi-2026",
+      "ecosystem": "pypi",
+      "source_record_ids": ["GHSA-7929-ff6q-qmmh"],
+      "source_urls": ["https://github.com/advisories/GHSA-7929-ff6q-qmmh"],
+      "artifacts": [
+        {"ecosystem": "pypi", "name": "instalogin1234", "version": "0.0.1", "digest": null}
+      ],
+      "affected_expressions": ["= 0.0.1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-03T21:31:28Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-7929-ff6q-qmmh"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-016",
+      "incident_group": "tj-actions-changed-files-2025",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-mrrh-fwg8-r2c3"],
+      "source_urls": ["https://github.com/advisories/GHSA-mrrh-fwg8-r2c3"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "tj-actions/changed-files", "version": "45.0.7", "digest": null}
+      ],
+      "affected_expressions": ["<= 45.0.7"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2025-03-15T06:30:34Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-mrrh-fwg8-r2c3"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-017",
+      "incident_group": "reviewdog-action-setup-2025",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-qmg3-hpqr-gqvc"],
+      "source_urls": ["https://github.com/advisories/GHSA-qmg3-hpqr-gqvc"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "reviewdog/action-setup", "version": "1", "digest": null}
+      ],
+      "affected_expressions": ["= 1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2025-03-19T15:19:12Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-qmg3-hpqr-gqvc"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-018",
+      "incident_group": "gh-action-pypi-publish-2025",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-vxmw-7h4f-hqxh"],
+      "source_urls": ["https://github.com/advisories/GHSA-vxmw-7h4f-hqxh"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "pypa/gh-action-pypi-publish", "version": "1.12.4", "digest": null}
+      ],
+      "affected_expressions": ["< 1.13.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2025-09-04T14:07:03Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-vxmw-7h4f-hqxh"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-019",
+      "incident_group": "sonarqube-scan-action-2025",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-5xq9-5g24-4g6f"],
+      "source_urls": ["https://github.com/advisories/GHSA-5xq9-5g24-4g6f"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "SonarSource/sonarqube-scan-action", "version": "5.3.0", "digest": null}
+      ],
+      "affected_expressions": [">= 4.0.0, < 6.0.0"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2025-09-26T13:01:10Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-5xq9-5g24-4g6f"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-020",
+      "incident_group": "prek-action-2025",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-pwf7-47c3-mfhx"],
+      "source_urls": ["https://github.com/advisories/GHSA-pwf7-47c3-mfhx"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "j178/prek-action", "version": "1.0.5", "digest": null}
+      ],
+      "affected_expressions": ["<= 1.0.5"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "first_public_evidence",
+          "recorded_at": "2025-09-29T17:51:19Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-pwf7-47c3-mfhx"
+        }
+      ],
+      "earliest_evidence_replay": true
+    },
+    {
+      "case_id": "replay-021",
+      "incident_group": "super-linter-2026",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-r79c-pqj3-577x"],
+      "source_urls": ["https://github.com/advisories/GHSA-r79c-pqj3-577x"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "super-linter/super-linter", "version": "8.3.0", "digest": null}
+      ],
+      "affected_expressions": [">= 6.0.0, < 8.3.1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-02-09T17:46:31Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-r79c-pqj3-577x"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-022",
+      "incident_group": "claude-code-action-2026",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-8q5r-mmjf-575q"],
+      "source_urls": ["https://github.com/advisories/GHSA-8q5r-mmjf-575q"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "anthropics/claude-code-action", "version": "1.0.73", "digest": null}
+      ],
+      "affected_expressions": ["< 1.0.74"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-06-10T19:33:48Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-8q5r-mmjf-575q"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-023",
+      "incident_group": "setup-php-2026",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-5wxr-w449-57cm"],
+      "source_urls": ["https://github.com/advisories/GHSA-5wxr-w449-57cm"],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "shivammathur/setup-php", "version": "2.37.0", "digest": null}
+      ],
+      "affected_expressions": ["< 2.37.1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-05-20T15:32:31Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-5wxr-w449-57cm"
+        }
+      ],
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-024",
+      "incident_group": "harden-runner-2026",
+      "ecosystem": "github-actions",
+      "source_record_ids": ["GHSA-46g3-37rh-v698", "GHSA-g699-3x6g-wm3g"],
+      "source_urls": [
+        "https://github.com/advisories/GHSA-46g3-37rh-v698",
+        "https://github.com/advisories/GHSA-g699-3x6g-wm3g"
+      ],
+      "artifacts": [
+        {"ecosystem": "github-actions", "name": "step-security/harden-runner", "version": "2.15.1", "digest": null}
+      ],
+      "affected_expressions": ["<= 2.15.1"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-03-17T18:37:46Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-g699-3x6g-wm3g"
+        },
+        {
+          "sequence": 2,
+          "event_type": "corrected",
+          "recorded_at": "2026-03-20T21:21:36Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "GHSA-46g3-37rh-v698"
+        }
+      ],
+      "expected_correction_state": "corrected",
+      "earliest_evidence_replay": false
+    },
+    {
+      "case_id": "replay-025",
+      "incident_group": "synthetic-oci-digest-affected",
+      "ecosystem": "oci",
+      "source_record_ids": ["synthetic:oci-digest-affected"],
+      "source_urls": ["https://example.invalid/goodboy/oci-digest-affected"],
+      "artifacts": [
+        {
+          "ecosystem": "oci",
+          "name": "registry.example.invalid/goodboy/fixture",
+          "version": null,
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "affected_expressions": ["digest = sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-05T00:00:00Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "synthetic:oci-digest-affected"
+        }
+      ],
+      "earliest_evidence_replay": false,
+      "fixture_origin": "synthetic_derived"
+    },
+    {
+      "case_id": "replay-026",
+      "incident_group": "synthetic-oci-tag-unknown",
+      "ecosystem": "oci",
+      "source_record_ids": ["synthetic:oci-tag-unknown"],
+      "source_urls": ["https://example.invalid/goodboy/oci-tag-unknown"],
+      "artifacts": [
+        {
+          "ecosystem": "oci",
+          "name": "registry.example.invalid/goodboy/fixture",
+          "version": "latest",
+          "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "affected_expressions": ["tag is mutable; only the supplied digest may be evaluated"],
+      "expected_events": [
+        {
+          "sequence": 1,
+          "event_type": "advisory_published",
+          "recorded_at": "2026-08-05T00:00:00Z",
+          "timestamp_precision": "exact",
+          "source_record_id": "synthetic:oci-tag-unknown"
+        }
+      ],
+      "expected_incident_status": "investigating",
+      "expected_correction_state": "unknown",
+      "expected_receipt_result": "unknown",
+      "earliest_evidence_replay": false,
+      "fixture_origin": "synthetic_derived"
+    }
+  ]
+}

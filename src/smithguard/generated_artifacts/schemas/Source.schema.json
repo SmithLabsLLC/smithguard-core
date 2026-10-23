@@ -1,0 +1,362 @@
+{
+  "$defs": {
+    "AcquisitionMethod": {
+      "enum": [
+        "git",
+        "rest_api",
+        "download",
+        "rss",
+        "webhook",
+        "manual_replay"
+      ],
+      "title": "AcquisitionMethod",
+      "type": "string"
+    },
+    "AllowedHost": {
+      "maxLength": 253,
+      "pattern": "^[a-z0-9.-]+$",
+      "title": "AllowedHost",
+      "type": "string"
+    },
+    "DataClassification3": {
+      "enum": [
+        "public",
+        "restricted_source"
+      ],
+      "title": "DataClassification3",
+      "type": "string"
+    },
+    "Decision": {
+      "enum": [
+        "approved_public",
+        "approved_internal",
+        "approved_link_only",
+        "quarantined",
+        "prohibited"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "NormalizedFactRedistribution": {
+      "enum": [
+        "allowed",
+        "attribution",
+        "conditional",
+        "link_only",
+        "prohibited",
+        "unknown"
+      ],
+      "title": "NormalizedFactRedistribution",
+      "type": "string"
+    },
+    "RawRedistribution": {
+      "enum": [
+        "allowed",
+        "attribution",
+        "share_alike",
+        "conditional",
+        "link_only",
+        "prohibited",
+        "unknown"
+      ],
+      "title": "RawRedistribution",
+      "type": "string"
+    },
+    "RawStorage": {
+      "enum": [
+        "allowed",
+        "conditional",
+        "link_only",
+        "prohibited",
+        "unknown"
+      ],
+      "title": "RawStorage",
+      "type": "string"
+    },
+    "Retention": {
+      "enum": [
+        "immutable_permitted",
+        "until_withdrawn",
+        "minimal_metadata_only",
+        "link_only",
+        "prohibited",
+        "unknown"
+      ],
+      "title": "Retention",
+      "type": "string"
+    },
+    "Retrieval": {
+      "enum": [
+        "allowed",
+        "conditional",
+        "prohibited",
+        "unknown"
+      ],
+      "title": "Retrieval",
+      "type": "string"
+    },
+    "RightsDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution_required": {
+          "title": "Attribution Required",
+          "type": "boolean"
+        },
+        "attribution_text": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribution Text"
+        },
+        "correction_required": {
+          "title": "Correction Required",
+          "type": "boolean"
+        },
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "license_expression": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Expression"
+        },
+        "normalized_fact_redistribution": {
+          "$ref": "#/$defs/NormalizedFactRedistribution"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "raw_redistribution": {
+          "$ref": "#/$defs/RawRedistribution"
+        },
+        "raw_storage": {
+          "$ref": "#/$defs/RawStorage"
+        },
+        "retention": {
+          "$ref": "#/$defs/Retention"
+        },
+        "retrieval": {
+          "$ref": "#/$defs/Retrieval"
+        },
+        "review_due_on": {
+          "format": "date",
+          "title": "Review Due On",
+          "type": "string"
+        },
+        "reviewed_on": {
+          "format": "date",
+          "title": "Reviewed On",
+          "type": "string"
+        },
+        "terms_url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Terms Url",
+          "type": "string"
+        },
+        "withdrawal_required": {
+          "title": "Withdrawal Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "retrieval",
+        "raw_storage",
+        "raw_redistribution",
+        "normalized_fact_redistribution",
+        "attribution_required",
+        "retention",
+        "correction_required",
+        "withdrawal_required",
+        "decision",
+        "terms_url",
+        "reviewed_on",
+        "review_due_on"
+      ],
+      "title": "RightsDecision",
+      "type": "object"
+    },
+    "SourceClass": {
+      "enum": [
+        "primary",
+        "curated",
+        "discovery",
+        "raw_signal"
+      ],
+      "title": "SourceClass",
+      "type": "string"
+    },
+    "WithdrawalBehavior": {
+      "enum": [
+        "retain_mark_withdrawn",
+        "remove_raw_keep_minimal_tombstone",
+        "link_only",
+        "unknown"
+      ],
+      "title": "WithdrawalBehavior",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "acquisition_methods": {
+      "items": {
+        "$ref": "#/$defs/AcquisitionMethod"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Acquisition Methods",
+      "type": "array"
+    },
+    "allowed_hosts": {
+      "items": {
+        "$ref": "#/$defs/AllowedHost"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Allowed Hosts",
+      "type": "array"
+    },
+    "cadence": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cadence"
+    },
+    "canonical_url": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Canonical Url",
+      "type": "string"
+    },
+    "correction_url": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Correction Url",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "$ref": "#/$defs/DataClassification3"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kill_switch": {
+      "title": "Kill Switch",
+      "type": "boolean"
+    },
+    "kind": {
+      "const": "source",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "operator": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Operator",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "rights": {
+      "$ref": "#/$defs/RightsDecision"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_class": {
+      "$ref": "#/$defs/SourceClass"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "withdrawal_behavior": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WithdrawalBehavior"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "name",
+    "source_class",
+    "canonical_url",
+    "operator",
+    "acquisition_methods",
+    "allowed_hosts",
+    "rights",
+    "correction_url",
+    "kill_switch"
+  ],
+  "title": "Source",
+  "type": "object"
+}

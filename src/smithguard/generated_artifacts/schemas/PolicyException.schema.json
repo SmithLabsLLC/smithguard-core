@@ -1,0 +1,252 @@
+{
+  "$defs": {
+    "Ecosystem5": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "unknown"
+      ],
+      "title": "Ecosystem5",
+      "type": "string"
+    },
+    "LocalArtifactInput": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem5"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "registry_host": {
+          "anyOf": [
+            {
+              "maxLength": 259,
+              "pattern": "^[A-Za-z0-9.-]+(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registry Host"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "visibility"
+      ],
+      "title": "LocalArtifactInput",
+      "type": "object"
+    },
+    "RecheckTrigger": {
+      "enum": [
+        "correction",
+        "withdrawal",
+        "new_evidence",
+        "policy_change",
+        "dependency_change",
+        "exception_expiry"
+      ],
+      "title": "RecheckTrigger",
+      "type": "string"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "State11": {
+      "enum": [
+        "active",
+        "expired",
+        "revoked",
+        "superseded",
+        "recheck_required"
+      ],
+      "title": "State11",
+      "type": "string"
+    },
+    "Visibility": {
+      "enum": [
+        "verified_public",
+        "private",
+        "unknown"
+      ],
+      "title": "Visibility",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "artifact": {
+      "$ref": "#/$defs/LocalArtifactInput"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "created_for_rule_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Created For Rule Id",
+      "type": "string"
+    },
+    "customer_ticket": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Customer Ticket"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "evidence_revision": {
+      "minimum": 1,
+      "title": "Evidence Revision",
+      "type": "integer"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "policy_exception",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "project_alias": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Project Alias",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "recheck_triggers": {
+      "items": {
+        "$ref": "#/$defs/RecheckTrigger"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "title": "Recheck Triggers",
+      "type": "array"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/State11"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "actor_id",
+    "created_for_rule_id",
+    "project_alias",
+    "artifact",
+    "reason",
+    "customer_ticket",
+    "incident_id",
+    "evidence_revision",
+    "expires_at",
+    "recheck_triggers",
+    "state"
+  ],
+  "title": "PolicyException",
+  "type": "object"
+}

@@ -1,0 +1,521 @@
+{
+  "$defs": {
+    "AssertionOrigin": {
+      "enum": [
+        "observed_by_goodboy",
+        "declared_by_source",
+        "inferred_by_goodboy",
+        "enriched_by_goodboy"
+      ],
+      "title": "AssertionOrigin",
+      "type": "string"
+    },
+    "AssertionSourceState": {
+      "enum": [
+        "identified",
+        "unknown"
+      ],
+      "title": "AssertionSourceState",
+      "type": "string"
+    },
+    "ClaimLineage": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_source_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertion_source_state": {
+          "$ref": "#/$defs/AssertionSourceState"
+        },
+        "attribution_policy_version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "title": "Attribution Policy Version",
+          "type": "string"
+        },
+        "authority_policy_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Authority Policy Id",
+          "type": "string"
+        },
+        "authority_policy_version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "title": "Authority Policy Version",
+          "type": "string"
+        },
+        "authority_rule_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Authority Rule Id",
+          "type": "string"
+        },
+        "confirmation_method": {
+          "$ref": "#/$defs/ConfirmationMethod"
+        },
+        "confirmation_reason_code": {
+          "maxLength": 120,
+          "minLength": 2,
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Confirmation Reason Code",
+          "type": "string"
+        },
+        "confirming_authority_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exception_reason_code": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 2,
+              "pattern": "^[a-z0-9_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Exception Reason Code"
+        },
+        "public_status": {
+          "$ref": "#/$defs/PublicStatus"
+        },
+        "source_references": {
+          "items": {
+            "$ref": "#/$defs/Uri"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Source References",
+          "type": "array"
+        },
+        "source_rights_register_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Source Rights Register Id",
+          "type": "string"
+        },
+        "transport_source_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Transport Source Id",
+          "type": "string"
+        },
+        "upstream_ids": {
+          "items": {
+            "$ref": "#/$defs/UpstreamId"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Upstream Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "transport_source_id",
+        "assertion_source_state",
+        "assertion_source_id",
+        "confirming_authority_id",
+        "confirmation_method",
+        "confirmation_reason_code",
+        "authority_policy_id",
+        "authority_policy_version",
+        "authority_rule_id",
+        "source_rights_register_id",
+        "attribution_policy_version",
+        "upstream_ids",
+        "source_references",
+        "public_status",
+        "exception_reason_code"
+      ],
+      "title": "ClaimLineage",
+      "type": "object"
+    },
+    "ClaimType": {
+      "enum": [
+        "malicious",
+        "compromised",
+        "vulnerable",
+        "removed",
+        "deprecated",
+        "unmaintained",
+        "capability",
+        "relationship",
+        "correction",
+        "unknown"
+      ],
+      "title": "ClaimType",
+      "type": "string"
+    },
+    "CollectionMethod": {
+      "enum": [
+        "git",
+        "rest_api",
+        "download",
+        "rss",
+        "webhook",
+        "manual_replay",
+        "customer_local"
+      ],
+      "title": "CollectionMethod",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "confirmed",
+        "probable",
+        "possible",
+        "unverified",
+        "disputed",
+        "unknown"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "ConfirmationMethod": {
+      "enum": [
+        "reported_source",
+        "automated_source_policy",
+        "automated_corroboration",
+        "human_review",
+        "withdrawal",
+        "dispute"
+      ],
+      "title": "ConfirmationMethod",
+      "type": "string"
+    },
+    "DataClassification6": {
+      "enum": [
+        "public",
+        "restricted_source"
+      ],
+      "title": "DataClassification6",
+      "type": "string"
+    },
+    "IdentityVerification": {
+      "enum": [
+        "verified",
+        "unverified",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "IdentityVerification",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_origin": {
+          "$ref": "#/$defs/AssertionOrigin"
+        },
+        "claim_lineage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClaimLineage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "collection_method": {
+          "$ref": "#/$defs/CollectionMethod"
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "identity_verification": {
+          "$ref": "#/$defs/IdentityVerification"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "signature_state": {
+          "$ref": "#/$defs/SignatureState"
+        },
+        "source_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_modified_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_published_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_record_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Source Record Id",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_record_id",
+        "source_url",
+        "retrieved_at",
+        "source_published_at",
+        "collection_method",
+        "assertion_origin",
+        "identity_verification",
+        "signature_state"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "PublicStatus": {
+      "enum": [
+        "reported",
+        "corroborated",
+        "confirmed",
+        "disputed",
+        "withdrawn"
+      ],
+      "title": "PublicStatus",
+      "type": "string"
+    },
+    "SignatureState": {
+      "enum": [
+        "valid",
+        "invalid",
+        "missing",
+        "stale",
+        "unsupported",
+        "unknown"
+      ],
+      "title": "SignatureState",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    },
+    "State1": {
+      "enum": [
+        "active",
+        "superseded",
+        "disputed",
+        "withdrawn",
+        "expired"
+      ],
+      "title": "State1",
+      "type": "string"
+    },
+    "Timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "UpstreamId": {
+      "maxLength": 160,
+      "minLength": 2,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+      "title": "UpstreamId",
+      "type": "string"
+    },
+    "Uri": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Uri",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "claim_type": {
+      "$ref": "#/$defs/ClaimType"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "$ref": "#/$defs/DataClassification6"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "claim",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "object_value": {
+      "anyOf": [
+        {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Object Value"
+    },
+    "predicate": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Predicate",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/State1"
+    },
+    "subject_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Subject Id",
+      "type": "string"
+    },
+    "supersedes_claim_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StableId"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "valid_from": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "valid_until": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "claim_type",
+    "subject_id",
+    "predicate",
+    "object_value",
+    "confidence",
+    "state",
+    "valid_from",
+    "valid_until",
+    "provenance"
+  ],
+  "title": "Claim",
+  "type": "object"
+}

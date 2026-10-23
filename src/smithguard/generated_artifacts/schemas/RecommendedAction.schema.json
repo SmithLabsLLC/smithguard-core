@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "observe",
+        "check",
+        "contain",
+        "remediate",
+        "validate",
+        "recover"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "BoundedTextListItem": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "BoundedTextListItem",
+      "type": "string"
+    },
+    "DataClassification13": {
+      "enum": [
+        "public",
+        "customer_local"
+      ],
+      "title": "DataClassification13",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "action_type": {
+      "$ref": "#/$defs/ActionType"
+    },
+    "approval_required": {
+      "title": "Approval Required",
+      "type": "boolean"
+    },
+    "automation_allowed": {
+      "title": "Automation Allowed",
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "$ref": "#/$defs/DataClassification13"
+    },
+    "evidence_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "expected_result": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Expected Result",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "recommended_action",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "preconditions": {
+      "items": {
+        "$ref": "#/$defs/BoundedTextListItem"
+      },
+      "maxItems": 50,
+      "title": "Preconditions",
+      "type": "array"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "risk_level": {
+      "maximum": 4,
+      "minimum": 0,
+      "title": "Risk Level",
+      "type": "integer"
+    },
+    "rollback": {
+      "items": {
+        "$ref": "#/$defs/BoundedTextListItem"
+      },
+      "maxItems": 50,
+      "title": "Rollback",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "validation": {
+      "items": {
+        "$ref": "#/$defs/BoundedTextListItem"
+      },
+      "maxItems": 50,
+      "title": "Validation",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "action_type",
+    "risk_level",
+    "approval_required",
+    "preconditions",
+    "expected_result",
+    "validation",
+    "rollback",
+    "evidence_ids",
+    "automation_allowed"
+  ],
+  "title": "RecommendedAction",
+  "type": "object"
+}

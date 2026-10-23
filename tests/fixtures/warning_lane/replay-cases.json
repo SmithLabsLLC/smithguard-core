@@ -1,0 +1,30 @@
+[
+  {
+    "name": "x_post_cited_by_status_id",
+    "citations": ["https://x.com/i/status/1970000000000000000"],
+    "sources": [{"url": "https://x.com/example_researcher/status/1970000000000000000?s=20", "context": "Reports a malicious release of the orion-cli package.", "published_at": null}],
+    "expect_citation_bound": true,
+    "expect_published_from_post_id": true
+  },
+  {
+    "name": "twitter_host_and_web_status_path",
+    "citations": ["https://twitter.com/i/web/status/1970000000000000001"],
+    "sources": [{"url": "https://mobile.twitter.com/example_researcher/status/1970000000000000001/", "context": "Reports a typosquatted orion-cli package.", "published_at": null}],
+    "expect_citation_bound": true,
+    "expect_published_from_post_id": true
+  },
+  {
+    "name": "web_page_with_tracking_and_trailing_slash",
+    "citations": ["https://www.research.example/advisories/orion?utm_source=x"],
+    "sources": [{"url": "https://research.example/advisories/orion/", "context": "An advisory describes a compromised orion-cli release.", "published_at": "2026-08-05"}],
+    "expect_citation_bound": true,
+    "expect_published_from_post_id": false
+  },
+  {
+    "name": "different_post_is_not_cited",
+    "citations": ["https://x.com/i/status/1970000000000000002"],
+    "sources": [{"url": "https://x.com/example_researcher/status/1970000000000000003", "context": "Reports a malicious orion-cli release.", "published_at": null}],
+    "expect_citation_bound": false,
+    "expect_published_from_post_id": true
+  }
+]

@@ -1,0 +1,346 @@
+{
+  "$defs": {
+    "Directness": {
+      "enum": [
+        "direct",
+        "transitive",
+        "root",
+        "unknown"
+      ],
+      "title": "Directness",
+      "type": "string"
+    },
+    "Ecosystem5": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "unknown"
+      ],
+      "title": "Ecosystem5",
+      "type": "string"
+    },
+    "Format": {
+      "enum": [
+        "package_list",
+        "npm_lock",
+        "python_lock",
+        "github_actions",
+        "oci",
+        "cyclonedx",
+        "spdx"
+      ],
+      "title": "Format",
+      "type": "string"
+    },
+    "InventoryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/LocalArtifactInput"
+        },
+        "dependency_path_ids": {
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "maxItems": 100,
+          "title": "Dependency Path Ids",
+          "type": "array"
+        },
+        "directness": {
+          "$ref": "#/$defs/Directness"
+        },
+        "inventory_stage": {
+          "$ref": "#/$defs/InventoryStage"
+        },
+        "local_entry_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Local Entry Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local_entry_id",
+        "artifact",
+        "directness",
+        "inventory_stage",
+        "dependency_path_ids"
+      ],
+      "title": "InventoryEntry",
+      "type": "object"
+    },
+    "InventoryStage": {
+      "enum": [
+        "source",
+        "analyzed_source",
+        "build_input",
+        "built_artifact",
+        "deployment",
+        "runtime",
+        "unknown"
+      ],
+      "title": "InventoryStage",
+      "type": "string"
+    },
+    "LocalArtifactInput": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem5"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "registry_host": {
+          "anyOf": [
+            {
+              "maxLength": 259,
+              "pattern": "^[A-Za-z0-9.-]+(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registry Host"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "visibility"
+      ],
+      "title": "LocalArtifactInput",
+      "type": "object"
+    },
+    "QualityState": {
+      "enum": [
+        "complete",
+        "partial",
+        "missing",
+        "invalid",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ],
+      "title": "QualityState",
+      "type": "string"
+    },
+    "SbomQuality": {
+      "additionalProperties": false,
+      "properties": {
+        "conflicts": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "format": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "hashes": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "identifiers": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "overall": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "provenance": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "relationships": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "root_component": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "versions": {
+          "$ref": "#/$defs/QualityState"
+        }
+      },
+      "required": [
+        "format",
+        "root_component",
+        "identifiers",
+        "versions",
+        "relationships",
+        "hashes",
+        "provenance",
+        "conflicts",
+        "overall"
+      ],
+      "title": "SbomQuality",
+      "type": "object"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    },
+    "UnknownListItem": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "UnknownListItem",
+      "type": "string"
+    },
+    "Visibility": {
+      "enum": [
+        "verified_public",
+        "private",
+        "unknown"
+      ],
+      "title": "Visibility",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "captured_at": {
+      "format": "date-time",
+      "title": "Captured At",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "customer_local",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/InventoryEntry"
+      },
+      "maxItems": 100000,
+      "title": "Entries",
+      "type": "array"
+    },
+    "format": {
+      "$ref": "#/$defs/Format"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "inventory_fingerprint": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Inventory Fingerprint",
+      "type": "string"
+    },
+    "kind": {
+      "const": "inventory_snapshot",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "parser_unknowns": {
+      "items": {
+        "$ref": "#/$defs/UnknownListItem"
+      },
+      "maxItems": 100,
+      "title": "Parser Unknowns",
+      "type": "array"
+    },
+    "project_alias": {
+      "maxLength": 100,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Project Alias",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "sbom_quality": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SbomQuality"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "project_alias",
+    "inventory_fingerprint",
+    "captured_at",
+    "format",
+    "entries",
+    "parser_unknowns",
+    "sbom_quality"
+  ],
+  "title": "InventorySnapshot",
+  "type": "object"
+}

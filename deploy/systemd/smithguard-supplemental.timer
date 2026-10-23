@@ -1,0 +1,12 @@
+[Unit]
+Description=Check due SmithGuard supplemental context every six hours
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:15:00 UTC
+RandomizedDelaySec=5min
+AccuracySec=1min
+Persistent=true
+Unit=smithguard-supplemental.service
+
+[Install]
+WantedBy=timers.target

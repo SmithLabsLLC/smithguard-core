@@ -1,0 +1,1839 @@
+{
+  "$defs": {
+    "Affects": {
+      "additionalProperties": false,
+      "properties": {
+        "arch": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 1000,
+          "title": "Arch",
+          "type": "array"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 1000,
+          "title": "Functions",
+          "type": "array"
+        },
+        "os": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 1000,
+          "title": "Os",
+          "type": "array"
+        }
+      },
+      "required": [
+        "arch",
+        "os",
+        "functions"
+      ],
+      "title": "Affects",
+      "type": "object"
+    },
+    "Alias": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "title": "Alias",
+      "type": "string"
+    },
+    "AssessmentSignature": {
+      "additionalProperties": false,
+      "description": "Ed25519 signature over the canonical JSON of the whole response without this field: keys sorted, no whitespace, non-ASCII escaped as \\uXXXX. Verify with the key at /v1/public-keys/{public_key_id}.json.",
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "canonicalization": {
+          "const": "smithguard-canonical-json-v1",
+          "title": "Canonicalization",
+          "type": "string"
+        },
+        "public_key_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Public Key Id",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 88,
+          "minLength": 88,
+          "pattern": "^[A-Za-z0-9+/]{86}==$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm",
+        "public_key_id",
+        "canonicalization",
+        "value"
+      ],
+      "title": "AssessmentSignature",
+      "type": "object"
+    },
+    "AttributionUrl": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "AttributionUrl",
+      "type": "string"
+    },
+    "Classification": {
+      "enum": [
+        "malicious",
+        "compromised",
+        "vulnerable"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "confirmed",
+        "probable",
+        "possible",
+        "unverified",
+        "disputed",
+        "unknown"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "ConfirmationStatus": {
+      "enum": [
+        "unverified",
+        "confirmation_candidate",
+        "contradiction_candidate",
+        "confirmed_elsewhere"
+      ],
+      "title": "ConfirmationStatus",
+      "type": "string"
+    },
+    "Context": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution_complete": {
+          "title": "Attribution Complete",
+          "type": "boolean"
+        },
+        "attribution_urls": {
+          "items": {
+            "$ref": "#/$defs/AttributionUrl"
+          },
+          "maxItems": 1000,
+          "title": "Attribution Urls",
+          "type": "array"
+        },
+        "license_expression": {
+          "$ref": "#/$defs/LicenseExpression"
+        },
+        "packages": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Packages"
+              },
+              {
+                "$ref": "#/$defs/Packages1"
+              }
+            ]
+          },
+          "maxItems": 1000,
+          "title": "Packages",
+          "type": "array"
+        },
+        "raw_body_sha256": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Raw Body Sha256",
+          "type": "string"
+        },
+        "reachability": {
+          "const": "not_assessed",
+          "title": "Reachability",
+          "type": "string"
+        },
+        "reference_urls": {
+          "items": {
+            "$ref": "#/$defs/ReferenceUrl"
+          },
+          "maxItems": 1000,
+          "title": "Reference Urls",
+          "type": "array"
+        },
+        "review_status": {
+          "$ref": "#/$defs/ReviewStatus"
+        },
+        "source_withdrawn_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "raw_body_sha256",
+        "review_status",
+        "license_expression",
+        "attribution_complete",
+        "source_withdrawn_at",
+        "attribution_urls",
+        "packages",
+        "reference_urls",
+        "reachability"
+      ],
+      "title": "Context",
+      "type": "object"
+    },
+    "CoverageState": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem"
+        },
+        "result": {
+          "$ref": "#/$defs/Result"
+        },
+        "stage": {
+          "$ref": "#/$defs/Stage"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "stage",
+        "result",
+        "as_of"
+      ],
+      "title": "CoverageState",
+      "type": "object"
+    },
+    "CustomRange": {
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Events"
+              },
+              {
+                "$ref": "#/$defs/Events1"
+              },
+              {
+                "$ref": "#/$defs/Events2"
+              },
+              {
+                "$ref": "#/$defs/Events3"
+              }
+            ]
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Events",
+          "type": "array"
+        },
+        "type": {
+          "const": "ECOSYSTEM",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "events"
+      ],
+      "title": "CustomRange",
+      "type": "object"
+    },
+    "Ecosystem": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "composer",
+        "erlang",
+        "git",
+        "maven",
+        "nuget",
+        "open-vsx",
+        "pub",
+        "rubygems",
+        "swift",
+        "vscode",
+        "unknown"
+      ],
+      "title": "Ecosystem",
+      "type": "string"
+    },
+    "Ecosystem3": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "composer",
+        "erlang",
+        "git",
+        "maven",
+        "nuget",
+        "open-vsx",
+        "pub",
+        "rubygems",
+        "swift",
+        "vscode"
+      ],
+      "title": "Ecosystem3",
+      "type": "string"
+    },
+    "EcosystemSpecific": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_functions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PublicOriginTextList"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "title": "Affected Functions",
+          "type": "object"
+        },
+        "affects": {
+          "$ref": "#/$defs/Affects"
+        },
+        "reachability": {
+          "const": "not_assessed",
+          "title": "Reachability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "affects",
+        "affected_functions",
+        "reachability"
+      ],
+      "title": "EcosystemSpecific",
+      "type": "object"
+    },
+    "EcosystemSpecific1": {
+      "additionalProperties": false,
+      "properties": {
+        "custom_ranges": {
+          "items": {
+            "$ref": "#/$defs/CustomRange"
+          },
+          "maxItems": 1000,
+          "title": "Custom Ranges",
+          "type": "array"
+        },
+        "imports": {
+          "items": {
+            "$ref": "#/$defs/Import"
+          },
+          "maxItems": 1000,
+          "title": "Imports",
+          "type": "array"
+        },
+        "reachability": {
+          "const": "not_assessed",
+          "title": "Reachability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "imports",
+        "custom_ranges",
+        "reachability"
+      ],
+      "title": "EcosystemSpecific1",
+      "type": "object"
+    },
+    "Events": {
+      "additionalProperties": false,
+      "properties": {
+        "introduced": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Introduced",
+          "type": "string"
+        }
+      },
+      "required": [
+        "introduced"
+      ],
+      "title": "Events",
+      "type": "object"
+    },
+    "Events1": {
+      "additionalProperties": false,
+      "properties": {
+        "fixed": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Fixed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixed"
+      ],
+      "title": "Events1",
+      "type": "object"
+    },
+    "Events2": {
+      "additionalProperties": false,
+      "properties": {
+        "last_affected": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Last Affected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "last_affected"
+      ],
+      "title": "Events2",
+      "type": "object"
+    },
+    "Events3": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Limit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "limit"
+      ],
+      "title": "Events3",
+      "type": "object"
+    },
+    "EvidenceClass": {
+      "enum": [
+        "social_only",
+        "web_only",
+        "web_and_social"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    },
+    "EvidenceMaturity": {
+      "additionalProperties": false,
+      "properties": {
+        "composition": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "deployment": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "provenance": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "runtime": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "signature": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "vex": {
+          "$ref": "#/$defs/EvidenceState"
+        }
+      },
+      "required": [
+        "composition",
+        "provenance",
+        "signature",
+        "vex",
+        "deployment",
+        "runtime"
+      ],
+      "title": "EvidenceMaturity",
+      "type": "object"
+    },
+    "EvidenceState": {
+      "enum": [
+        "present",
+        "missing",
+        "invalid",
+        "stale",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ],
+      "title": "EvidenceState",
+      "type": "string"
+    },
+    "FixedVersion": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "FixedVersion",
+      "type": "string"
+    },
+    "FreshnessState1": {
+      "description": "fresh or complete means current; anything else means recent reports may be missing.",
+      "enum": [
+        "fresh",
+        "complete",
+        "stale",
+        "failed",
+        "missing",
+        "in_progress",
+        "reconciling",
+        "unresolved"
+      ],
+      "title": "FreshnessState1",
+      "type": "string"
+    },
+    "Import": {
+      "additionalProperties": false,
+      "properties": {
+        "goarch": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 100,
+          "title": "Goarch",
+          "type": "array"
+        },
+        "goos": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 100,
+          "title": "Goos",
+          "type": "array"
+        },
+        "path": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Path",
+          "type": "string"
+        },
+        "symbols": {
+          "items": {
+            "$ref": "#/$defs/PublicOriginText"
+          },
+          "maxItems": 1000,
+          "title": "Symbols",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "symbols",
+        "goos",
+        "goarch"
+      ],
+      "title": "Import",
+      "type": "object"
+    },
+    "IncidentStatus": {
+      "enum": [
+        "internal_candidate",
+        "emerging_unverified",
+        "investigating",
+        "reported",
+        "corroborated",
+        "confirmed",
+        "contained",
+        "resolved",
+        "disputed",
+        "withdrawn",
+        "expired"
+      ],
+      "title": "IncidentStatus",
+      "type": "string"
+    },
+    "Informational": {
+      "enum": [
+        null,
+        "unsound",
+        "unmaintained",
+        "notice"
+      ],
+      "title": "Informational"
+    },
+    "LicenseExpression": {
+      "enum": [
+        "CC0-1.0",
+        "CC-BY-4.0"
+      ],
+      "title": "LicenseExpression",
+      "type": "string"
+    },
+    "ModelVersion": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "ModelVersion",
+      "type": "string"
+    },
+    "Packages": {
+      "additionalProperties": false,
+      "properties": {
+        "ecosystem": {
+          "const": "rust",
+          "title": "Ecosystem",
+          "type": "string"
+        },
+        "ecosystem_specific": {
+          "$ref": "#/$defs/EcosystemSpecific"
+        },
+        "index": {
+          "maximum": 999,
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "informational": {
+          "$ref": "#/$defs/Informational"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "range_comparability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RangeComparability"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "index",
+        "ecosystem",
+        "name",
+        "informational",
+        "ecosystem_specific"
+      ],
+      "title": "Packages",
+      "type": "object"
+    },
+    "Packages1": {
+      "additionalProperties": false,
+      "properties": {
+        "ecosystem": {
+          "const": "go",
+          "title": "Ecosystem",
+          "type": "string"
+        },
+        "ecosystem_specific": {
+          "$ref": "#/$defs/EcosystemSpecific1"
+        },
+        "index": {
+          "maximum": 999,
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "informational": {
+          "$ref": "#/$defs/Informational"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "range_comparability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RangeComparability"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "index",
+        "ecosystem",
+        "name",
+        "informational",
+        "ecosystem_specific"
+      ],
+      "title": "Packages1",
+      "type": "object"
+    },
+    "PublicArtifactIncident": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_range_ids": {
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "maxItems": 10000,
+          "title": "Affected Range Ids",
+          "type": "array"
+        },
+        "aliases": {
+          "items": {
+            "$ref": "#/$defs/Alias"
+          },
+          "maxItems": 20,
+          "title": "Aliases",
+          "type": "array"
+        },
+        "applies_to_version": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applies To Version"
+        },
+        "classification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Classification"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "fixed_versions": {
+          "items": {
+            "$ref": "#/$defs/FixedVersion"
+          },
+          "maxItems": 20,
+          "title": "Fixed Versions",
+          "type": "array"
+        },
+        "incident_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Incident Id",
+          "type": "string"
+        },
+        "last_changed_at": {
+          "format": "date-time",
+          "title": "Last Changed At",
+          "type": "string"
+        },
+        "relationship_basis": {
+          "$ref": "#/$defs/RelationshipBasis"
+        },
+        "report_relationship": {
+          "$ref": "#/$defs/ReportRelationship"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "source_reports": {
+          "items": {
+            "$ref": "#/$defs/PublicArtifactSourceReport"
+          },
+          "maxItems": 100,
+          "title": "Source Reports",
+          "type": "array"
+        },
+        "source_reports_truncated": {
+          "title": "Source Reports Truncated",
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/IncidentStatus"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "upstream_urls": {
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 10,
+          "title": "Upstream Urls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "incident_id",
+        "revision",
+        "status",
+        "confidence",
+        "title",
+        "last_changed_at",
+        "report_relationship",
+        "relationship_basis",
+        "source_reports",
+        "source_reports_truncated",
+        "applies_to_version",
+        "affected_range_ids",
+        "fixed_versions",
+        "aliases",
+        "upstream_urls"
+      ],
+      "title": "PublicArtifactIncident",
+      "type": "object"
+    },
+    "PublicArtifactInput": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "$ref": "#/$defs/Ecosystem3"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "public_visibility": {
+          "const": "asserted_public",
+          "title": "Public Visibility",
+          "type": "string"
+        },
+        "registry_host": {
+          "$ref": "#/$defs/RegistryHost"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "public_visibility"
+      ],
+      "title": "PublicArtifactInput",
+      "type": "object"
+    },
+    "PublicArtifactPreliminaryWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "claim": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Claim",
+          "type": "string"
+        },
+        "confirmation_status": {
+          "$ref": "#/$defs/ConfirmationStatus"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/EvidenceClass"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "final_reason": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Final Reason"
+        },
+        "last_checked_at": {
+          "format": "date-time",
+          "title": "Last Checked At",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "source_urls": {
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Source Urls",
+          "type": "array"
+        },
+        "state": {
+          "$ref": "#/$defs/State7"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Title",
+          "type": "string"
+        },
+        "warning_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Warning Id",
+          "type": "string"
+        },
+        "warning_text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "title": "Warning Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "warning_id",
+        "revision",
+        "state",
+        "title",
+        "claim",
+        "source_urls",
+        "evidence_class",
+        "confirmation_status",
+        "warning_text",
+        "observed_at",
+        "last_checked_at",
+        "expires_at",
+        "final_reason"
+      ],
+      "title": "PublicArtifactPreliminaryWarning",
+      "type": "object"
+    },
+    "PublicArtifactSourceReport": {
+      "additionalProperties": false,
+      "properties": {
+        "applies_to_version": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applies To Version"
+        },
+        "fixed_versions": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/FixedVersion"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Versions"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "origin_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicOriginContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Source Name",
+          "type": "string"
+        },
+        "source_updated_at": {
+          "format": "date-time",
+          "title": "Source Updated At",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/State6"
+        },
+        "upstream_record_id": {
+          "maxLength": 160,
+          "minLength": 3,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+          "title": "Upstream Record Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_name",
+        "upstream_record_id",
+        "state",
+        "source_updated_at",
+        "observed_at"
+      ],
+      "title": "PublicArtifactSourceReport",
+      "type": "object"
+    },
+    "PublicCveContext": {
+      "additionalProperties": false,
+      "properties": {
+        "cve": {
+          "maxLength": 28,
+          "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+          "title": "Cve",
+          "type": "string"
+        },
+        "epss": {
+          "$ref": "#/$defs/PublicEpssContext"
+        },
+        "kev": {
+          "$ref": "#/$defs/PublicKevContext"
+        }
+      },
+      "required": [
+        "cve",
+        "epss",
+        "kev"
+      ],
+      "title": "PublicCveContext",
+      "type": "object"
+    },
+    "PublicEpssContext": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution": {
+          "const": "FIRST Exploit Prediction Scoring System",
+          "title": "Attribution",
+          "type": "string"
+        },
+        "listed": {
+          "title": "Listed",
+          "type": "null"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_id": {
+          "const": "gbsec:source:first-epss",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceUrl"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/State8"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicEpssValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source_id",
+        "attribution",
+        "state",
+        "observed_at",
+        "source_as_of",
+        "source_url",
+        "snapshot_id",
+        "listed",
+        "value"
+      ],
+      "title": "PublicEpssContext",
+      "type": "object"
+    },
+    "PublicEpssValue": {
+      "additionalProperties": false,
+      "properties": {
+        "epss": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$",
+          "title": "Epss",
+          "type": "string"
+        },
+        "model_version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "percentile": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$",
+          "title": "Percentile",
+          "type": "string"
+        },
+        "score_date": {
+          "format": "date",
+          "title": "Score Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "epss",
+        "percentile",
+        "score_date",
+        "model_version"
+      ],
+      "title": "PublicEpssValue",
+      "type": "object"
+    },
+    "PublicIncidentUri": {
+      "format": "uri",
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "PublicIncidentUri",
+      "type": "string"
+    },
+    "PublicKevContext": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution": {
+          "const": "CISA Known Exploited Vulnerabilities Catalog",
+          "title": "Attribution",
+          "type": "string"
+        },
+        "listed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Listed"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_id": {
+          "const": "gbsec:source:cisa-kev",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceUrl"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/State8"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicKevValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source_id",
+        "attribution",
+        "state",
+        "observed_at",
+        "source_as_of",
+        "source_url",
+        "snapshot_id",
+        "listed",
+        "value"
+      ],
+      "title": "PublicKevContext",
+      "type": "object"
+    },
+    "PublicKevValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date_added": {
+          "format": "date",
+          "title": "Date Added",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date_added"
+      ],
+      "title": "PublicKevValue",
+      "type": "object"
+    },
+    "PublicOriginContext": {
+      "additionalProperties": false,
+      "description": "Upstream symbol and platform assertions with dated source provenance; application reachability is not assessed and this context never changes package-version applicability.",
+      "properties": {
+        "attribution_urls": {
+          "items": {
+            "$ref": "#/$defs/AttributionUrl"
+          },
+          "maxItems": 1000,
+          "title": "Attribution Urls",
+          "type": "array"
+        },
+        "context": {
+          "$ref": "#/$defs/Context"
+        },
+        "license_expression": {
+          "$ref": "#/$defs/LicenseExpression"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_sha256": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/State5"
+        }
+      },
+      "required": [
+        "state",
+        "snapshot_id",
+        "observed_at",
+        "source_as_of",
+        "source_sha256",
+        "license_expression",
+        "attribution_urls",
+        "context"
+      ],
+      "title": "PublicOriginContext",
+      "type": "object"
+    },
+    "PublicOriginText": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "title": "PublicOriginText",
+      "type": "string"
+    },
+    "PublicOriginTextList": {
+      "items": {
+        "$ref": "#/$defs/PublicOriginText"
+      },
+      "maxItems": 1000,
+      "title": "PublicOriginTextList",
+      "type": "array"
+    },
+    "PublicSourceFreshness": {
+      "additionalProperties": false,
+      "properties": {
+        "freshness_state": {
+          "$ref": "#/$defs/FreshnessState1"
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record_type": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Record Type",
+          "type": "string"
+        },
+        "source_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "record_type",
+        "freshness_state",
+        "last_success_at"
+      ],
+      "title": "PublicSourceFreshness",
+      "type": "object"
+    },
+    "RangeComparability": {
+      "enum": [
+        "comparable",
+        "unknown"
+      ],
+      "title": "RangeComparability",
+      "type": "string"
+    },
+    "ReferenceUrl": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "ReferenceUrl",
+      "type": "string"
+    },
+    "RegistryHost": {
+      "enum": [
+        "registry.npmjs.org",
+        "pypi.org",
+        "github.com",
+        "docker.io",
+        "ghcr.io",
+        "public.ecr.aws",
+        "quay.io",
+        "proxy.golang.org",
+        "crates.io",
+        "repo.packagist.org",
+        "hex.pm",
+        "repo1.maven.org",
+        "api.nuget.org",
+        "open-vsx.org",
+        "pub.dev",
+        "rubygems.org",
+        "swiftpackageindex.com",
+        "marketplace.visualstudio.com"
+      ],
+      "title": "RegistryHost",
+      "type": "string"
+    },
+    "RegistryState": {
+      "enum": [
+        "available",
+        "removed",
+        "yanked",
+        "deprecated",
+        "unknown"
+      ],
+      "title": "RegistryState",
+      "type": "string"
+    },
+    "RelationshipBasis": {
+      "enum": [
+        "not_available",
+        "catalog_assignment"
+      ],
+      "title": "RelationshipBasis",
+      "type": "string"
+    },
+    "RelationshipState": {
+      "enum": [
+        "no_incidents",
+        "single_incident_record",
+        "same_incident_record",
+        "separate_incident_records",
+        "not_confirmed"
+      ],
+      "title": "RelationshipState",
+      "type": "string"
+    },
+    "ReportRelationship": {
+      "enum": [
+        "not_confirmed",
+        "single_report",
+        "same_incident_record"
+      ],
+      "title": "ReportRelationship",
+      "type": "string"
+    },
+    "Result": {
+      "enum": [
+        "supported",
+        "partial",
+        "unsupported",
+        "stale",
+        "unknown"
+      ],
+      "title": "Result",
+      "type": "string"
+    },
+    "Result2": {
+      "enum": [
+        "affected",
+        "not_affected",
+        "possibly_affected",
+        "conflicting",
+        "unknown"
+      ],
+      "title": "Result2",
+      "type": "string"
+    },
+    "ReviewStatus": {
+      "enum": [
+        "REVIEWED",
+        "UNREVIEWED"
+      ],
+      "title": "ReviewStatus",
+      "type": "string"
+    },
+    "SchemaVersion1": {
+      "enum": [
+        "2.1.0",
+        "2.2.0"
+      ],
+      "title": "SchemaVersion1",
+      "type": "string"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "SourceUrl": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "SourceUrl",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    },
+    "Stage": {
+      "enum": [
+        "research",
+        "intake",
+        "normalized",
+        "matched",
+        "response-tested"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "State5": {
+      "enum": [
+        "fresh",
+        "stale",
+        "failed"
+      ],
+      "title": "State5",
+      "type": "string"
+    },
+    "State6": {
+      "enum": [
+        "active",
+        "removed",
+        "withdrawn"
+      ],
+      "title": "State6",
+      "type": "string"
+    },
+    "State7": {
+      "enum": [
+        "active",
+        "expired",
+        "withdrawn",
+        "promoted",
+        "contradicted"
+      ],
+      "title": "State7",
+      "type": "string"
+    },
+    "State8": {
+      "enum": [
+        "fresh",
+        "stale",
+        "failed",
+        "missing"
+      ],
+      "title": "State8",
+      "type": "string"
+    },
+    "Timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "UnknownListItem": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "UnknownListItem",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "affected_range_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Affected Range Ids",
+      "type": "array"
+    },
+    "artifact": {
+      "$ref": "#/$defs/PublicArtifactInput"
+    },
+    "coverage": {
+      "$ref": "#/$defs/CoverageState"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "cve_context": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PublicCveContext"
+          },
+          "maxItems": 2000,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cve Context"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "evidence_maturity": {
+      "$ref": "#/$defs/EvidenceMaturity"
+    },
+    "feed_revision": {
+      "maxLength": 160,
+      "minLength": 8,
+      "title": "Feed Revision",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Incident Ids",
+      "type": "array"
+    },
+    "incidents": {
+      "items": {
+        "$ref": "#/$defs/PublicArtifactIncident"
+      },
+      "maxItems": 100,
+      "title": "Incidents",
+      "type": "array"
+    },
+    "incidents_truncated": {
+      "title": "Incidents Truncated",
+      "type": "boolean"
+    },
+    "kind": {
+      "const": "public_artifact_assessment",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "not_applicable_incident_count": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Not Applicable Incident Count",
+      "type": "integer"
+    },
+    "preliminary_warnings": {
+      "items": {
+        "$ref": "#/$defs/PublicArtifactPreliminaryWarning"
+      },
+      "maxItems": 100,
+      "title": "Preliminary Warnings",
+      "type": "array"
+    },
+    "preliminary_warnings_truncated": {
+      "title": "Preliminary Warnings Truncated",
+      "type": "boolean"
+    },
+    "recommended_action_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Recommended Action Ids",
+      "type": "array"
+    },
+    "registry_state": {
+      "$ref": "#/$defs/RegistryState"
+    },
+    "relationship_state": {
+      "$ref": "#/$defs/RelationshipState"
+    },
+    "result": {
+      "$ref": "#/$defs/Result2"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/SchemaVersion1"
+    },
+    "signature": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssessmentSignature"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "source_freshness": {
+      "items": {
+        "$ref": "#/$defs/PublicSourceFreshness"
+      },
+      "maxItems": 10,
+      "title": "Source Freshness",
+      "type": "array"
+    },
+    "unknowns": {
+      "items": {
+        "$ref": "#/$defs/UnknownListItem"
+      },
+      "maxItems": 100,
+      "title": "Unknowns",
+      "type": "array"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "artifact",
+    "result",
+    "relationship_state",
+    "incidents",
+    "preliminary_warnings",
+    "preliminary_warnings_truncated",
+    "incident_ids",
+    "affected_range_ids",
+    "recommended_action_ids",
+    "evidence_maturity",
+    "coverage",
+    "registry_state",
+    "unknowns",
+    "feed_revision",
+    "not_applicable_incident_count",
+    "incidents_truncated",
+    "source_freshness"
+  ],
+  "title": "PublicArtifactAssessment",
+  "type": "object"
+}

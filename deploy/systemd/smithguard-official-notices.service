@@ -1,0 +1,53 @@
+[Unit]
+# Initialization and the first timer tick may be adjacent; the durable UTC-hour
+# receipt prevents a repeated fetch, including after an interrupted invocation.
+StartLimitIntervalSec=0
+Description=SmithGuard bounded official security bulletin intake
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/signals.env
+
+[Service]
+Type=oneshot
+# Only a later hourly attempt may run after a diagnosed failure.
+Restart=no
+User=smithguard-signals
+Group=smithguard-signals
+EnvironmentFile=/etc/SmithGuard/env/signals.env
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-official-notices --run
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=15min
+TimeoutStopSec=30s
+MemoryHigh=192M
+MemoryMax=256M
+MemorySwapMax=0
+OOMPolicy=kill
+UMask=0077
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

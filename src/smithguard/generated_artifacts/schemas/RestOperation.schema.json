@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "Method": {
+      "enum": [
+        "GET",
+        "POST"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "Operation": {
+      "enum": [
+        "list_incidents",
+        "get_incident",
+        "list_incident_changes",
+        "list_delivery_events",
+        "get_recommended_actions",
+        "assess_public_artifact",
+        "match_project_exposure",
+        "assess_dependency_change",
+        "list_emerging_signals",
+        "get_emerging_signal",
+        "get_source_coverage"
+      ],
+      "title": "Operation",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "rest_operation",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "max_input_bytes": {
+      "maximum": 52428800,
+      "minimum": 0,
+      "title": "Max Input Bytes",
+      "type": "integer"
+    },
+    "max_output_bytes": {
+      "maximum": 52428800,
+      "minimum": 1024,
+      "title": "Max Output Bytes",
+      "type": "integer"
+    },
+    "method": {
+      "$ref": "#/$defs/Method"
+    },
+    "operation": {
+      "$ref": "#/$defs/Operation"
+    },
+    "path": {
+      "maxLength": 200,
+      "pattern": "^/v1/",
+      "title": "Path",
+      "type": "string"
+    },
+    "public_service_allowed": {
+      "title": "Public Service Allowed",
+      "type": "boolean"
+    },
+    "read_only": {
+      "const": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "request_definition": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Request Definition"
+    },
+    "response_definition": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Response Definition",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "timeout_seconds": {
+      "maximum": 120,
+      "minimum": 1,
+      "title": "Timeout Seconds",
+      "type": "integer"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "operation",
+    "method",
+    "path",
+    "read_only",
+    "public_service_allowed",
+    "max_input_bytes",
+    "max_output_bytes",
+    "timeout_seconds",
+    "request_definition",
+    "response_definition"
+  ],
+  "title": "RestOperation",
+  "type": "object"
+}

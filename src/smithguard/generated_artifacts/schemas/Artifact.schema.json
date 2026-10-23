@@ -1,0 +1,146 @@
+{
+  "$defs": {
+    "Ecosystem": {
+      "enum": [
+        "npm",
+        "pypi",
+        "github-actions",
+        "oci",
+        "docker",
+        "go",
+        "rust",
+        "composer",
+        "erlang",
+        "git",
+        "maven",
+        "nuget",
+        "open-vsx",
+        "pub",
+        "rubygems",
+        "swift",
+        "vscode",
+        "unknown"
+      ],
+      "title": "Ecosystem",
+      "type": "string"
+    },
+    "IdentityState": {
+      "enum": [
+        "exact",
+        "range_only",
+        "tag_only",
+        "unresolved",
+        "unknown"
+      ],
+      "title": "IdentityState",
+      "type": "string"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "coordinate": {
+      "maxLength": 1000,
+      "minLength": 5,
+      "pattern": "^pkg:",
+      "title": "Coordinate",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "digest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ecosystem": {
+      "$ref": "#/$defs/Ecosystem"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "identity_state": {
+      "$ref": "#/$defs/IdentityState"
+    },
+    "kind": {
+      "const": "artifact",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+      "title": "Name",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Version"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "ecosystem",
+    "name",
+    "coordinate",
+    "version",
+    "digest",
+    "identity_state"
+  ],
+  "title": "Artifact",
+  "type": "object"
+}

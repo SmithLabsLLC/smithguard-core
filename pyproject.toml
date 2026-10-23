@@ -1,0 +1,97 @@
+[project]
+name = "smithguard"
+version = "0.16.0"
+description = "Evidence-first software supply-chain assessment and bulletin service"
+readme = "README.md"
+requires-python = "==3.14.*"
+dependencies = [
+  "alembic==1.20.0",
+  "cryptography==50.0.1",
+  "fastapi==0.141.1",
+  "httpx==0.28.1",
+  "jsonschema[format]==4.26.0",
+  "mcp==2.2.0",
+  "packaging==26.3",
+  "psycopg[binary,pool]==3.3.6",
+  "pydantic==2.13.5",
+  "sqlalchemy==2.0.54",
+  "uvicorn==0.53.0",
+]
+
+[project.scripts]
+smithguard-bulletins = "smithguard.bulletin_runtime:main"
+smithguard-api = "smithguard.runtime:api_main"
+smithguard-collect = "smithguard.runtime:collect_main"
+smithguard-supplemental = "smithguard.supplemental_runtime:main"
+smithguard-official-notices = "smithguard.official_notice_runtime:main"
+smithguard-signals = "smithguard.runtime:signals_main"
+smithguard-discovery = "smithguard.scheduled_runtime:main"
+smithguard-health = "smithguard.operational_health:health_main"
+smithguard-publish-metrics = "smithguard.cloudwatch_metrics:metric_publisher_main"
+smithguard-migrate = "smithguard.migration_runtime:main"
+smithguard-prepare-evidence = "smithguard.deployment_bootstrap:prepare_evidence_main"
+smithguard-reconcile = "smithguard.reconciliation_runtime:main"
+smithguard-runtime-preflight = "smithguard.deployment_bootstrap:runtime_preflight_main"
+smithguard-openssf-shadow = "smithguard.openssf_shadow:main"
+smithguard-openssf-catalog = "smithguard.openssf_catalog:main"
+
+[dependency-groups]
+dev = [
+  "datamodel-code-generator==0.82.0",
+  "editables==0.6",
+  "hatchling==1.32.4",
+  "pyyaml==6.0.3",
+  "pytest==9.1.1",
+  "ruff==0.16.8",
+  "pytest-xdist==3.8.0",
+]
+
+[build-system]
+requires = ["hatchling==1.32.4", "editables==0.6"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# Builds use the same exact toolchain in contributor checks and CI.
+required-version = "==0.13.4"
+# Install the locked dev/backend graph before building this project in that environment.
+# Third-party packages retain their default build isolation.
+no-build-isolation-package = ["smithguard"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/smithguard"]
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+testpaths = ["tests"]
+markers = [
+  "audit_ids(*ids): stable internal regression identifiers",
+]
+# Deprecations fail tests, so a dependency change is noticed before it breaks. The two
+# known third-party warnings come from Starlette's test client (it wants httpx2).
+filterwarnings = [
+  "error::DeprecationWarning",
+  "error::PendingDeprecationWarning",
+  "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+  "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+# Keep source syntax compatible with the shared controller libraries.
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C901"]
+
+[tool.ruff.lint.mccabe]
+# A ratchet at today's worst function (40): nothing may grow more complex. Lower it
+# as the largest validators are split.
+max-complexity = 40
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*.py" = ["E501"]
+"src/smithguard/contracts/generated.py" = ["E501", "S105"]
+"src/smithguard/deploy/release.py" = ["S310", "S603", "S607"]
+
+[tool.ruff.format]
+quote-style = "double"

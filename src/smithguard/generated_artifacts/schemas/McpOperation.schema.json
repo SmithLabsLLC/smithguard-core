@@ -1,0 +1,156 @@
+{
+  "$defs": {
+    "ServiceOperation": {
+      "enum": [
+        "list_incidents",
+        "get_incident",
+        "list_incident_changes",
+        "get_recommended_actions",
+        "assess_public_artifact",
+        "match_project_exposure",
+        "assess_dependency_change",
+        "list_emerging_signals",
+        "get_emerging_signal",
+        "get_source_coverage"
+      ],
+      "title": "ServiceOperation",
+      "type": "string"
+    },
+    "ToolName": {
+      "enum": [
+        "list_incidents",
+        "get_incident",
+        "list_incident_changes",
+        "assess_public_artifact",
+        "match_project_exposure",
+        "assess_dependency_change",
+        "get_recommended_actions",
+        "list_emerging_signals",
+        "get_emerging_signal",
+        "get_source_coverage"
+      ],
+      "title": "ToolName",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "destructive": {
+      "const": false,
+      "title": "Destructive",
+      "type": "boolean"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "input_definition": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Input Definition"
+    },
+    "kind": {
+      "const": "mcp_operation",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "max_input_bytes": {
+      "maximum": 52428800,
+      "minimum": 0,
+      "title": "Max Input Bytes",
+      "type": "integer"
+    },
+    "max_output_bytes": {
+      "maximum": 52428800,
+      "minimum": 1024,
+      "title": "Max Output Bytes",
+      "type": "integer"
+    },
+    "output_definition": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Output Definition",
+      "type": "string"
+    },
+    "public_service_allowed": {
+      "title": "Public Service Allowed",
+      "type": "boolean"
+    },
+    "read_only": {
+      "const": true,
+      "title": "Read Only",
+      "type": "boolean"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "service_operation": {
+      "$ref": "#/$defs/ServiceOperation"
+    },
+    "timeout_seconds": {
+      "maximum": 120,
+      "minimum": 1,
+      "title": "Timeout Seconds",
+      "type": "integer"
+    },
+    "tool_name": {
+      "$ref": "#/$defs/ToolName"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "tool_name",
+    "service_operation",
+    "read_only",
+    "destructive",
+    "public_service_allowed",
+    "input_definition",
+    "output_definition",
+    "max_input_bytes",
+    "max_output_bytes",
+    "timeout_seconds"
+  ],
+  "title": "McpOperation",
+  "type": "object"
+}

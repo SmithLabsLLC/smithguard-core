@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "smithguard-openssf-path-unicode16-v1",
+  "unicode_data_version": "16.0.0",
+  "supersedes": {
+    "contract_path": "contracts/v1/next-002-openssf-connector-contract.json",
+    "contract_sha256": "de284fe58a26ef794814939600e93ff4412bddc6a6378c090e957f4b9d8b1a8d",
+    "unicode_data_version": "15.0.0"
+  },
+  "unchanged_boundaries": {
+    "ascii_punctuation": "._%+@:-",
+    "accepted_non_ascii_unicode_category_prefixes": [
+      "L",
+      "M",
+      "N"
+    ],
+    "first_character_ascii_exceptions": [
+      "-",
+      "@"
+    ],
+    "first_character_unicode_category_prefixes": [
+      "L",
+      "N"
+    ],
+    "normalization": "preserve_exact_utf8_git_path",
+    "page_cursor_requires_exact_snapshot_path": true,
+    "page_cursor_recovery": "restart_from_beginning_after_snapshot_change",
+    "path_is_never_used_for_host_filesystem_access": true
+  },
+  "limits": {
+    "maximum_blob_bytes": 262144,
+    "maximum_diff_changes": 100000,
+    "maximum_package_component_characters": 300,
+    "maximum_package_component_utf8_bytes": 900,
+    "maximum_package_path_characters": 400,
+    "maximum_package_path_utf8_bytes": 1200,
+    "maximum_page_cursor_characters": 1000,
+    "maximum_page_cursor_utf8_bytes": 3000,
+    "maximum_page_size": 1000,
+    "maximum_tree_records": 500000
+  },
+  "stored_package_identity": "preserve_exact_original_record_value",
+  "historical_observations_reinterpreted": false,
+  "scope": "current_local_openssf_reader_unicode_runtime_compatibility"
+}

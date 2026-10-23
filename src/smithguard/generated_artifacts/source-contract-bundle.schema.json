@@ -1,0 +1,6700 @@
+{
+  "$defs": {
+    "AffectedRange": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "artifact_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "evaluation_state": {
+              "enum": [
+                "supported",
+                "partial",
+                "conflicting",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "expression": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "fixed": {
+              "maxLength": 200,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "introduced": {
+              "maxLength": 200,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "affected_range"
+            },
+            "last_affected": {
+              "maxLength": 200,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "provenance": {
+              "$ref": "#/$defs/Provenance"
+            },
+            "range_type": {
+              "enum": [
+                "ECOSYSTEM",
+                "SEMVER",
+                "GIT",
+                "EXACT",
+                "DIGEST",
+                "UNKNOWN"
+              ]
+            }
+          },
+          "required": [
+            "artifact_id",
+            "range_type",
+            "expression",
+            "introduced",
+            "fixed",
+            "last_affected",
+            "evaluation_state",
+            "provenance"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Affected artifact range",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "permitted normalized facts with provenance",
+        "logging": "range ID, artifact ID, range type, and evaluation result",
+        "privacy": "public"
+      }
+    },
+    "ApprovalRecord": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "actor_id": {
+              "maxLength": 160,
+              "minLength": 3,
+              "type": "string"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "decided_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "decision": {
+              "enum": [
+                "approved",
+                "denied"
+              ]
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "kind": {
+              "const": "approval_record"
+            },
+            "policy_decision_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "reason": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "scope": {
+              "enum": [
+                "one_assessment",
+                "artifact_version",
+                "project",
+                "time_bounded"
+              ]
+            }
+          },
+          "required": [
+            "policy_decision_id",
+            "decision",
+            "actor_id",
+            "decided_at",
+            "reason",
+            "scope",
+            "expires_at"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local approval or denial record",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only",
+        "logging": "approval ID, decision, actor pseudonym, and time only",
+        "privacy": "customer_local"
+      }
+    },
+    "Artifact": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "coordinate": {
+              "maxLength": 1000,
+              "minLength": 5,
+              "pattern": "^pkg:",
+              "type": "string"
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "digest": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ecosystem": {
+              "enum": [
+                "npm",
+                "pypi",
+                "github-actions",
+                "oci",
+                "docker",
+                "go",
+                "rust",
+                "composer",
+                "erlang",
+                "git",
+                "maven",
+                "nuget",
+                "open-vsx",
+                "pub",
+                "rubygems",
+                "swift",
+                "vscode",
+                "unknown"
+              ]
+            },
+            "identity_state": {
+              "enum": [
+                "exact",
+                "range_only",
+                "tag_only",
+                "unresolved",
+                "unknown"
+              ]
+            },
+            "kind": {
+              "const": "artifact"
+            },
+            "name": {
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+              "type": "string"
+            },
+            "version": {
+              "maxLength": 200,
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "ecosystem",
+            "name",
+            "coordinate",
+            "version",
+            "digest",
+            "identity_state"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Public artifact identity",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public coordinates only; private names are rejected",
+        "logging": "normalized public coordinate and digest only",
+        "privacy": "public"
+      }
+    },
+    "AssessmentReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "assessed_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "coverage": {
+              "items": {
+                "$ref": "#/$defs/CoverageState"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "dependency_delta_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "evidence_maturity": {
+              "$ref": "#/$defs/EvidenceMaturity"
+            },
+            "exception_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "exposure_path_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "feed_revision": {
+              "maxLength": 160,
+              "minLength": 8,
+              "type": "string"
+            },
+            "feed_snapshot_hash": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "inventory_fingerprint": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "kind": {
+              "const": "assessment_receipt"
+            },
+            "matcher_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "policy_decision_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "policy_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "remediation_frontier_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "result": {
+              "enum": [
+                "allow",
+                "allow_with_notice",
+                "acknowledgement_required",
+                "approval_required",
+                "deny",
+                "unknown"
+              ]
+            },
+            "unknowns": {
+              "$ref": "#/$defs/UnknownList"
+            }
+          },
+          "required": [
+            "assessed_at",
+            "feed_revision",
+            "feed_snapshot_hash",
+            "matcher_version",
+            "policy_version",
+            "inventory_fingerprint",
+            "coverage",
+            "evidence_maturity",
+            "exposure_path_ids",
+            "remediation_frontier_ids",
+            "policy_decision_id",
+            "exception_id",
+            "result",
+            "unknowns"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Immutable customer-local assessment receipt",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "deliberate reviewed customer export only; never public or Private Watchlists",
+        "logging": "receipt ID, versions, fingerprint, result, and counts only",
+        "privacy": "customer_local"
+      }
+    },
+    "AssessmentSignature": {
+      "additionalProperties": false,
+      "description": "Ed25519 signature over the canonical JSON of the whole response without this field: keys sorted, no whitespace, non-ASCII escaped as \\uXXXX. Verify with the key at /v1/public-keys/{public_key_id}.json.",
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "canonicalization": {
+          "const": "smithguard-canonical-json-v1"
+        },
+        "public_key_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "value": {
+          "maxLength": 88,
+          "minLength": 88,
+          "pattern": "^[A-Za-z0-9+/]{86}==$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm",
+        "public_key_id",
+        "canonicalization",
+        "value"
+      ],
+      "type": "object"
+    },
+    "AuthorityDecision": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "else": {
+                "properties": {
+                  "exception_reason_code": {
+                    "type": "null"
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "exception_required": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "exception_required"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "exception_reason_code": {
+                    "maxLength": 120,
+                    "minLength": 2,
+                    "pattern": "^[a-z0-9_]+$",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "artifact_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "assertion_source_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "attribution_policy_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "authority_policy_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "authority_policy_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "authority_rule_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "automated": {
+              "type": "boolean"
+            },
+            "claim_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "confirmation_method": {
+              "enum": [
+                "reported_source",
+                "automated_source_policy",
+                "automated_corroboration",
+                "human_review",
+                "withdrawal",
+                "dispute"
+              ]
+            },
+            "confirming_authority_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "decided_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "evidence_ids": {
+              "$ref": "#/$defs/AuthorityEvidenceIdList"
+            },
+            "exception_reason_code": {
+              "maxLength": 120,
+              "minLength": 2,
+              "pattern": "^[a-z0-9_]+$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "exception_required": {
+              "type": "boolean"
+            },
+            "incident_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "independent_goodboy_analysis": {
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "authority_decision"
+            },
+            "public_status": {
+              "enum": [
+                "reported",
+                "corroborated",
+                "confirmed",
+                "disputed",
+                "withdrawn"
+              ]
+            },
+            "reason_code": {
+              "maxLength": 120,
+              "minLength": 2,
+              "pattern": "^[a-z0-9_]+$",
+              "type": "string"
+            },
+            "source_references": {
+              "items": {
+                "$ref": "#/$defs/Uri"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "source_rights_register_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "transport_source_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "upstream_ids": {
+              "items": {
+                "maxLength": 160,
+                "minLength": 2,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "incident_id",
+            "claim_id",
+            "artifact_id",
+            "evidence_ids",
+            "public_status",
+            "confirmation_method",
+            "transport_source_id",
+            "assertion_source_id",
+            "confirming_authority_id",
+            "authority_policy_id",
+            "authority_policy_version",
+            "authority_rule_id",
+            "source_rights_register_id",
+            "attribution_policy_version",
+            "reason_code",
+            "automated",
+            "independent_goodboy_analysis",
+            "upstream_ids",
+            "source_references",
+            "exception_required",
+            "exception_reason_code",
+            "decided_at"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Append-only public malware authority decision",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public decision, bounded source references, and policy versions",
+        "logging": "decision ID, status, rule, sources, and evidence IDs only",
+        "privacy": "public policy decision over public source evidence"
+      }
+    },
+    "AuthorityEvidenceIdList": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "BoundedTextList": {
+      "items": {
+        "maxLength": 1000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+    },
+    "Claim": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "claim_type": {
+              "enum": [
+                "malicious",
+                "compromised",
+                "vulnerable",
+                "removed",
+                "deprecated",
+                "unmaintained",
+                "capability",
+                "relationship",
+                "correction",
+                "unknown"
+              ]
+            },
+            "confidence": {
+              "enum": [
+                "confirmed",
+                "probable",
+                "possible",
+                "unverified",
+                "disputed",
+                "unknown"
+              ]
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "restricted_source"
+              ]
+            },
+            "kind": {
+              "const": "claim"
+            },
+            "object_value": {
+              "maxLength": 1000,
+              "type": [
+                "string",
+                "number",
+                "integer",
+                "boolean",
+                "null"
+              ]
+            },
+            "predicate": {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            "provenance": {
+              "$ref": "#/$defs/Provenance"
+            },
+            "state": {
+              "enum": [
+                "active",
+                "superseded",
+                "disputed",
+                "withdrawn",
+                "expired"
+              ]
+            },
+            "subject_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "supersedes_claim_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "valid_from": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "valid_until": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "claim_type",
+            "subject_id",
+            "predicate",
+            "object_value",
+            "confidence",
+            "state",
+            "valid_from",
+            "valid_until",
+            "provenance"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Evidence-backed claim",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "derived claim and permitted references; never restricted source body",
+        "logging": "claim ID, type, source ID, state, and revision only",
+        "privacy": "public or restricted_source"
+      }
+    },
+    "ClaimLineage": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "assertion_source_id": {
+                "type": "null"
+              },
+              "confirming_authority_id": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "assertion_source_state": {
+                "const": "identified"
+              }
+            },
+            "required": [
+              "assertion_source_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "assertion_source_id": {
+                "$ref": "#/$defs/StableId"
+              }
+            },
+            "required": [
+              "assertion_source_id"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "assertion_source_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertion_source_state": {
+          "enum": [
+            "identified",
+            "unknown"
+          ]
+        },
+        "attribution_policy_version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "type": "string"
+        },
+        "authority_policy_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "authority_policy_version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "type": "string"
+        },
+        "authority_rule_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "confirmation_method": {
+          "enum": [
+            "reported_source",
+            "automated_source_policy",
+            "automated_corroboration",
+            "human_review",
+            "withdrawal",
+            "dispute"
+          ]
+        },
+        "confirmation_reason_code": {
+          "maxLength": 120,
+          "minLength": 2,
+          "pattern": "^[a-z0-9_]+$",
+          "type": "string"
+        },
+        "confirming_authority_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exception_reason_code": {
+          "maxLength": 120,
+          "minLength": 2,
+          "pattern": "^[a-z0-9_]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "public_status": {
+          "enum": [
+            "reported",
+            "corroborated",
+            "confirmed",
+            "disputed",
+            "withdrawn"
+          ]
+        },
+        "source_references": {
+          "items": {
+            "$ref": "#/$defs/Uri"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "source_rights_register_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "transport_source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "upstream_ids": {
+          "items": {
+            "maxLength": 160,
+            "minLength": 2,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "transport_source_id",
+        "assertion_source_state",
+        "assertion_source_id",
+        "confirming_authority_id",
+        "confirmation_method",
+        "confirmation_reason_code",
+        "authority_policy_id",
+        "authority_policy_version",
+        "authority_rule_id",
+        "source_rights_register_id",
+        "attribution_policy_version",
+        "upstream_ids",
+        "source_references",
+        "public_status",
+        "exception_reason_code"
+      ],
+      "type": "object"
+    },
+    "ContractHeader": {
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "data_classification": {
+          "enum": [
+            "public",
+            "restricted_source",
+            "customer_local",
+            "private_watchlists_minimized",
+            "internal_control"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "kind": {
+          "maxLength": 80,
+          "minLength": 2,
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "schema_version",
+        "revision",
+        "created_at",
+        "updated_at",
+        "data_classification"
+      ],
+      "type": "object"
+    },
+    "CoverageState": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker",
+            "go",
+            "rust",
+            "composer",
+            "erlang",
+            "git",
+            "maven",
+            "nuget",
+            "open-vsx",
+            "pub",
+            "rubygems",
+            "swift",
+            "vscode",
+            "unknown"
+          ]
+        },
+        "result": {
+          "enum": [
+            "supported",
+            "partial",
+            "unsupported",
+            "stale",
+            "unknown"
+          ]
+        },
+        "stage": {
+          "enum": [
+            "research",
+            "intake",
+            "normalized",
+            "matched",
+            "response-tested"
+          ]
+        }
+      },
+      "required": [
+        "ecosystem",
+        "stage",
+        "result",
+        "as_of"
+      ],
+      "type": "object"
+    },
+    "DeliveryEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/DeliveryEventHeader"
+        },
+        {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "data_classification": {
+                    "const": "public"
+                  }
+                },
+                "required": [
+                  "data_classification"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "project_alias": {
+                    "const": null
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "correction_state": {
+              "enum": [
+                "current",
+                "corrected",
+                "disputed",
+                "expired",
+                "withdrawn"
+              ]
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "customer_local",
+                "private_watchlists_minimized"
+              ]
+            },
+            "deduplication_key": {
+              "description": "Must equal event_id.",
+              "maxLength": 200,
+              "minLength": 16,
+              "type": "string"
+            },
+            "event_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "event_type": {
+              "enum": [
+                "incident_created",
+                "incident_updated",
+                "corrected",
+                "disputed",
+                "expired",
+                "withdrawn"
+              ]
+            },
+            "evidence_state": {
+              "enum": [
+                "confirmed",
+                "probable",
+                "possible",
+                "unverified",
+                "disputed",
+                "unknown"
+              ]
+            },
+            "incident_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "incident_revision": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "incident_state": {
+              "enum": [
+                "investigating",
+                "confirmed",
+                "contained",
+                "resolved",
+                "disputed",
+                "withdrawn",
+                "expired"
+              ]
+            },
+            "incident_updated_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "kind": {
+              "const": "delivery_event"
+            },
+            "occurred_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "project_alias": {
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "public_incident_url": {
+              "$ref": "#/$defs/PublicIncidentUri"
+            },
+            "published_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "recommended_action_level": {
+              "maximum": 4,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "severity": {
+              "enum": [
+                "unknown",
+                "low",
+                "moderate",
+                "high",
+                "critical"
+              ]
+            }
+          },
+          "required": [
+            "event_id",
+            "event_type",
+            "occurred_at",
+            "incident_id",
+            "incident_revision",
+            "incident_state",
+            "severity",
+            "evidence_state",
+            "correction_state",
+            "recommended_action_level",
+            "published_at",
+            "incident_updated_at",
+            "public_incident_url",
+            "project_alias",
+            "deduplication_key"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Correction-aware delivery event",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "minimal event; no source code, inventory, paths, policy, or full receipt",
+        "logging": "event ID, destination ID, incident revision, attempt, and outcome",
+        "privacy": "public, customer_local, or private_watchlists_minimized"
+      }
+    },
+    "DeliveryEventHeader": {
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "data_classification": {
+          "enum": [
+            "public",
+            "customer_local",
+            "private_watchlists_minimized"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "kind": {
+          "maxLength": 80,
+          "minLength": 2,
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "2.0.0"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "schema_version",
+        "revision",
+        "created_at",
+        "updated_at",
+        "data_classification"
+      ],
+      "type": "object"
+    },
+    "DeliveryEventPage": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DeliveryEvent"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "next_cursor": {
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "truncated",
+        "next_cursor",
+        "as_of"
+      ],
+      "type": "object"
+    },
+    "DependencyDelta": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "added_entry_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "after_snapshot_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "before_snapshot_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "changed_entry_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "kind": {
+              "const": "dependency_delta"
+            },
+            "material_transitive_expansion": {
+              "type": "boolean"
+            },
+            "removed_entry_ids": {
+              "$ref": "#/$defs/StableIdList"
+            }
+          },
+          "required": [
+            "before_snapshot_id",
+            "after_snapshot_id",
+            "added_entry_ids",
+            "removed_entry_ids",
+            "changed_entry_ids",
+            "material_transitive_expansion"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local dependency delta",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only",
+        "logging": "delta ID, before and after fingerprints, and counts only",
+        "privacy": "customer_local"
+      }
+    },
+    "EmptyInput": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EvidenceMaturity": {
+      "additionalProperties": false,
+      "properties": {
+        "composition": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "deployment": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "provenance": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "runtime": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "signature": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "vex": {
+          "$ref": "#/$defs/EvidenceState"
+        }
+      },
+      "required": [
+        "composition",
+        "provenance",
+        "signature",
+        "vex",
+        "deployment",
+        "runtime"
+      ],
+      "type": "object"
+    },
+    "EvidenceState": {
+      "enum": [
+        "present",
+        "missing",
+        "invalid",
+        "stale",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ]
+    },
+    "ExposurePath": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "affected_artifact_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "incident_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "kind": {
+              "const": "exposure_path"
+            },
+            "project_alias": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "state": {
+              "enum": [
+                "proven",
+                "probable",
+                "possible",
+                "conflicting",
+                "unknown"
+              ]
+            },
+            "steps": {
+              "items": {
+                "$ref": "#/$defs/ExposurePathStep"
+              },
+              "maxItems": 101,
+              "minItems": 2,
+              "type": "array"
+            }
+          },
+          "required": [
+            "project_alias",
+            "incident_id",
+            "affected_artifact_id",
+            "steps",
+            "state"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local exposure path",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only; never Private Watchlists",
+        "logging": "path ID and step count only",
+        "privacy": "customer_local"
+      }
+    },
+    "ExposurePathStep": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_state": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "node_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "node_type": {
+          "enum": [
+            "project",
+            "workflow",
+            "image",
+            "artifact",
+            "incident",
+            "claim",
+            "evidence"
+          ]
+        },
+        "relationship_type": {
+          "enum": [
+            "root",
+            "depends_on",
+            "contains",
+            "uses",
+            "affects",
+            "supports"
+          ]
+        },
+        "sequence": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sequence",
+        "node_id",
+        "node_type",
+        "relationship_type",
+        "evidence_state"
+      ],
+      "type": "object"
+    },
+    "Incident": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "else": {
+                "properties": {
+                  "data_classification": {
+                    "const": "public"
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "internal_candidate",
+                      "emerging_unverified"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "data_classification": {
+                    "const": "internal_control"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "affected_range_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "alias_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "artifact_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "authority": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AuthorityDecision"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "authority_decision_ids": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableIdList"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "claim_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "confidence": {
+              "enum": [
+                "confirmed",
+                "probable",
+                "possible",
+                "unverified",
+                "disputed",
+                "unknown"
+              ]
+            },
+            "coverage": {
+              "items": {
+                "$ref": "#/$defs/CoverageState"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "internal_control"
+              ]
+            },
+            "event_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "first_observed_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "kind": {
+              "const": "incident"
+            },
+            "last_changed_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "redirect_to": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationship_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "status": {
+              "$ref": "#/$defs/IncidentStatus"
+            },
+            "title": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "unknowns": {
+              "$ref": "#/$defs/UnknownList"
+            }
+          },
+          "required": [
+            "title",
+            "status",
+            "confidence",
+            "claim_ids",
+            "artifact_ids",
+            "affected_range_ids",
+            "relationship_ids",
+            "event_ids",
+            "alias_ids",
+            "first_observed_at",
+            "last_changed_at",
+            "coverage"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Canonical incident",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public classification only; rights-filtered claims, public artifacts, events, and references",
+        "logging": "incident ID, revision, state, coverage, and counts only",
+        "privacy": "internal_control while internal_candidate or emerging_unverified; public after promotion"
+      }
+    },
+    "IncidentEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "else": {
+                "properties": {
+                  "data_classification": {
+                    "const": "public"
+                  }
+                }
+              },
+              "if": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "old_status": {
+                        "enum": [
+                          "internal_candidate",
+                          "emerging_unverified"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "old_status"
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "new_status": {
+                        "enum": [
+                          "internal_candidate",
+                          "emerging_unverified"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "new_status"
+                    ]
+                  }
+                ]
+              },
+              "then": {
+                "properties": {
+                  "data_classification": {
+                    "const": "internal_control"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "actor_id": {
+              "maxLength": 160,
+              "minLength": 3,
+              "type": "string"
+            },
+            "actor_type": {
+              "enum": [
+                "rule",
+                "reviewer",
+                "maintainer",
+                "affected_party",
+                "system"
+              ]
+            },
+            "confidence": {
+              "enum": [
+                "confirmed",
+                "probable",
+                "possible",
+                "unverified",
+                "disputed",
+                "unknown"
+              ]
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "internal_control"
+              ]
+            },
+            "event_type": {
+              "enum": [
+                "created",
+                "state_changed",
+                "alias_added",
+                "redirected",
+                "merged",
+                "split",
+                "disputed",
+                "appealed",
+                "corrected",
+                "expired",
+                "withdrawn",
+                "renewed"
+              ]
+            },
+            "evidence_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "incident_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "kind": {
+              "const": "incident_event"
+            },
+            "new_status": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/IncidentStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "occurred_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "old_status": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/IncidentStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reason_code": {
+              "maxLength": 120,
+              "minLength": 2,
+              "pattern": "^[a-z0-9_]+$",
+              "type": "string"
+            },
+            "superseded_revision": {
+              "minimum": 1,
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "incident_id",
+            "event_type",
+            "old_status",
+            "new_status",
+            "actor_type",
+            "actor_id",
+            "reason_code",
+            "evidence_ids",
+            "occurred_at",
+            "confidence"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Append-only incident lifecycle event",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public events omit private actor identity and restricted evidence",
+        "logging": "event ID, incident ID, type, actor class, and revision only",
+        "privacy": "public or internal_control"
+      }
+    },
+    "IncidentEventPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/IncidentEvent"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "next_cursor": {
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "truncated",
+        "next_cursor"
+      ],
+      "type": "object"
+    },
+    "IncidentIdInput": {
+      "additionalProperties": false,
+      "properties": {
+        "incident_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      },
+      "required": [
+        "incident_id"
+      ],
+      "type": "object"
+    },
+    "IncidentPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Incident"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "next_cursor": {
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "truncated",
+        "next_cursor"
+      ],
+      "type": "object"
+    },
+    "IncidentPageInput": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "incident_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "limit": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "incident_id"
+      ],
+      "type": "object"
+    },
+    "IncidentStatus": {
+      "enum": [
+        "internal_candidate",
+        "emerging_unverified",
+        "investigating",
+        "reported",
+        "corroborated",
+        "confirmed",
+        "contained",
+        "resolved",
+        "disputed",
+        "withdrawn",
+        "expired"
+      ]
+    },
+    "InventoryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/LocalArtifactInput"
+        },
+        "dependency_path_ids": {
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "directness": {
+          "enum": [
+            "direct",
+            "transitive",
+            "root",
+            "unknown"
+          ]
+        },
+        "inventory_stage": {
+          "enum": [
+            "source",
+            "analyzed_source",
+            "build_input",
+            "built_artifact",
+            "deployment",
+            "runtime",
+            "unknown"
+          ]
+        },
+        "local_entry_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      },
+      "required": [
+        "local_entry_id",
+        "artifact",
+        "directness",
+        "inventory_stage",
+        "dependency_path_ids"
+      ],
+      "type": "object"
+    },
+    "InventorySnapshot": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "captured_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "entries": {
+              "items": {
+                "$ref": "#/$defs/InventoryEntry"
+              },
+              "maxItems": 100000,
+              "type": "array"
+            },
+            "format": {
+              "enum": [
+                "package_list",
+                "npm_lock",
+                "python_lock",
+                "github_actions",
+                "oci",
+                "cyclonedx",
+                "spdx"
+              ]
+            },
+            "inventory_fingerprint": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "kind": {
+              "const": "inventory_snapshot"
+            },
+            "parser_unknowns": {
+              "$ref": "#/$defs/UnknownList",
+              "default": []
+            },
+            "project_alias": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "sbom_quality": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/SbomQuality"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "project_alias",
+            "inventory_fingerprint",
+            "captured_at",
+            "format",
+            "entries",
+            "parser_unknowns",
+            "sbom_quality"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local inventory snapshot",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "never exported by default; reviewed customer-controlled report only",
+        "logging": "snapshot ID, fingerprint, entry count, format, and result only",
+        "privacy": "customer_local"
+      }
+    },
+    "LocalArtifactInput": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "version": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "oci",
+                  "docker"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/Sha256"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker",
+            "go",
+            "rust",
+            "unknown"
+          ]
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        "registry_host": {
+          "maxLength": 259,
+          "pattern": "^[A-Za-z0-9.-]+(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "maxLength": 200,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "visibility": {
+          "enum": [
+            "verified_public",
+            "private",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "visibility"
+      ],
+      "type": "object"
+    },
+    "McpOperation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "tool_name": {
+                    "enum": [
+                      "match_project_exposure",
+                      "assess_dependency_change"
+                    ]
+                  }
+                },
+                "required": [
+                  "tool_name"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "public_service_allowed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "data_classification": {
+              "const": "public"
+            },
+            "destructive": {
+              "const": false
+            },
+            "input_definition": {
+              "maxLength": 120,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "mcp_operation"
+            },
+            "max_input_bytes": {
+              "maximum": 52428800,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "max_output_bytes": {
+              "maximum": 52428800,
+              "minimum": 1024,
+              "type": "integer"
+            },
+            "output_definition": {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            "public_service_allowed": {
+              "type": "boolean"
+            },
+            "read_only": {
+              "const": true
+            },
+            "service_operation": {
+              "enum": [
+                "list_incidents",
+                "get_incident",
+                "list_incident_changes",
+                "get_recommended_actions",
+                "assess_public_artifact",
+                "match_project_exposure",
+                "assess_dependency_change",
+                "list_emerging_signals",
+                "get_emerging_signal",
+                "get_source_coverage"
+              ]
+            },
+            "timeout_seconds": {
+              "maximum": 120,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "tool_name": {
+              "enum": [
+                "list_incidents",
+                "get_incident",
+                "list_incident_changes",
+                "assess_public_artifact",
+                "match_project_exposure",
+                "assess_dependency_change",
+                "get_recommended_actions",
+                "list_emerging_signals",
+                "get_emerging_signal",
+                "get_source_coverage"
+              ]
+            }
+          },
+          "required": [
+            "tool_name",
+            "service_operation",
+            "read_only",
+            "destructive",
+            "public_service_allowed",
+            "input_definition",
+            "output_definition",
+            "max_input_bytes",
+            "max_output_bytes",
+            "timeout_seconds"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Canonical read-only MCP operation",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "bounded schema-defined result only",
+        "logging": "tool name, request ID, result class, counts, bytes, and duration",
+        "privacy": "public metadata; referenced payload may be customer_local"
+      }
+    },
+    "PageInput": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "PolicyDecision": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "approval_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "artifact": {
+              "$ref": "#/$defs/LocalArtifactInput"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "decision_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "disposition": {
+              "enum": [
+                "record_only",
+                "notify",
+                "require_acknowledgement",
+                "require_approval",
+                "deny"
+              ]
+            },
+            "exception_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/StableId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "kind": {
+              "const": "policy_decision"
+            },
+            "policy_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "project_alias": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "reason_codes": {
+              "items": {
+                "maxLength": 120,
+                "pattern": "^[a-z0-9_]+$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "recheck_triggers": {
+              "items": {
+                "enum": [
+                  "correction",
+                  "withdrawal",
+                  "new_evidence",
+                  "policy_change",
+                  "dependency_change",
+                  "exception_expiry"
+                ]
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "rule_id": {
+              "$ref": "#/$defs/StableId"
+            }
+          },
+          "required": [
+            "policy_version",
+            "rule_id",
+            "artifact",
+            "project_alias",
+            "disposition",
+            "reason_codes",
+            "exception_id",
+            "approval_id",
+            "decision_at",
+            "recheck_triggers"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local policy disposition",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only",
+        "logging": "decision ID, rule ID, disposition, and reason code only",
+        "privacy": "customer_local"
+      }
+    },
+    "PolicyException": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "actor_id": {
+              "maxLength": 160,
+              "minLength": 3,
+              "type": "string"
+            },
+            "artifact": {
+              "$ref": "#/$defs/LocalArtifactInput"
+            },
+            "created_for_rule_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "customer_ticket": {
+              "maxLength": 160,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "evidence_revision": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "expires_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "incident_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "kind": {
+              "const": "policy_exception"
+            },
+            "project_alias": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "type": "string"
+            },
+            "reason": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "recheck_triggers": {
+              "items": {
+                "enum": [
+                  "correction",
+                  "withdrawal",
+                  "new_evidence",
+                  "policy_change",
+                  "dependency_change",
+                  "exception_expiry"
+                ]
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "revoked",
+                "superseded",
+                "recheck_required"
+              ]
+            }
+          },
+          "required": [
+            "actor_id",
+            "created_for_rule_id",
+            "project_alias",
+            "artifact",
+            "reason",
+            "customer_ticket",
+            "incident_id",
+            "evidence_revision",
+            "expires_at",
+            "recheck_triggers",
+            "state"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local scoped expiring exception",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only",
+        "logging": "exception ID, rule ID, scope class, expiry, and state only",
+        "privacy": "customer_local"
+      }
+    },
+    "PreliminaryWarning": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/PreliminaryWarningHeader"
+        },
+        {
+          "properties": {
+            "affected_artifacts": {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "pattern": "^[ -~]+$",
+                "type": "string"
+              },
+              "maxItems": 100,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "automation_allowed": {
+              "const": false
+            },
+            "awaiting_authoritative_confirmation": {
+              "type": "boolean"
+            },
+            "claim": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": "string"
+            },
+            "confirmation_status": {
+              "enum": [
+                "unverified",
+                "confirmation_candidate",
+                "contradiction_candidate",
+                "confirmed_elsewhere"
+              ]
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "evidence_class": {
+              "enum": [
+                "social_only",
+                "web_only",
+                "web_and_social"
+              ]
+            },
+            "expires_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "final_reason": {
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "human_reviewed": {
+              "type": "boolean"
+            },
+            "independent_source_clusters": {
+              "maximum": 20,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "preliminary_warning"
+            },
+            "last_checked_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "latest_recheck_outcome": {
+              "enum": [
+                "not_checked",
+                "still_unverified",
+                "no_new_evidence",
+                "confirmation_candidate",
+                "contradiction_candidate",
+                "budget_blocked",
+                "provider_unavailable",
+                "expired"
+              ]
+            },
+            "latest_recheck_reason": {
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "latest_recheck_source_urls": {
+              "items": {
+                "$ref": "#/$defs/PublicIncidentUri"
+              },
+              "maxItems": 8,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "max_action_level": {
+              "const": 0
+            },
+            "next_check_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "observed_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "qualification_actor_id": {
+              "maxLength": 160,
+              "minLength": 3,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]+$",
+              "type": "string"
+            },
+            "qualification_basis": {
+              "enum": [
+                "human_review",
+                "owner_authorized_early_lead_policy"
+              ]
+            },
+            "qualification_reason": {
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": "string"
+            },
+            "qualification_sha256": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "recheck_count": {
+              "maximum": 12,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "schema_version": {
+              "enum": [
+                "1.0.0",
+                "1.1.0"
+              ]
+            },
+            "source_origins": {
+              "items": {
+                "maxLength": 253,
+                "minLength": 1,
+                "pattern": "^[a-z0-9.-]+$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "source_urls": {
+              "items": {
+                "$ref": "#/$defs/PublicIncidentUri"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "withdrawn",
+                "promoted",
+                "contradicted"
+              ]
+            },
+            "terminal_actor_id": {
+              "maxLength": 160,
+              "minLength": 3,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]+$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "terminal_evidence_urls": {
+              "items": {
+                "$ref": "#/$defs/PublicIncidentUri"
+              },
+              "maxItems": 20,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "terminal_expected_revision": {
+              "minimum": 1,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "title": {
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[ -~]+$",
+              "type": "string"
+            },
+            "warning_text": {
+              "const": "Emerging and unverified. SmithGuard has not independently confirmed this warning and is awaiting authoritative or non-social confirmation. Use it to investigate, not as proof or authorization for a disruptive action."
+            }
+          },
+          "required": [
+            "title",
+            "state",
+            "claim",
+            "affected_artifacts",
+            "source_urls",
+            "evidence_class",
+            "independent_source_clusters",
+            "confirmation_status",
+            "awaiting_authoritative_confirmation",
+            "automation_allowed",
+            "max_action_level",
+            "human_reviewed",
+            "warning_text",
+            "observed_at",
+            "last_checked_at",
+            "next_check_at",
+            "expires_at",
+            "recheck_count",
+            "latest_recheck_outcome",
+            "final_reason"
+          ],
+          "type": "object"
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
+                "const": "1.0.0"
+              }
+            },
+            "required": [
+              "schema_version"
+            ]
+          },
+          "then": {
+            "properties": {
+              "human_reviewed": {
+                "const": true
+              },
+              "independent_source_clusters": {
+                "minimum": 2
+              },
+              "source_urls": {
+                "minItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
+                "const": "1.1.0"
+              }
+            },
+            "required": [
+              "schema_version"
+            ]
+          },
+          "then": {
+            "required": [
+              "qualification_basis",
+              "qualification_actor_id",
+              "qualification_reason",
+              "qualification_sha256",
+              "source_origins",
+              "latest_recheck_reason",
+              "latest_recheck_source_urls",
+              "terminal_actor_id",
+              "terminal_evidence_urls",
+              "terminal_expected_revision"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "qualification_basis": {
+                "const": "human_review"
+              }
+            },
+            "required": [
+              "qualification_basis"
+            ]
+          },
+          "then": {
+            "properties": {
+              "human_reviewed": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "qualification_basis": {
+                "const": "owner_authorized_early_lead_policy"
+              }
+            },
+            "required": [
+              "qualification_basis"
+            ]
+          },
+          "then": {
+            "properties": {
+              "human_reviewed": {
+                "const": false
+              }
+            }
+          }
+        }
+      ],
+      "title": "Public preliminary warning",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public warning, public URLs, bounded outcomes, and expiry history",
+        "logging": "warning ID, revision, state, source count, check count, and times only",
+        "privacy": "public minimized warning; raw model and social content omitted"
+      }
+    },
+    "PreliminaryWarningHeader": {
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "data_classification": {
+          "enum": [
+            "public",
+            "restricted_source",
+            "customer_local",
+            "private_watchlists_minimized",
+            "internal_control"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "kind": {
+          "maxLength": 80,
+          "minLength": 2,
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "schema_version": {
+          "enum": [
+            "1.0.0",
+            "1.1.0"
+          ]
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "schema_version",
+        "revision",
+        "created_at",
+        "updated_at",
+        "data_classification"
+      ],
+      "type": "object"
+    },
+    "PreliminaryWarningIdInput": {
+      "additionalProperties": false,
+      "properties": {
+        "signal_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      },
+      "required": [
+        "signal_id"
+      ],
+      "type": "object"
+    },
+    "PreliminaryWarningPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/PreliminaryWarning"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "next_cursor": {
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "truncated",
+        "next_cursor"
+      ],
+      "type": "object"
+    },
+    "PreliminaryWarningPageInput": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "state": {
+          "default": "active",
+          "enum": [
+            "active",
+            "expired",
+            "withdrawn",
+            "promoted",
+            "contradicted",
+            "all"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "PrivateWatchlistArtifact": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "version": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "oci",
+                  "docker"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "registry_host": {
+                "enum": [
+                  "docker.io",
+                  "ghcr.io",
+                  "public.ecr.aws",
+                  "quay.io"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "npm"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "registry.npmjs.org"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "pypi"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "pypi.org"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "github-actions"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "github.com"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker"
+          ]
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9@._/+:-]+$",
+          "type": "string"
+        },
+        "registry_host": {
+          "enum": [
+            "registry.npmjs.org",
+            "pypi.org",
+            "github.com",
+            "docker.io",
+            "ghcr.io",
+            "public.ecr.aws",
+            "quay.io"
+          ]
+        },
+        "version": {
+          "maxLength": 200,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "PrivateWatchlistEntry": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "target_type": {
+                "const": "software_dependency"
+              }
+            },
+            "required": [
+              "target_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "artifact": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/PrivateWatchlistArtifact"
+                  },
+                  {
+                    "properties": {
+                      "ecosystem": {
+                        "enum": [
+                          "npm",
+                          "pypi"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "target_type": {
+                "const": "github_action"
+              }
+            },
+            "required": [
+              "target_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "artifact": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/PrivateWatchlistArtifact"
+                  },
+                  {
+                    "properties": {
+                      "ecosystem": {
+                        "const": "github-actions"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "target_type": {
+                "const": "container_image"
+              }
+            },
+            "required": [
+              "target_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "artifact": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/PrivateWatchlistArtifact"
+                  },
+                  {
+                    "properties": {
+                      "ecosystem": {
+                        "enum": [
+                          "oci",
+                          "docker"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/PrivateWatchlistArtifact"
+        },
+        "directness": {
+          "enum": [
+            "direct",
+            "transitive"
+          ]
+        },
+        "first_seen_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "importance": {
+          "enum": [
+            "standard",
+            "important",
+            "critical"
+          ]
+        },
+        "inventory_revision": {
+          "maxLength": 160,
+          "minLength": 8,
+          "type": "string"
+        },
+        "last_confirmed_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "project_alias": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "type": "string"
+        },
+        "public_visibility": {
+          "const": "verified_public"
+        },
+        "target_type": {
+          "enum": [
+            "software_dependency",
+            "github_action",
+            "container_image"
+          ]
+        },
+        "usage": {
+          "enum": [
+            "production",
+            "development",
+            "build",
+            "unknown"
+          ]
+        },
+        "visibility_source_url": {
+          "$ref": "#/$defs/PrivateWatchlistVisibilityUri"
+        },
+        "visibility_verified_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "project_alias",
+        "target_type",
+        "artifact",
+        "public_visibility",
+        "visibility_verified_at",
+        "visibility_source_url",
+        "directness",
+        "usage",
+        "importance",
+        "inventory_revision",
+        "first_seen_at",
+        "last_confirmed_at"
+      ],
+      "type": "object"
+    },
+    "PrivateWatchlistRejection": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "accepted": {
+              "const": false
+            },
+            "data_classification": {
+              "const": "internal_control"
+            },
+            "field_paths": {
+              "items": {
+                "maxLength": 300,
+                "pattern": "^/",
+                "type": "string"
+              },
+              "maxItems": 30,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "kind": {
+              "const": "private_watchlist_rejection"
+            },
+            "payload_logged": {
+              "const": false
+            },
+            "reason_codes": {
+              "items": {
+                "enum": [
+                  "feature_disabled",
+                  "not_synthetic",
+                  "unknown_registry",
+                  "private_artifact",
+                  "unsupported_target_type",
+                  "target_type_mismatch",
+                  "invalid_usage",
+                  "invalid_importance",
+                  "missing_exact_version",
+                  "missing_immutable_digest",
+                  "source_code",
+                  "repository_name",
+                  "branch_name",
+                  "file_path",
+                  "lockfile_body",
+                  "sbom_body",
+                  "dependency_path",
+                  "build_log",
+                  "environment_data",
+                  "secret",
+                  "ownership_map",
+                  "full_receipt",
+                  "human_name",
+                  "historical_snapshot",
+                  "unknown_field",
+                  "limit_exceeded"
+                ]
+              },
+              "maxItems": 30,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "request_id": {
+              "maxLength": 160,
+              "minLength": 8,
+              "type": "string"
+            }
+          },
+          "required": [
+            "request_id",
+            "accepted",
+            "reason_codes",
+            "field_paths",
+            "payload_logged"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Private Watchlists fail-closed rejection result",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "safe error only",
+        "logging": "request ID, reason codes, field paths, and counts; never rejected values",
+        "privacy": "internal_control"
+      }
+    },
+    "PrivateWatchlistSet": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "data_classification": {
+              "const": "private_watchlists_minimized"
+            },
+            "entries": {
+              "items": {
+                "$ref": "#/$defs/PrivateWatchlistEntry"
+              },
+              "maxItems": 100000,
+              "type": "array"
+            },
+            "expires_unconfirmed_after_days": {
+              "const": 45
+            },
+            "feature_state": {
+              "const": "disabled"
+            },
+            "inventory_revision": {
+              "maxLength": 160,
+              "minLength": 8,
+              "type": "string"
+            },
+            "kind": {
+              "const": "private_watchlist_set"
+            },
+            "replace_current": {
+              "const": true
+            },
+            "synthetic_only": {
+              "const": true
+            },
+            "tenant_id": {
+              "maxLength": 160,
+              "minLength": 16,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "feature_state",
+            "synthetic_only",
+            "tenant_id",
+            "replace_current",
+            "inventory_revision",
+            "entries",
+            "expires_unconfirmed_after_days"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Disabled synthetic Private Watchlists replace-current set",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "tenant-scoped latest set only; no history or excluded fields",
+        "logging": "tenant ID, revision, entry count, bytes, and result only",
+        "privacy": "private_watchlists_minimized"
+      }
+    },
+    "PrivateWatchlistVisibilityUri": {
+      "format": "uri",
+      "maxLength": 2048,
+      "pattern": "^https://(www\\.npmjs\\.com|pypi\\.org|github\\.com|hub\\.docker\\.com|ghcr\\.io|gallery\\.ecr\\.aws|quay\\.io)/",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_origin": {
+          "enum": [
+            "observed_by_goodboy",
+            "declared_by_source",
+            "inferred_by_goodboy",
+            "enriched_by_goodboy"
+          ]
+        },
+        "claim_lineage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClaimLineage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collection_method": {
+          "enum": [
+            "git",
+            "rest_api",
+            "download",
+            "rss",
+            "webhook",
+            "manual_replay",
+            "customer_local"
+          ]
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity_verification": {
+          "enum": [
+            "verified",
+            "unverified",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "signature_state": {
+          "enum": [
+            "valid",
+            "invalid",
+            "missing",
+            "stale",
+            "unsupported",
+            "unknown"
+          ]
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_modified_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_published_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_record_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_url": {
+          "$ref": "#/$defs/Uri"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_record_id",
+        "source_url",
+        "retrieved_at",
+        "source_published_at",
+        "collection_method",
+        "assertion_origin",
+        "identity_verification",
+        "signature_state"
+      ],
+      "type": "object"
+    },
+    "PublicArtifactAssessment": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/PublicArtifactAssessmentHeader"
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
+                "const": "2.2.0"
+              }
+            },
+            "required": [
+              "schema_version"
+            ]
+          },
+          "then": {
+            "properties": {
+              "cve_context": {
+                "type": "array"
+              }
+            },
+            "required": [
+              "cve_context"
+            ]
+          }
+        },
+        {
+          "properties": {
+            "affected_range_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "artifact": {
+              "$ref": "#/$defs/PublicArtifactInput"
+            },
+            "coverage": {
+              "$ref": "#/$defs/CoverageState"
+            },
+            "cve_context": {
+              "description": "Exact CVE context for listed incident aliases. Supplemental EPSS and KEV context never changes the assessment result; missing values are unknown, and failed or stale sources retain their dated values with that state.",
+              "items": {
+                "$ref": "#/$defs/PublicCveContext"
+              },
+              "maxItems": 2000,
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "evidence_maturity": {
+              "$ref": "#/$defs/EvidenceMaturity"
+            },
+            "feed_revision": {
+              "maxLength": 160,
+              "minLength": 8,
+              "type": "string"
+            },
+            "incident_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "incidents": {
+              "items": {
+                "$ref": "#/$defs/PublicArtifactIncident"
+              },
+              "maxItems": 100,
+              "type": "array"
+            },
+            "incidents_truncated": {
+              "description": "True when more applicable incidents exist than the 100 listed.",
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "public_artifact_assessment"
+            },
+            "not_applicable_incident_count": {
+              "description": "Matching-package incidents left out because their affected versions exclude the requested version.",
+              "maximum": 100000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "preliminary_warnings": {
+              "items": {
+                "$ref": "#/$defs/PublicArtifactPreliminaryWarning"
+              },
+              "maxItems": 100,
+              "type": "array"
+            },
+            "preliminary_warnings_truncated": {
+              "type": "boolean"
+            },
+            "recommended_action_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "registry_state": {
+              "enum": [
+                "available",
+                "removed",
+                "yanked",
+                "deprecated",
+                "unknown"
+              ]
+            },
+            "relationship_state": {
+              "enum": [
+                "no_incidents",
+                "single_incident_record",
+                "same_incident_record",
+                "separate_incident_records",
+                "not_confirmed"
+              ]
+            },
+            "result": {
+              "enum": [
+                "affected",
+                "not_affected",
+                "possibly_affected",
+                "conflicting",
+                "unknown"
+              ]
+            },
+            "signature": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AssessmentSignature"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Present on every public API answer; null only in unsigned local use."
+            },
+            "source_freshness": {
+              "description": "Freshness of each source that covers this ecosystem.",
+              "items": {
+                "$ref": "#/$defs/PublicSourceFreshness"
+              },
+              "maxItems": 10,
+              "type": "array"
+            },
+            "unknowns": {
+              "$ref": "#/$defs/UnknownList"
+            }
+          },
+          "required": [
+            "artifact",
+            "result",
+            "relationship_state",
+            "incidents",
+            "preliminary_warnings",
+            "preliminary_warnings_truncated",
+            "incident_ids",
+            "affected_range_ids",
+            "recommended_action_ids",
+            "evidence_maturity",
+            "coverage",
+            "registry_state",
+            "unknowns",
+            "feed_revision",
+            "not_applicable_incident_count",
+            "incidents_truncated",
+            "source_freshness"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Public artifact assessment result",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public evidence and explicit unknowns",
+        "logging": "assessment ID, public coordinate, result, feed revision, and counts",
+        "privacy": "public"
+      }
+    },
+    "PublicArtifactAssessmentHeader": {
+      "properties": {
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "data_classification": {
+          "const": "public"
+        },
+        "id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "kind": {
+          "maxLength": 80,
+          "minLength": 2,
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "schema_version": {
+          "enum": [
+            "2.1.0",
+            "2.2.0"
+          ]
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "schema_version",
+        "revision",
+        "created_at",
+        "updated_at",
+        "data_classification"
+      ],
+      "type": "object"
+    },
+    "PublicArtifactAssessmentRequest": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "artifact": {
+              "$ref": "#/$defs/PublicArtifactInput"
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "kind": {
+              "const": "public_artifact_assessment_request"
+            }
+          },
+          "required": [
+            "artifact"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Public artifact assessment request",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "request may contain only a public artifact coordinate",
+        "logging": "request ID and exact public coordinate only",
+        "privacy": "public"
+      }
+    },
+    "PublicArtifactAssessmentShortRequest": {
+      "additionalProperties": false,
+      "description": "The simple request form: an ecosystem, a package name and an exact version (or an immutable digest). The registry host defaults to the ecosystem's public registry and is required only for container images.",
+      "examples": [
+        {
+          "ecosystem": "npm",
+          "name": "event-stream",
+          "version": "3.3.6"
+        },
+        {
+          "ecosystem": "maven",
+          "name": "org.apache.logging.log4j:log4j-core",
+          "version": "2.14.1"
+        }
+      ],
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker",
+            "go",
+            "rust",
+            "composer",
+            "erlang",
+            "git",
+            "maven",
+            "nuget",
+            "open-vsx",
+            "pub",
+            "rubygems",
+            "swift",
+            "vscode"
+          ]
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+          "type": "string"
+        },
+        "registry_host": {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "ecosystem",
+        "name"
+      ],
+      "title": "Short public artifact assessment request",
+      "type": "object"
+    },
+    "PublicArtifactIncident": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_range_ids": {
+          "$ref": "#/$defs/StableIdList"
+        },
+        "aliases": {
+          "description": "Public advisory identifiers for this incident, such as GHSA, CVE and MAL IDs.",
+          "items": {
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[ -~]+$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "applies_to_version": {
+          "description": "Whether this incident's affected versions include the requested version, compared with the ecosystem's own version rules; null when the ranges cannot decide. npm ranges deliberately include prereleases that fall inside the range (node-semver would skip them), so a prerelease can read as affected.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "classification": {
+          "default": null,
+          "oneOf": [
+            {
+              "enum": [
+                "malicious",
+                "compromised",
+                "vulnerable"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "confirmed",
+            "probable",
+            "possible",
+            "unverified",
+            "disputed",
+            "unknown"
+          ]
+        },
+        "fixed_versions": {
+          "description": "Source-reported fix candidates across release branches and sources (explicit patched versions, fix events and legacy exclusive upper bounds), lowest first. This union is not a safe-upgrade guarantee: sources can disagree; assess the chosen exact target version and inspect each source report.",
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "incident_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "last_changed_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "relationship_basis": {
+          "enum": [
+            "not_available",
+            "catalog_assignment"
+          ]
+        },
+        "report_relationship": {
+          "enum": [
+            "not_confirmed",
+            "single_report",
+            "same_incident_record"
+          ]
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_reports": {
+          "items": {
+            "$ref": "#/$defs/PublicArtifactSourceReport"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "source_reports_truncated": {
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/IncidentStatus"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        "upstream_urls": {
+          "description": "The upstream advisory records behind this incident.",
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "incident_id",
+        "revision",
+        "status",
+        "confidence",
+        "title",
+        "last_changed_at",
+        "report_relationship",
+        "relationship_basis",
+        "source_reports",
+        "source_reports_truncated",
+        "applies_to_version",
+        "affected_range_ids",
+        "fixed_versions",
+        "aliases",
+        "upstream_urls"
+      ],
+      "type": "object"
+    },
+    "PublicArtifactInput": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "version": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "oci",
+                  "docker"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "registry_host": {
+                "enum": [
+                  "docker.io",
+                  "ghcr.io",
+                  "public.ecr.aws",
+                  "quay.io"
+                ]
+              }
+            },
+            "required": [
+              "digest"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "npm"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "registry.npmjs.org"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "pypi"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "pypi.org"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "github-actions"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "github.com"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "go"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "proxy.golang.org"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "const": "rust"
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "registry_host": {
+                "const": "crates.io"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker",
+            "go",
+            "rust",
+            "composer",
+            "erlang",
+            "git",
+            "maven",
+            "nuget",
+            "open-vsx",
+            "pub",
+            "rubygems",
+            "swift",
+            "vscode"
+          ]
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+          "type": "string"
+        },
+        "public_visibility": {
+          "const": "asserted_public"
+        },
+        "registry_host": {
+          "enum": [
+            "registry.npmjs.org",
+            "pypi.org",
+            "github.com",
+            "docker.io",
+            "ghcr.io",
+            "public.ecr.aws",
+            "quay.io",
+            "proxy.golang.org",
+            "crates.io",
+            "repo.packagist.org",
+            "hex.pm",
+            "repo1.maven.org",
+            "api.nuget.org",
+            "open-vsx.org",
+            "pub.dev",
+            "rubygems.org",
+            "swiftpackageindex.com",
+            "marketplace.visualstudio.com"
+          ]
+        },
+        "version": {
+          "maxLength": 200,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "ecosystem",
+        "registry_host",
+        "name",
+        "version",
+        "digest",
+        "public_visibility"
+      ],
+      "type": "object"
+    },
+    "PublicArtifactPreliminaryWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "claim": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        },
+        "confirmation_status": {
+          "enum": [
+            "unverified",
+            "confirmation_candidate",
+            "contradiction_candidate",
+            "confirmed_elsewhere"
+          ]
+        },
+        "evidence_class": {
+          "enum": [
+            "social_only",
+            "web_only",
+            "web_and_social"
+          ]
+        },
+        "expires_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "final_reason": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_checked_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "observed_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "revision": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_urls": {
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "state": {
+          "enum": [
+            "active",
+            "expired",
+            "withdrawn",
+            "promoted",
+            "contradicted"
+          ]
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        },
+        "warning_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "warning_text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "warning_id",
+        "revision",
+        "state",
+        "title",
+        "claim",
+        "source_urls",
+        "evidence_class",
+        "confirmation_status",
+        "warning_text",
+        "observed_at",
+        "last_checked_at",
+        "expires_at",
+        "final_reason"
+      ],
+      "type": "object"
+    },
+    "PublicArtifactSourceReport": {
+      "additionalProperties": false,
+      "properties": {
+        "applies_to_version": {
+          "description": "Whether this source record's own package ranges include the requested version; other reports never supply its applicability.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "fixed_versions": {
+          "description": "Fix candidates explicitly reported by this source for the package, across release branches. Assess the chosen exact target version; other sources may disagree.",
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": [
+            "array",
+            "null"
+          ],
+          "uniqueItems": true
+        },
+        "observed_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "origin_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicOriginContext"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "state": {
+          "enum": [
+            "active",
+            "removed",
+            "withdrawn"
+          ]
+        },
+        "upstream_record_id": {
+          "maxLength": 160,
+          "minLength": 3,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_name",
+        "upstream_record_id",
+        "state",
+        "source_updated_at",
+        "observed_at"
+      ],
+      "type": "object"
+    },
+    "PublicCveContext": {
+      "additionalProperties": false,
+      "properties": {
+        "cve": {
+          "maxLength": 28,
+          "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+          "type": "string"
+        },
+        "epss": {
+          "$ref": "#/$defs/PublicEpssContext"
+        },
+        "kev": {
+          "$ref": "#/$defs/PublicKevContext"
+        }
+      },
+      "required": [
+        "cve",
+        "epss",
+        "kev"
+      ],
+      "type": "object"
+    },
+    "PublicEpssContext": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "missing"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "listed": {
+                "type": "null"
+              },
+              "observed_at": {
+                "type": "null"
+              },
+              "snapshot_id": {
+                "type": "null"
+              },
+              "source_as_of": {
+                "type": "null"
+              },
+              "source_url": {
+                "type": "null"
+              },
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "attribution": {
+          "const": "FIRST Exploit Prediction Scoring System"
+        },
+        "listed": {
+          "type": "null"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_id": {
+          "const": "gbsec:source:first-epss"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2048,
+              "pattern": "^https://",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "fresh",
+            "stale",
+            "failed",
+            "missing"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicEpssValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source_id",
+        "attribution",
+        "state",
+        "observed_at",
+        "source_as_of",
+        "source_url",
+        "snapshot_id",
+        "listed",
+        "value"
+      ],
+      "type": "object"
+    },
+    "PublicEpssValue": {
+      "additionalProperties": false,
+      "properties": {
+        "epss": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$",
+          "type": "string"
+        },
+        "model_version": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "percentile": {
+          "maxLength": 32,
+          "minLength": 1,
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$",
+          "type": "string"
+        },
+        "score_date": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "epss",
+        "percentile",
+        "score_date",
+        "model_version"
+      ],
+      "type": "object"
+    },
+    "PublicIncidentUri": {
+      "format": "uri",
+      "maxLength": 2048,
+      "pattern": "^https://",
+      "type": "string"
+    },
+    "PublicKevContext": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "missing"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "listed": {
+                "type": "null"
+              },
+              "observed_at": {
+                "type": "null"
+              },
+              "snapshot_id": {
+                "type": "null"
+              },
+              "source_as_of": {
+                "type": "null"
+              },
+              "source_url": {
+                "type": "null"
+              },
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "listed": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "$ref": "#/$defs/PublicKevValue"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "listed": {
+                "enum": [
+                  false,
+                  null
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "attribution": {
+          "const": "CISA Known Exploited Vulnerabilities Catalog"
+        },
+        "listed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_id": {
+          "const": "gbsec:source:cisa-kev"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2048,
+              "pattern": "^https://",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "fresh",
+            "stale",
+            "failed",
+            "missing"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicKevValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source_id",
+        "attribution",
+        "state",
+        "observed_at",
+        "source_as_of",
+        "source_url",
+        "snapshot_id",
+        "listed",
+        "value"
+      ],
+      "type": "object"
+    },
+    "PublicKevValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date_added": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date_added"
+      ],
+      "type": "object"
+    },
+    "PublicOriginContext": {
+      "additionalProperties": false,
+      "description": "Upstream symbol and platform assertions with dated source provenance; application reachability is not assessed and this context never changes package-version applicability.",
+      "properties": {
+        "attribution_urls": {
+          "items": {
+            "format": "uri",
+            "maxLength": 2048,
+            "pattern": "^https?://",
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "type": "array"
+        },
+        "context": {
+          "additionalProperties": false,
+          "properties": {
+            "attribution_complete": {
+              "type": "boolean"
+            },
+            "attribution_urls": {
+              "items": {
+                "format": "uri",
+                "maxLength": 2048,
+                "pattern": "^https?://",
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            "license_expression": {
+              "enum": [
+                "CC0-1.0",
+                "CC-BY-4.0"
+              ]
+            },
+            "packages": {
+              "items": {
+                "oneOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ecosystem": {
+                        "const": "rust"
+                      },
+                      "ecosystem_specific": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "affected_functions": {
+                            "additionalProperties": {
+                              "$ref": "#/$defs/PublicOriginTextList"
+                            },
+                            "maxProperties": 1000,
+                            "propertyNames": {
+                              "$ref": "#/$defs/PublicOriginText"
+                            },
+                            "type": "object"
+                          },
+                          "affects": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "arch": {
+                                "$ref": "#/$defs/PublicOriginTextList"
+                              },
+                              "functions": {
+                                "$ref": "#/$defs/PublicOriginTextList"
+                              },
+                              "os": {
+                                "$ref": "#/$defs/PublicOriginTextList"
+                              }
+                            },
+                            "required": [
+                              "arch",
+                              "os",
+                              "functions"
+                            ],
+                            "type": "object"
+                          },
+                          "reachability": {
+                            "const": "not_assessed"
+                          }
+                        },
+                        "required": [
+                          "affects",
+                          "affected_functions",
+                          "reachability"
+                        ],
+                        "type": "object"
+                      },
+                      "index": {
+                        "maximum": 999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "informational": {
+                        "enum": [
+                          null,
+                          "unsound",
+                          "unmaintained",
+                          "notice"
+                        ]
+                      },
+                      "name": {
+                        "$ref": "#/$defs/PublicOriginText"
+                      },
+                      "range_comparability": {
+                        "enum": [
+                          "comparable",
+                          "unknown"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "index",
+                      "ecosystem",
+                      "name",
+                      "informational",
+                      "ecosystem_specific"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ecosystem": {
+                        "const": "go"
+                      },
+                      "ecosystem_specific": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "custom_ranges": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "events": {
+                                  "items": {
+                                    "oneOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "introduced": {
+                                            "maxLength": 200,
+                                            "minLength": 1,
+                                            "pattern": "^[ -~]+$",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "introduced"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "fixed": {
+                                            "maxLength": 200,
+                                            "minLength": 1,
+                                            "pattern": "^[ -~]+$",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "fixed"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "last_affected": {
+                                            "maxLength": 200,
+                                            "minLength": 1,
+                                            "pattern": "^[ -~]+$",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "last_affected"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "limit": {
+                                            "maxLength": 200,
+                                            "minLength": 1,
+                                            "pattern": "^[ -~]+$",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "limit"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    ]
+                                  },
+                                  "maxItems": 1000,
+                                  "minItems": 1,
+                                  "type": "array"
+                                },
+                                "type": {
+                                  "const": "ECOSYSTEM"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "events"
+                              ],
+                              "type": "object"
+                            },
+                            "maxItems": 1000,
+                            "type": "array"
+                          },
+                          "imports": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "goarch": {
+                                  "items": {
+                                    "$ref": "#/$defs/PublicOriginText"
+                                  },
+                                  "maxItems": 100,
+                                  "type": "array"
+                                },
+                                "goos": {
+                                  "items": {
+                                    "$ref": "#/$defs/PublicOriginText"
+                                  },
+                                  "maxItems": 100,
+                                  "type": "array"
+                                },
+                                "path": {
+                                  "$ref": "#/$defs/PublicOriginText"
+                                },
+                                "symbols": {
+                                  "$ref": "#/$defs/PublicOriginTextList"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "symbols",
+                                "goos",
+                                "goarch"
+                              ],
+                              "type": "object"
+                            },
+                            "maxItems": 1000,
+                            "type": "array"
+                          },
+                          "reachability": {
+                            "const": "not_assessed"
+                          }
+                        },
+                        "required": [
+                          "imports",
+                          "custom_ranges",
+                          "reachability"
+                        ],
+                        "type": "object"
+                      },
+                      "index": {
+                        "maximum": 999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "informational": {
+                        "enum": [
+                          null,
+                          "unsound",
+                          "unmaintained",
+                          "notice"
+                        ]
+                      },
+                      "name": {
+                        "$ref": "#/$defs/PublicOriginText"
+                      },
+                      "range_comparability": {
+                        "enum": [
+                          "comparable",
+                          "unknown"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "index",
+                      "ecosystem",
+                      "name",
+                      "informational",
+                      "ecosystem_specific"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            "raw_body_sha256": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "reachability": {
+              "const": "not_assessed"
+            },
+            "reference_urls": {
+              "items": {
+                "format": "uri",
+                "maxLength": 2048,
+                "pattern": "^https?://",
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            "review_status": {
+              "enum": [
+                "REVIEWED",
+                "UNREVIEWED"
+              ]
+            },
+            "source_withdrawn_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "raw_body_sha256",
+            "review_status",
+            "license_expression",
+            "attribution_complete",
+            "source_withdrawn_at",
+            "attribution_urls",
+            "packages",
+            "reference_urls",
+            "reachability"
+          ],
+          "type": "object"
+        },
+        "license_expression": {
+          "enum": [
+            "CC0-1.0",
+            "CC-BY-4.0"
+          ]
+        },
+        "observed_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "snapshot_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_as_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "state": {
+          "enum": [
+            "fresh",
+            "stale",
+            "failed"
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "snapshot_id",
+        "observed_at",
+        "source_as_of",
+        "source_sha256",
+        "license_expression",
+        "attribution_urls",
+        "context"
+      ],
+      "type": "object"
+    },
+    "PublicOriginText": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "type": "string"
+    },
+    "PublicOriginTextList": {
+      "items": {
+        "$ref": "#/$defs/PublicOriginText"
+      },
+      "maxItems": 1000,
+      "type": "array"
+    },
+    "PublicSourceFreshness": {
+      "additionalProperties": false,
+      "properties": {
+        "freshness_state": {
+          "description": "fresh or complete means current; anything else means recent reports may be missing.",
+          "enum": [
+            "fresh",
+            "complete",
+            "stale",
+            "failed",
+            "missing",
+            "in_progress",
+            "reconciling",
+            "unresolved"
+          ]
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record_type": {
+          "maxLength": 80,
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      },
+      "required": [
+        "source_id",
+        "record_type",
+        "freshness_state",
+        "last_success_at"
+      ],
+      "type": "object"
+    },
+    "QualityState": {
+      "enum": [
+        "complete",
+        "partial",
+        "missing",
+        "invalid",
+        "conflicting",
+        "unsupported",
+        "unknown"
+      ]
+    },
+    "RawEvidence": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "byte_count": {
+              "maximum": 52428800,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "canonical_url": {
+              "$ref": "#/$defs/Uri"
+            },
+            "data_classification": {
+              "const": "restricted_source"
+            },
+            "kind": {
+              "const": "raw_evidence"
+            },
+            "media_type": {
+              "maxLength": 200,
+              "minLength": 3,
+              "type": "string"
+            },
+            "quarantine_reasons": {
+              "items": {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "retrieved_at": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "rights_decision": {
+              "enum": [
+                "approved_public",
+                "approved_internal",
+                "approved_link_only",
+                "quarantined",
+                "prohibited"
+              ]
+            },
+            "sha256": {
+              "$ref": "#/$defs/Sha256"
+            },
+            "source_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "source_modified_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source_published_at": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source_record_id": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "storage_state": {
+              "enum": [
+                "stored_immutable",
+                "quarantined",
+                "link_only",
+                "not_retained"
+              ]
+            }
+          },
+          "required": [
+            "source_id",
+            "source_record_id",
+            "canonical_url",
+            "retrieved_at",
+            "sha256",
+            "byte_count",
+            "media_type",
+            "storage_state",
+            "rights_decision"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Raw evidence",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "raw bytes only when the source rights explicitly allow it",
+        "logging": "identifier, source, checksum, byte count, and quarantine state only",
+        "privacy": "restricted_source"
+      }
+    },
+    "RecommendedAction": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "risk_level": {
+                    "minimum": 2
+                  }
+                },
+                "required": [
+                  "risk_level"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "approval_required": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "risk_level": {
+                    "const": 4
+                  }
+                },
+                "required": [
+                  "risk_level"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "automation_allowed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "action_type": {
+              "enum": [
+                "observe",
+                "check",
+                "contain",
+                "remediate",
+                "validate",
+                "recover"
+              ]
+            },
+            "approval_required": {
+              "type": "boolean"
+            },
+            "automation_allowed": {
+              "type": "boolean"
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "customer_local"
+              ]
+            },
+            "evidence_ids": {
+              "$ref": "#/$defs/StableIdList"
+            },
+            "expected_result": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "kind": {
+              "const": "recommended_action"
+            },
+            "preconditions": {
+              "$ref": "#/$defs/BoundedTextList"
+            },
+            "risk_level": {
+              "maximum": 4,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "rollback": {
+              "$ref": "#/$defs/BoundedTextList"
+            },
+            "validation": {
+              "$ref": "#/$defs/BoundedTextList"
+            }
+          },
+          "required": [
+            "action_type",
+            "risk_level",
+            "approval_required",
+            "preconditions",
+            "expected_result",
+            "validation",
+            "rollback",
+            "evidence_ids",
+            "automation_allowed"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Evidence-linked recommended action",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "typed plan without credentials, commands, or private paths",
+        "logging": "action ID, type, risk level, and approval class only",
+        "privacy": "public or customer_local"
+      }
+    },
+    "RecommendedActionPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/RecommendedAction"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "next_cursor": {
+          "maxLength": 512,
+          "minLength": 16,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "truncated",
+        "next_cursor"
+      ],
+      "type": "object"
+    },
+    "Relationship": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "assertion_origin": {
+              "enum": [
+                "observed_by_goodboy",
+                "declared_by_source",
+                "inferred_by_goodboy",
+                "enriched_by_goodboy"
+              ]
+            },
+            "confidence": {
+              "enum": [
+                "confirmed",
+                "probable",
+                "possible",
+                "unverified",
+                "disputed",
+                "unknown"
+              ]
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "customer_local"
+              ]
+            },
+            "kind": {
+              "const": "relationship"
+            },
+            "object_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "provenance": {
+              "$ref": "#/$defs/Provenance"
+            },
+            "relationship_type": {
+              "enum": [
+                "affects",
+                "alias_of",
+                "redirects_to",
+                "merged_into",
+                "split_from",
+                "depends_on",
+                "contains",
+                "built_from",
+                "deployed_as",
+                "observed_at_runtime",
+                "supersedes",
+                "corroborates",
+                "contradicts",
+                "unknown"
+              ]
+            },
+            "state": {
+              "enum": [
+                "active",
+                "superseded",
+                "disputed",
+                "withdrawn",
+                "expired"
+              ]
+            },
+            "subject_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "valid_from": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "valid_until": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Timestamp"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "subject_id",
+            "object_id",
+            "relationship_type",
+            "assertion_origin",
+            "confidence",
+            "valid_from",
+            "valid_until",
+            "state",
+            "provenance"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Evidence-backed relationship",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "public relationships only; customer-local paths stay local",
+        "logging": "relationship ID, type, origin, and state only",
+        "privacy": "public or customer_local"
+      }
+    },
+    "RemediationFrontier": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "change_type": {
+              "enum": [
+                "upgrade",
+                "remove",
+                "pin_digest",
+                "replace",
+                "contain",
+                "monitor",
+                "unknown"
+              ]
+            },
+            "compatibility_unknowns": {
+              "$ref": "#/$defs/UnknownList"
+            },
+            "data_classification": {
+              "const": "customer_local"
+            },
+            "expected_effect": {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "exposure_path_id": {
+              "$ref": "#/$defs/StableId"
+            },
+            "kind": {
+              "const": "remediation_frontier"
+            },
+            "owner_scope": {
+              "enum": [
+                "project",
+                "platform",
+                "base_image",
+                "dependency",
+                "workflow",
+                "vendor",
+                "unknown"
+              ]
+            },
+            "rollback": {
+              "$ref": "#/$defs/BoundedTextList"
+            },
+            "support_state": {
+              "enum": [
+                "supported",
+                "plausible",
+                "unverified",
+                "conflicting",
+                "unknown"
+              ]
+            },
+            "target_artifact": {
+              "$ref": "#/$defs/LocalArtifactInput"
+            },
+            "validation": {
+              "$ref": "#/$defs/BoundedTextList"
+            }
+          },
+          "required": [
+            "exposure_path_id",
+            "owner_scope",
+            "change_type",
+            "target_artifact",
+            "expected_effect",
+            "compatibility_unknowns",
+            "validation",
+            "rollback",
+            "support_state"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Customer-local remediation frontier",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "reviewed customer-controlled report only",
+        "logging": "frontier ID, owner class, expected effect, and decision only",
+        "privacy": "customer_local"
+      }
+    },
+    "ReplayArtifactInput": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "oci",
+                  "docker"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "digest": {
+                "$ref": "#/$defs/Sha256"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ecosystem": {
+          "enum": [
+            "npm",
+            "pypi",
+            "github-actions",
+            "oci",
+            "docker",
+            "go",
+            "rust",
+            "composer",
+            "erlang",
+            "git",
+            "maven",
+            "nuget",
+            "open-vsx",
+            "pub",
+            "rubygems",
+            "swift",
+            "vscode"
+          ]
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 200,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "ecosystem",
+        "name",
+        "version",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "ReplayCase": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "affected_expressions": {
+              "items": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 40,
+              "minItems": 1,
+              "type": "array"
+            },
+            "artifacts": {
+              "items": {
+                "$ref": "#/$defs/ReplayArtifactInput"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            "case_id": {
+              "pattern": "^replay-[0-9]{3}$",
+              "type": "string"
+            },
+            "data_classification": {
+              "const": "public"
+            },
+            "earliest_evidence_replay": {
+              "type": "boolean"
+            },
+            "ecosystem": {
+              "enum": [
+                "npm",
+                "pypi",
+                "github-actions",
+                "oci",
+                "docker"
+              ]
+            },
+            "expected_correction_state": {
+              "enum": [
+                "current",
+                "corrected",
+                "disputed",
+                "withdrawn",
+                "unknown"
+              ]
+            },
+            "expected_events": {
+              "items": {
+                "$ref": "#/$defs/ReplayExpectedEvent"
+              },
+              "maxItems": 100,
+              "minItems": 1,
+              "type": "array"
+            },
+            "expected_incident_status": {
+              "enum": [
+                "investigating",
+                "reported",
+                "corroborated",
+                "confirmed",
+                "resolved",
+                "disputed",
+                "withdrawn",
+                "expired"
+              ]
+            },
+            "expected_receipt_result": {
+              "enum": [
+                "allow",
+                "allow_with_notice",
+                "acknowledgement_required",
+                "approval_required",
+                "deny",
+                "unknown"
+              ]
+            },
+            "fixture_origin": {
+              "enum": [
+                "public_fact",
+                "synthetic_derived"
+              ]
+            },
+            "incident_group": {
+              "maxLength": 160,
+              "minLength": 3,
+              "type": "string"
+            },
+            "kind": {
+              "const": "replay_case"
+            },
+            "rights_decision": {
+              "enum": [
+                "approved_public",
+                "approved_link_only",
+                "quarantined"
+              ]
+            },
+            "source_record_ids": {
+              "items": {
+                "maxLength": 160,
+                "minLength": 3,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "source_urls": {
+              "items": {
+                "$ref": "#/$defs/Uri"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "case_id",
+            "incident_group",
+            "ecosystem",
+            "source_record_ids",
+            "source_urls",
+            "artifacts",
+            "affected_expressions",
+            "expected_events",
+            "expected_incident_status",
+            "expected_correction_state",
+            "expected_receipt_result",
+            "earliest_evidence_replay",
+            "rights_decision",
+            "fixture_origin"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Historical replay expectation",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "SmithGuard-authored derived facts and source links only",
+        "logging": "case ID, ecosystem, result, counts, and timing only",
+        "privacy": "public"
+      }
+    },
+    "ReplayExpectedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_type": {
+          "enum": [
+            "first_public_evidence",
+            "advisory_published",
+            "artifact_removed",
+            "corrected",
+            "disputed",
+            "withdrawn"
+          ]
+        },
+        "recorded_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "sequence": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "source_record_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        "timestamp_precision": {
+          "enum": [
+            "exact",
+            "minute",
+            "day"
+          ]
+        }
+      },
+      "required": [
+        "sequence",
+        "event_type",
+        "recorded_at",
+        "timestamp_precision",
+        "source_record_id"
+      ],
+      "type": "object"
+    },
+    "RestOperation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "operation": {
+                    "enum": [
+                      "match_project_exposure",
+                      "assess_dependency_change"
+                    ]
+                  }
+                },
+                "required": [
+                  "operation"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "public_service_allowed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "data_classification": {
+              "const": "public"
+            },
+            "kind": {
+              "const": "rest_operation"
+            },
+            "max_input_bytes": {
+              "maximum": 52428800,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "max_output_bytes": {
+              "maximum": 52428800,
+              "minimum": 1024,
+              "type": "integer"
+            },
+            "method": {
+              "enum": [
+                "GET",
+                "POST"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "list_incidents",
+                "get_incident",
+                "list_incident_changes",
+                "list_delivery_events",
+                "get_recommended_actions",
+                "assess_public_artifact",
+                "match_project_exposure",
+                "assess_dependency_change",
+                "list_emerging_signals",
+                "get_emerging_signal",
+                "get_source_coverage"
+              ]
+            },
+            "path": {
+              "maxLength": 200,
+              "pattern": "^/v1/",
+              "type": "string"
+            },
+            "public_service_allowed": {
+              "type": "boolean"
+            },
+            "read_only": {
+              "const": true
+            },
+            "request_definition": {
+              "maxLength": 120,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "response_definition": {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            "timeout_seconds": {
+              "maximum": 120,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "operation",
+            "method",
+            "path",
+            "read_only",
+            "public_service_allowed",
+            "max_input_bytes",
+            "max_output_bytes",
+            "timeout_seconds",
+            "request_definition",
+            "response_definition"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Canonical read-only REST operation",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "bounded schema-defined response only",
+        "logging": "operation, request ID, result class, counts, bytes, and duration",
+        "privacy": "public metadata; referenced payload may be customer_local"
+      }
+    },
+    "RightsDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution_required": {
+          "type": "boolean"
+        },
+        "attribution_text": {
+          "maxLength": 500,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "correction_required": {
+          "type": "boolean"
+        },
+        "decision": {
+          "enum": [
+            "approved_public",
+            "approved_internal",
+            "approved_link_only",
+            "quarantined",
+            "prohibited"
+          ]
+        },
+        "license_expression": {
+          "maxLength": 120,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalized_fact_redistribution": {
+          "enum": [
+            "allowed",
+            "attribution",
+            "conditional",
+            "link_only",
+            "prohibited",
+            "unknown"
+          ]
+        },
+        "notes": {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "raw_redistribution": {
+          "enum": [
+            "allowed",
+            "attribution",
+            "share_alike",
+            "conditional",
+            "link_only",
+            "prohibited",
+            "unknown"
+          ]
+        },
+        "raw_storage": {
+          "enum": [
+            "allowed",
+            "conditional",
+            "link_only",
+            "prohibited",
+            "unknown"
+          ]
+        },
+        "retention": {
+          "enum": [
+            "immutable_permitted",
+            "until_withdrawn",
+            "minimal_metadata_only",
+            "link_only",
+            "prohibited",
+            "unknown"
+          ]
+        },
+        "retrieval": {
+          "enum": [
+            "allowed",
+            "conditional",
+            "prohibited",
+            "unknown"
+          ]
+        },
+        "review_due_on": {
+          "format": "date",
+          "type": "string"
+        },
+        "reviewed_on": {
+          "format": "date",
+          "type": "string"
+        },
+        "terms_url": {
+          "$ref": "#/$defs/Uri"
+        },
+        "withdrawal_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "retrieval",
+        "raw_storage",
+        "raw_redistribution",
+        "normalized_fact_redistribution",
+        "attribution_required",
+        "retention",
+        "correction_required",
+        "withdrawal_required",
+        "decision",
+        "reviewed_on",
+        "review_due_on",
+        "terms_url"
+      ],
+      "type": "object"
+    },
+    "SbomQuality": {
+      "additionalProperties": false,
+      "properties": {
+        "conflicts": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "format": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "hashes": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "identifiers": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "overall": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "provenance": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "relationships": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "root_component": {
+          "$ref": "#/$defs/QualityState"
+        },
+        "versions": {
+          "$ref": "#/$defs/QualityState"
+        }
+      },
+      "required": [
+        "format",
+        "root_component",
+        "identifiers",
+        "versions",
+        "relationships",
+        "hashes",
+        "provenance",
+        "conflicts",
+        "overall"
+      ],
+      "type": "object"
+    },
+    "Sha256": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "Source": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/ContractHeader"
+        },
+        {
+          "properties": {
+            "acquisition_methods": {
+              "items": {
+                "enum": [
+                  "git",
+                  "rest_api",
+                  "download",
+                  "rss",
+                  "webhook",
+                  "manual_replay"
+                ]
+              },
+              "maxItems": 8,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "allowed_hosts": {
+              "items": {
+                "maxLength": 253,
+                "pattern": "^[a-z0-9.-]+$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "cadence": {
+              "maxLength": 100,
+              "type": "string"
+            },
+            "canonical_url": {
+              "$ref": "#/$defs/Uri"
+            },
+            "correction_url": {
+              "$ref": "#/$defs/Uri"
+            },
+            "data_classification": {
+              "enum": [
+                "public",
+                "restricted_source"
+              ]
+            },
+            "kill_switch": {
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "source"
+            },
+            "name": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "operator": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "rights": {
+              "$ref": "#/$defs/RightsDecision"
+            },
+            "source_class": {
+              "enum": [
+                "primary",
+                "curated",
+                "discovery",
+                "raw_signal"
+              ]
+            },
+            "withdrawal_behavior": {
+              "enum": [
+                "retain_mark_withdrawn",
+                "remove_raw_keep_minimal_tombstone",
+                "link_only",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "source_class",
+            "canonical_url",
+            "operator",
+            "acquisition_methods",
+            "allowed_hosts",
+            "rights",
+            "correction_url",
+            "kill_switch"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Source",
+      "unevaluatedProperties": false,
+      "x-smithguard-handling": {
+        "export": "only rights-approved fields with attribution",
+        "logging": "identifier, class, rights decision, and health only",
+        "privacy": "public or restricted_source"
+      }
+    },
+    "SourceCoverageLane": {
+      "additionalProperties": false,
+      "properties": {
+        "ecosystems": {
+          "items": {
+            "enum": [
+              "npm",
+              "pypi",
+              "github-actions",
+              "oci",
+              "docker",
+              "go",
+              "rust",
+              "composer",
+              "erlang",
+              "git",
+              "maven",
+              "nuget",
+              "open-vsx",
+              "pub",
+              "rubygems",
+              "swift",
+              "vscode",
+              "unknown"
+            ]
+          },
+          "maxItems": 20,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "freshness_state": {
+          "enum": [
+            "missing",
+            "failed",
+            "stale",
+            "fresh",
+            "complete"
+          ]
+        },
+        "lane": {
+          "enum": [
+            "historical",
+            "updates"
+          ]
+        },
+        "last_attempt_at": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_success_at": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "newest_published_at": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "normalized_record_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "oldest_published_at": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "record_type": {
+          "pattern": "^[a-z][a-z0-9_]{2,79}$",
+          "type": "string"
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_record_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stale_after": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "not_started",
+            "in_progress",
+            "complete",
+            "failed"
+          ]
+        },
+        "unknowns": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "source_id",
+        "lane",
+        "record_type",
+        "state",
+        "page_count",
+        "source_record_count",
+        "normalized_record_count",
+        "oldest_published_at",
+        "newest_published_at",
+        "last_attempt_at",
+        "last_success_at",
+        "stale_after",
+        "freshness_state",
+        "ecosystems",
+        "unknowns"
+      ],
+      "type": "object"
+    },
+    "SourceCoverageReport": {
+      "additionalProperties": false,
+      "properties": {
+        "human_review_hours": {
+          "maximum": 8784,
+          "minimum": 0,
+          "type": "number"
+        },
+        "lanes": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "as_of": {
+                "$ref": "#/$defs/Timestamp"
+              },
+              "continuous_monitoring_claimed": {
+                "const": false
+              },
+              "ecosystem": {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              "result": {
+                "enum": [
+                  "supported",
+                  "partial",
+                  "unsupported",
+                  "stale",
+                  "unknown"
+                ]
+              },
+              "stage": {
+                "enum": [
+                  "research",
+                  "intake",
+                  "normalized",
+                  "matched",
+                  "response-tested"
+                ]
+              },
+              "unknowns": {
+                "items": {
+                  "maxLength": 300,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "version_range_evaluation": {
+                "description": "How version ranges are decided: ecosystem_rules orders versions with the registry's own rules; digest_only matches immutable digests; not_supported leaves ranges undecided.",
+                "enum": [
+                  "ecosystem_rules",
+                  "digest_only",
+                  "not_supported"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem",
+              "stage",
+              "result",
+              "as_of",
+              "unknowns",
+              "continuous_monitoring_claimed",
+              "version_range_evaluation"
+            ],
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "live_collector_uptime": {
+          "enum": [
+            "not_measured_no_live_collectors",
+            "not_measured_public_beta_collector"
+          ]
+        },
+        "measured_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "source_lanes": {
+          "items": {
+            "$ref": "#/$defs/SourceCoverageLane"
+          },
+          "maxItems": 100,
+          "type": "array"
+        }
+      },
+      "required": [
+        "measured_at",
+        "human_review_hours",
+        "live_collector_uptime",
+        "lanes",
+        "source_lanes"
+      ],
+      "type": "object"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "type": "string"
+    },
+    "StableIdList": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "Timestamp": {
+      "format": "date-time",
+      "pattern": "Z$",
+      "type": "string"
+    },
+    "UnknownList": {
+      "items": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "Uri": {
+      "format": "uri",
+      "maxLength": 2048,
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.smithlabs.ai/smithguard/v1/contract-bundle.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Authoritative Phase 0A contracts for public evidence, local decisions, delivery, and disabled synthetic Private Watchlists.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Source"
+    },
+    {
+      "$ref": "#/$defs/RawEvidence"
+    },
+    {
+      "$ref": "#/$defs/AuthorityDecision"
+    },
+    {
+      "$ref": "#/$defs/Claim"
+    },
+    {
+      "$ref": "#/$defs/Artifact"
+    },
+    {
+      "$ref": "#/$defs/AffectedRange"
+    },
+    {
+      "$ref": "#/$defs/Relationship"
+    },
+    {
+      "$ref": "#/$defs/Incident"
+    },
+    {
+      "$ref": "#/$defs/IncidentEvent"
+    },
+    {
+      "$ref": "#/$defs/PreliminaryWarning"
+    },
+    {
+      "$ref": "#/$defs/RecommendedAction"
+    },
+    {
+      "$ref": "#/$defs/PublicArtifactAssessmentRequest"
+    },
+    {
+      "$ref": "#/$defs/PublicArtifactAssessment"
+    },
+    {
+      "$ref": "#/$defs/InventorySnapshot"
+    },
+    {
+      "$ref": "#/$defs/DependencyDelta"
+    },
+    {
+      "$ref": "#/$defs/ExposurePath"
+    },
+    {
+      "$ref": "#/$defs/RemediationFrontier"
+    },
+    {
+      "$ref": "#/$defs/PolicyDecision"
+    },
+    {
+      "$ref": "#/$defs/ApprovalRecord"
+    },
+    {
+      "$ref": "#/$defs/PolicyException"
+    },
+    {
+      "$ref": "#/$defs/AssessmentReceipt"
+    },
+    {
+      "$ref": "#/$defs/DeliveryEvent"
+    },
+    {
+      "$ref": "#/$defs/RestOperation"
+    },
+    {
+      "$ref": "#/$defs/McpOperation"
+    },
+    {
+      "$ref": "#/$defs/PrivateWatchlistSet"
+    },
+    {
+      "$ref": "#/$defs/PrivateWatchlistRejection"
+    },
+    {
+      "$ref": "#/$defs/ReplayCase"
+    }
+  ],
+  "title": "SmithGuard v1 contract bundle",
+  "x-smithguard-contract-definitions": [
+    "Source",
+    "RawEvidence",
+    "AuthorityDecision",
+    "Claim",
+    "Artifact",
+    "AffectedRange",
+    "Relationship",
+    "Incident",
+    "IncidentEvent",
+    "PreliminaryWarning",
+    "RecommendedAction",
+    "PublicArtifactAssessmentRequest",
+    "PublicArtifactAssessment",
+    "InventorySnapshot",
+    "DependencyDelta",
+    "ExposurePath",
+    "RemediationFrontier",
+    "PolicyDecision",
+    "ApprovalRecord",
+    "PolicyException",
+    "AssessmentReceipt",
+    "DeliveryEvent",
+    "RestOperation",
+    "McpOperation",
+    "PrivateWatchlistSet",
+    "PrivateWatchlistRejection",
+    "ReplayCase"
+  ],
+  "x-smithguard-contract-version": "1.1.0"
+}

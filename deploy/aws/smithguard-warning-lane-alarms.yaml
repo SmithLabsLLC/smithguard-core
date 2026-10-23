@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Fail-closed alarms for an exact SmithGuard warning-lane activation
+
+Metadata:
+  WarningLaneMetricsWithoutAlarm:
+    - WarningLaneCandidatesSampled24h
+
+Parameters:
+  AlarmTopicArn:
+    Type: String
+  AlarmActionsState:
+    Type: String
+    Default: disabled
+    AllowedValues:
+      - disabled
+      - enabled
+
+Conditions:
+  AlarmActionsEnabled: !Equals [!Ref AlarmActionsState, enabled]
+
+Resources:
+  WarningLanePolicyInactive:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-policy-inactive
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLanePolicyActive
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneProviderFailure:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-provider-failure
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneProviderFailures24h
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLanePendingStale:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-pending-stale
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneOldestPendingAgeSeconds
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 900
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneDeadLetter:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-dead-letter
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneDeadLetters24h
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneDiscoveryStale:
+    Type: AWS::CloudWatch::Alarm
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Explain missing recent discovery success during operation or startup.
+        must:
+          - Preserve the 2700-second threshold and five-minute maximum evaluation.
+          - Keep missing data breaching and existing notification actions unchanged.
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-discovery-stale
+      AlarmDescription: >-
+        Discovery has no recent successful run (45-minute limit), or metric data
+        is missing. A value of 1000000000 means no recent success was found; it is
+        not a literal age. After an authorized restart, this alert may occur until
+        the first scheduled success, health publication and alarm evaluation.
+        Investigate a missed first success, the fixed startup deadline, or an
+        alert that persists after verified publication/evaluation delay. A paused
+        lane can report a neutral age; OK while paused does not prove discovery
+        reliability. Runbook: docs/operations/warning-trial-supervision.md.
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneLastDiscoverySuccessAgeSeconds
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 2700
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneValidationRejectionHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-validation-rejection-high
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneValidationRejectionBasisPoints
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 7500
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneTechnicalEnvelopeBreached:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-technical-envelope-breached
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneTechnicalEnvelopeBreaches24h
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneRecheckFailure:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-recheck-failure
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneRecheckFailures24h
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]
+  WarningLaneExpiryFailure:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !If [AlarmActionsEnabled, true, false]
+      AlarmName: smithguard-warning-lane-expiry-failure
+      Namespace: SmithLabs/SmithGuardWarningLane
+      MetricName: WarningLaneExpiryFailures
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopicArn]

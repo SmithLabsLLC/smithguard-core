@@ -1,0 +1,426 @@
+{
+  "$defs": {
+    "AffectedArtifact": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "title": "AffectedArtifact",
+      "type": "string"
+    },
+    "ConfirmationStatus": {
+      "enum": [
+        "unverified",
+        "confirmation_candidate",
+        "contradiction_candidate",
+        "confirmed_elsewhere"
+      ],
+      "title": "ConfirmationStatus",
+      "type": "string"
+    },
+    "EvidenceClass": {
+      "enum": [
+        "social_only",
+        "web_only",
+        "web_and_social"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    },
+    "LatestRecheckOutcome": {
+      "enum": [
+        "not_checked",
+        "still_unverified",
+        "no_new_evidence",
+        "confirmation_candidate",
+        "contradiction_candidate",
+        "budget_blocked",
+        "provider_unavailable",
+        "expired"
+      ],
+      "title": "LatestRecheckOutcome",
+      "type": "string"
+    },
+    "PublicIncidentUri": {
+      "format": "uri",
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "PublicIncidentUri",
+      "type": "string"
+    },
+    "QualificationBasis": {
+      "enum": [
+        "human_review",
+        "owner_authorized_early_lead_policy"
+      ],
+      "title": "QualificationBasis",
+      "type": "string"
+    },
+    "SchemaVersion2": {
+      "enum": [
+        "1.0.0",
+        "1.1.0"
+      ],
+      "title": "SchemaVersion2",
+      "type": "string"
+    },
+    "SourceOrigin": {
+      "maxLength": 253,
+      "minLength": 1,
+      "pattern": "^[a-z0-9.-]+$",
+      "title": "SourceOrigin",
+      "type": "string"
+    },
+    "State3": {
+      "enum": [
+        "active",
+        "expired",
+        "withdrawn",
+        "promoted",
+        "contradicted"
+      ],
+      "title": "State3",
+      "type": "string"
+    },
+    "Timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "affected_artifacts": {
+      "items": {
+        "$ref": "#/$defs/AffectedArtifact"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Affected Artifacts",
+      "type": "array"
+    },
+    "automation_allowed": {
+      "const": false,
+      "title": "Automation Allowed",
+      "type": "boolean"
+    },
+    "awaiting_authoritative_confirmation": {
+      "title": "Awaiting Authoritative Confirmation",
+      "type": "boolean"
+    },
+    "claim": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "title": "Claim",
+      "type": "string"
+    },
+    "confirmation_status": {
+      "$ref": "#/$defs/ConfirmationStatus"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "const": "public",
+      "title": "Data Classification",
+      "type": "string"
+    },
+    "evidence_class": {
+      "$ref": "#/$defs/EvidenceClass"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "final_reason": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Final Reason"
+    },
+    "human_reviewed": {
+      "title": "Human Reviewed",
+      "type": "boolean"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "independent_source_clusters": {
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Independent Source Clusters",
+      "type": "integer"
+    },
+    "kind": {
+      "const": "preliminary_warning",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "last_checked_at": {
+      "format": "date-time",
+      "title": "Last Checked At",
+      "type": "string"
+    },
+    "latest_recheck_outcome": {
+      "$ref": "#/$defs/LatestRecheckOutcome"
+    },
+    "latest_recheck_reason": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latest Recheck Reason"
+    },
+    "latest_recheck_source_urls": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 8,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latest Recheck Source Urls"
+    },
+    "max_action_level": {
+      "const": 0,
+      "title": "Max Action Level",
+      "type": "integer"
+    },
+    "next_check_at": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "qualification_actor_id": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "minLength": 3,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Qualification Actor Id"
+    },
+    "qualification_basis": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QualificationBasis"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "qualification_reason": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "^[ -~]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Qualification Reason"
+    },
+    "qualification_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Qualification Sha256"
+    },
+    "recheck_count": {
+      "maximum": 12,
+      "minimum": 0,
+      "title": "Recheck Count",
+      "type": "integer"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/SchemaVersion2"
+    },
+    "source_origins": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SourceOrigin"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Origins"
+    },
+    "source_urls": {
+      "items": {
+        "$ref": "#/$defs/PublicIncidentUri"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Source Urls",
+      "type": "array"
+    },
+    "state": {
+      "$ref": "#/$defs/State3"
+    },
+    "terminal_actor_id": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "minLength": 3,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Terminal Actor Id"
+    },
+    "terminal_evidence_urls": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PublicIncidentUri"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Terminal Evidence Urls"
+    },
+    "terminal_expected_revision": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Terminal Expected Revision"
+    },
+    "title": {
+      "maxLength": 300,
+      "minLength": 1,
+      "pattern": "^[ -~]+$",
+      "title": "Title",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "warning_text": {
+      "const": "Emerging and unverified. SmithGuard has not independently confirmed this warning and is awaiting authoritative or non-social confirmation. Use it to investigate, not as proof or authorization for a disruptive action.",
+      "title": "Warning Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "title",
+    "state",
+    "claim",
+    "affected_artifacts",
+    "source_urls",
+    "evidence_class",
+    "independent_source_clusters",
+    "confirmation_status",
+    "awaiting_authoritative_confirmation",
+    "automation_allowed",
+    "max_action_level",
+    "human_reviewed",
+    "warning_text",
+    "observed_at",
+    "last_checked_at",
+    "next_check_at",
+    "expires_at",
+    "recheck_count",
+    "latest_recheck_outcome",
+    "final_reason"
+  ],
+  "title": "PreliminaryWarning",
+  "type": "object"
+}

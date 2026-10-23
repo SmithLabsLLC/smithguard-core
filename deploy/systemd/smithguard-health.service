@@ -1,0 +1,48 @@
+[Unit]
+Description=SmithGuard private operational health decision
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/health.env
+
+[Service]
+Environment=SMITHGUARD_API_PRESSURE_EXPECTED=1
+Type=oneshot
+User=smithguard-health
+Group=smithguard-health
+SupplementaryGroups=smithguard-ops-read
+EnvironmentFile=/etc/SmithGuard/env/health.env
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-health
+TimeoutStartSec=60s
+UMask=0027
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+RuntimeDirectory=smithguard-health-kernel
+RuntimeDirectoryMode=0700
+BindReadOnlyPaths=/proc/meminfo:/run/smithguard-health-kernel/meminfo /proc/loadavg:/run/smithguard-health-kernel/loadavg
+ReadOnlyPaths=-/var/lib/smithguard/openssf-health -/var/lib/smithguard/catalog-health
+ReadWritePaths=/var/lib/smithguard/health
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128

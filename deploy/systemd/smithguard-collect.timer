@@ -1,0 +1,12 @@
+[Unit]
+Description=Run bounded SmithGuard collection each hour
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=2min
+Persistent=yes
+AccuracySec=1min
+Unit=smithguard-collect.service
+
+[Install]
+WantedBy=timers.target

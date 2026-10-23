@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0.0",
+  "checkpoint_id": "NEXT-002",
+  "status": "runtime_implemented_disabled",
+  "source_id": "gbsec:source:openssf-malicious-packages",
+  "connector_id": "gbsec:connector:openssf-git-v1",
+  "repository_url": "https://github.com/ossf/malicious-packages",
+  "reviewed_snapshot": {
+    "commit": "f94d3c298d2a9658982a99894c2f440906257d14",
+    "commit_time": "2026-08-11T19:55:40Z",
+    "license_sha256": "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "active_json_records": 235026,
+    "withdrawn_json_records": 346,
+    "unmergable_json_records_excluded": 9,
+    "maximum_observed_reviewed_blob_bytes": 101901
+  },
+  "current_official_observation": {
+    "observed_at": "2026-08-16T13:43:36Z",
+    "commit": "a37fdcd5094cb2a0df4a253fc117bdf1220112a6",
+    "commit_time": "2026-08-15T18:47:54Z",
+    "tree": "4b7e6a5fe61d19ffae9c399a431e7c8e1bc189cb",
+    "license_sha256": "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "active_supported_records": 230996,
+    "withdrawn_supported_records": 346,
+    "supported_records": 231342,
+    "unsupported_ecosystem_records": 4341,
+    "ignored_nonrecord_entries": 5,
+    "total_reviewed_bytes": 443497763,
+    "supported_manifest_sha256": "sha256:75d40380ab751ae7379c2c1a1182624a2df03eccc185842e617e87b4fa264552"
+  },
+  "initial_supported_ecosystems": [
+    "npm",
+    "pypi"
+  ],
+  "accepted_fields": [
+    "affected",
+    "aliases",
+    "database_specific",
+    "id",
+    "modified",
+    "published",
+    "references",
+    "withdrawn"
+  ],
+  "limits": {
+    "maximum_blob_bytes": 262144,
+    "maximum_diff_changes": 100000,
+    "maximum_package_component_characters": 300,
+    "maximum_package_component_utf8_bytes": 900,
+    "maximum_package_path_characters": 400,
+    "maximum_package_path_utf8_bytes": 1200,
+    "maximum_page_cursor_characters": 1000,
+    "maximum_page_cursor_utf8_bytes": 3000,
+    "maximum_page_size": 1000,
+    "maximum_tree_records": 500000
+  },
+  "path_policy": {
+    "ascii_punctuation": "._%+@:-",
+    "accepted_non_ascii_unicode_category_prefixes": [
+      "L",
+      "M",
+      "N"
+    ],
+    "first_character_ascii_exceptions": [
+      "-",
+      "@"
+    ],
+    "first_character_unicode_category_prefixes": [
+      "L",
+      "N"
+    ],
+    "normalization": "preserve_exact_utf8_git_path",
+    "unicode_data_version": "15.0.0",
+    "page_cursor_requires_exact_snapshot_path": true,
+    "page_cursor_recovery": "restart_from_beginning_after_snapshot_change",
+    "path_is_never_used_for_host_filesystem_access": true,
+    "npm_tree_comparison": "ascii_lowercase_tree_path_only_record_identity_preserved",
+    "pypi_tree_comparison": "ascii_pep503_style_tree_path_only_record_identity_preserved"
+  },
+  "tree_states": [
+    "malicious",
+    "withdrawn"
+  ],
+  "change_states": [
+    "added",
+    "modified",
+    "removed",
+    "renamed",
+    "withdrawn",
+    "restored"
+  ],
+  "correlation_rules": [
+    "direct_openssf_record_is_original_assertion",
+    "github_copy_of_same_mal_id_is_transport_not_independent_origin",
+    "typed_ghsa_cve_osv_aliases_are_preserved",
+    "package_identity_alone_never_merges_security_events",
+    "candidate_never_changes_public_incident_without_later_decision"
+  ],
+  "failure_rules": [
+    "reject_non_forward_commit_transition",
+    "reject_license_drift",
+    "reject_unreviewed_json_path_shape",
+    "reject_dot_segments_controls_separators_and_unreviewed_unicode_categories",
+    "reject_symlink_or_non_blob_json_entry",
+    "reject_oversized_tree_blob_page_or_diff",
+    "reject_path_record_identity_mismatch",
+    "reject_tree_record_withdrawal_mismatch",
+    "process_supported_ecosystems_while_all_json_siblings_remain_within_reviewed_safety_envelope",
+    "exclude_osv_unmergable_until_separate_written_decision",
+    "preserve_last_good_checkpoint_on_non_forward_history",
+    "quarantine_malformed_supported_record_without_advancing_checkpoint",
+    "fail_health_when_enabled_receipt_is_missing_failed_or_stale"
+  ],
+  "shadow_runtime": {
+    "entry_point": "smithguard-openssf-shadow",
+    "service": "smithguard-openssf-shadow.service",
+    "timer": "smithguard-openssf-shadow.timer",
+    "identity": "smithguard-openssf",
+    "state_root": "/var/lib/smithguard/openssf-shadow",
+    "kill_switch": "SMITHGUARD_OPENSSF_SHADOW_ENABLED",
+    "kill_switch_default": "0",
+    "database_access": false,
+    "public_effect": false,
+    "full_validation_interval_hours": 24,
+    "health_max_age_hours": 3,
+    "production_timer_enabled": false
+  },
+  "activation": {
+    "governance_policy_enabled": false,
+    "network_fetch_implemented": true,
+    "scheduled_collection_authorized": false,
+    "production_backfill_authorized": false,
+    "public_output_authorized": false,
+    "deployment_authorized": false
+  },
+  "later_required_gates": [
+    "reviewed_exact_artifact",
+    "isolated_full_history_replay",
+    "bounded_update_and_correction_replay",
+    "shadow_public_byte_comparison",
+    "sampled_false_merge_and_false_split_review",
+    "fresh_backup_clean_restore_and_rollback",
+    "source_health_lag_scope_and_kill_switch_proof",
+    "separate_owner_activation_and_deployment_decision"
+  ]
+}

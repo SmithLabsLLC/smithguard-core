@@ -1,0 +1,148 @@
+{
+  "distribution_review": "required_before_any_public_package_release",
+  "packages": [
+    {
+      "license": "MIT",
+      "name": "alembic",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/alembic/1.20.0/",
+      "version": "1.20.0"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "name": "cryptography",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/cryptography/50.0.1/",
+      "version": "50.0.1"
+    },
+    {
+      "license": "MIT",
+      "name": "datamodel-code-generator",
+      "scope": "development",
+      "source": "https://pypi.org/project/datamodel-code-generator/0.82.0/",
+      "version": "0.82.0"
+    },
+    {
+      "license": "MIT",
+      "name": "editables",
+      "scope": "build",
+      "source": "https://pypi.org/project/editables/0.6/",
+      "version": "0.6"
+    },
+    {
+      "license": "MIT",
+      "name": "fastapi",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/fastapi/0.141.1/",
+      "version": "0.141.1"
+    },
+    {
+      "license": "MIT",
+      "name": "hatchling",
+      "scope": "build",
+      "source": "https://pypi.org/project/hatchling/1.32.4/",
+      "version": "1.32.4"
+    },
+    {
+      "license": "MIT",
+      "name": "jsonschema",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/jsonschema/4.26.0/",
+      "version": "4.26.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpx",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/httpx/0.28.1/",
+      "version": "0.28.1"
+    },
+    {
+      "license": "MIT",
+      "name": "mcp",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/mcp/2.2.0/",
+      "version": "2.2.0"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "name": "packaging",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/packaging/26.3/",
+      "version": "26.3"
+    },
+    {
+      "license": "LGPL-3.0-only",
+      "name": "psycopg",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/psycopg/3.3.6/",
+      "version": "3.3.6"
+    },
+    {
+      "license": "LGPL-3.0-only",
+      "name": "psycopg-binary",
+      "scope": "runtime-extra",
+      "source": "https://pypi.org/project/psycopg-binary/3.3.6/",
+      "version": "3.3.6"
+    },
+    {
+      "license": "LGPL-3.0-only",
+      "name": "psycopg-pool",
+      "scope": "runtime-extra",
+      "source": "https://pypi.org/project/psycopg-pool/3.3.2/",
+      "version": "3.3.2"
+    },
+    {
+      "license": "MIT",
+      "name": "pydantic",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/pydantic/2.13.5/",
+      "version": "2.13.5"
+    },
+    {
+      "license": "MIT",
+      "name": "pytest",
+      "scope": "development",
+      "source": "https://pypi.org/project/pytest/9.1.1/",
+      "version": "9.1.1"
+    },
+    {
+      "license": "MIT",
+      "name": "pytest-xdist",
+      "scope": "development",
+      "source": "https://pypi.org/project/pytest-xdist/3.8.0/",
+      "version": "3.8.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pyyaml",
+      "scope": "development",
+      "source": "https://pypi.org/project/PyYAML/6.0.3/",
+      "version": "6.0.3"
+    },
+    {
+      "license": "MIT",
+      "name": "ruff",
+      "scope": "development",
+      "source": "https://pypi.org/project/ruff/0.16.8/",
+      "version": "0.16.8"
+    },
+    {
+      "license": "MIT",
+      "name": "sqlalchemy",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/SQLAlchemy/2.0.54/",
+      "version": "2.0.54"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "uvicorn",
+      "scope": "runtime",
+      "source": "https://pypi.org/project/uvicorn/0.53.0/",
+      "version": "0.53.0"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "scope": "direct_runtime_development_build_and_selected_runtime_extras",
+  "transitive_review": "deferred_until_public_distribution_or_customer_delivery"
+}

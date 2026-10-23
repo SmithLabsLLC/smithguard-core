@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "ActorType": {
+      "enum": [
+        "rule",
+        "reviewer",
+        "maintainer",
+        "affected_party",
+        "system"
+      ],
+      "title": "ActorType",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "confirmed",
+        "probable",
+        "possible",
+        "unverified",
+        "disputed",
+        "unknown"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "DataClassification12": {
+      "enum": [
+        "public",
+        "internal_control"
+      ],
+      "title": "DataClassification12",
+      "type": "string"
+    },
+    "EventType": {
+      "enum": [
+        "created",
+        "state_changed",
+        "alias_added",
+        "redirected",
+        "merged",
+        "split",
+        "disputed",
+        "appealed",
+        "corrected",
+        "expired",
+        "withdrawn",
+        "renewed"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "IncidentStatus": {
+      "enum": [
+        "internal_candidate",
+        "emerging_unverified",
+        "investigating",
+        "reported",
+        "corroborated",
+        "confirmed",
+        "contained",
+        "resolved",
+        "disputed",
+        "withdrawn",
+        "expired"
+      ],
+      "title": "IncidentStatus",
+      "type": "string"
+    },
+    "StableId": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "StableId",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "actor_type": {
+      "$ref": "#/$defs/ActorType"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "data_classification": {
+      "$ref": "#/$defs/DataClassification12"
+    },
+    "event_type": {
+      "$ref": "#/$defs/EventType"
+    },
+    "evidence_ids": {
+      "items": {
+        "$ref": "#/$defs/StableId"
+      },
+      "maxItems": 10000,
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "incident_id": {
+      "maxLength": 160,
+      "minLength": 8,
+      "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "incident_event",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Kind",
+      "type": "string"
+    },
+    "new_status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IncidentStatus"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "old_status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IncidentStatus"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason_code": {
+      "maxLength": 120,
+      "minLength": 2,
+      "pattern": "^[a-z0-9_]+$",
+      "title": "Reason Code",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "superseded_revision": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Superseded Revision"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "schema_version",
+    "revision",
+    "created_at",
+    "updated_at",
+    "data_classification",
+    "incident_id",
+    "event_type",
+    "old_status",
+    "new_status",
+    "actor_type",
+    "actor_id",
+    "reason_code",
+    "evidence_ids",
+    "occurred_at",
+    "confidence"
+  ],
+  "title": "IncidentEvent",
+  "type": "object"
+}

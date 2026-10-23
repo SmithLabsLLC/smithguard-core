@@ -1,0 +1,53 @@
+[Unit]
+Description=SmithGuard bounded EPSS KEV and direct origin advisory context
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathIsSymbolicLink=/opt/SmithGuard/current
+ConditionPathExists=/etc/SmithGuard/env/collector.env
+StartLimitIntervalSec=15min
+StartLimitBurst=1
+
+[Service]
+Type=oneshot
+# Preserve a failed attempt; recovery requires diagnosis or a later due timer.
+Restart=no
+User=smithguard-collector
+Group=smithguard-collector
+SupplementaryGroups=smithguard-evidence
+EnvironmentFile=/etc/SmithGuard/env/collector.env
+WorkingDirectory=/opt/SmithGuard/current
+ExecStart=/opt/SmithGuard/current/app/.venv/bin/smithguard-supplemental --commit
+TimeoutStartSec=15min
+TimeoutStopSec=1min
+MemoryHigh=640M
+MemoryMax=768M
+MemorySwapMax=0
+OOMPolicy=kill
+UMask=0027
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+ProcSubset=pid
+ReadOnlyPaths=/opt/SmithGuard
+ReadWritePaths=/var/lib/smithguard/evidence
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+IPAddressDeny=link-local
+IPAddressDeny=fd00:ec2::254/128
