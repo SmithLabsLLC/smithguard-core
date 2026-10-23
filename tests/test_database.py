@@ -469,7 +469,7 @@ def test_warning_receipt_migration_preserves_prior_projection_and_adds_bounded_i
         with engine.begin() as connection:
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0035_bulletin_automation"
+                == "0037_bulletin_intake_health"
             )
             connection.execute(
                 text(

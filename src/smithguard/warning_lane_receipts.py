@@ -67,6 +67,8 @@ class ProviderUsage:
     response_bytes: int = 0
     credential_route: str | None = None
     native_invocations: tuple[NativeInvocationUsage, ...] = ()
+    native_search_requests: int | None = None
+    native_model_turns: int | None = None
 
 
 def _aware(value: datetime) -> datetime:
@@ -82,7 +84,12 @@ def content_hash(value: Mapping[str, Any]) -> str:
 
 
 def _provider_document(value: ProviderUsage) -> dict[str, Any]:
-    if value.credential_route not in {None, "api_key", "grok_build_subscription"}:
+    if value.credential_route not in {
+        None,
+        "api_key",
+        "grok_build_subscription",
+        "claude_code_subscription",
+    }:
         raise WarningLaneReceiptError("provider credential route is invalid")
     text_fields = {
         "stage": (value.stage, 40),
@@ -112,6 +119,21 @@ def _provider_document(value: ProviderUsage) -> dict[str, Any]:
     if value.cached_input_tokens > value.input_tokens:
         raise WarningLaneReceiptError("cached input exceeds total input")
     native = value.credential_route == "grok_build_subscription"
+    claude = value.credential_route == "claude_code_subscription"
+    if claude:
+        if (
+            value.model != "claude-opus-5-5"
+            or not re.fullmatch(r"claude-code:[a-f0-9-]{36}:[a-f0-9-]{36}", value.response_id)
+            or type(value.native_search_requests) is not int
+            or not 0 <= value.native_search_requests <= 128
+            or type(value.native_model_turns) is not int
+            or not 1 <= value.native_model_turns <= value.configured_maximum_turns
+            or value.native_invocations
+            or value.reasoning_tokens > value.output_tokens
+        ):
+            raise WarningLaneReceiptError("Claude usage provenance invalid")
+    elif value.native_search_requests is not None or value.native_model_turns is not None:
+        raise WarningLaneReceiptError("Claude counters on another credential route")
     try:
         validate_native_invocations(value.native_invocations)
     except ValueError as error:
@@ -136,6 +158,24 @@ def _provider_document(value: ProviderUsage) -> dict[str, Any]:
         ):
             raise WarningLaneReceiptError("native invocation tool totals inconsistent")
     return {
+        **(
+            {
+                "identity_scope": "native_harness_session_and_result",
+                "model_scope": "aggregate_actual_model_including_search_helpers",
+                "actual_model": "claude-opus-5-5",
+                "configured_reasoning_effort": "high",
+                "search_helper_effort_scope": "not_independently_observable",
+                "request_bytes_scope": "input_prompt",
+                "response_bytes_scope": "stdout_and_stderr_stream",
+                "tool_calls_scope": "observed_native_WebSearch_calls",
+                "native_search_requests": value.native_search_requests,
+                "native_model_turns": value.native_model_turns,
+                "search_coverage": "public_web_index_only_not_native_x_search",
+                "usage_basis": "aggregate_modelUsage_including_search_helpers",
+            }
+            if claude
+            else {}
+        ),
         **(
             {
                 "identity_scope": (
@@ -172,7 +212,9 @@ def _provider_document(value: ProviderUsage) -> dict[str, Any]:
         "total_tokens": value.total_tokens,
         "cached_input_tokens": value.cached_input_tokens,
         "reasoning_tokens": value.reasoning_tokens,
-        ("tool_calls" if native else "server_side_tool_calls"): value.server_side_tool_calls,
+        (
+            "tool_calls" if native or claude else "server_side_tool_calls"
+        ): value.server_side_tool_calls,
         "configured_maximum_turns": value.configured_maximum_turns,
         "request_bytes": value.request_bytes,
         "elapsed_milliseconds": value.elapsed_milliseconds,
@@ -208,7 +250,10 @@ def append_warning_lane_receipt(
     ):
         raise WarningLaneReceiptError("provider failure error class is invalid")
     core: dict[str, Any] = {
-        "schema_version": "3.1.0"
+        "schema_version": "4.0.0"
+        if provider_usage is not None
+        and provider_usage.credential_route == "claude_code_subscription"
+        else "3.1.0"
         if provider_usage is not None and provider_usage.native_invocations
         else "3.0.0"
         if provider_usage is not None

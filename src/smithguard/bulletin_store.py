@@ -9,7 +9,7 @@ from __future__ import annotations
 import base64
 import binascii
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
@@ -274,15 +274,26 @@ def publish(session, document, *, grant, registry, now, manual_approval=None):
         )
     row.freshness_reason = None
     row.expires_at = (
-        row.first_seen_at + timedelta(hours=24)
+        row.first_seen_at.astimezone(UTC) + timedelta(hours=24)
         if document["evidence_class"] == "emerging_report"
         else None
     )
     stream.mode = grant["mode"]
     stream.grant_hash = sha256_id(canonical_json_bytes(grant))
     kind = "published" if previous is None else document["lifecycle"]
+    factual_comparison = None
+    if previous is not None:
+        from smithguard.bulletin_comparison import comparison
+
+        factual_comparison = comparison(previous.document, document)
     if kind not in {"published", "disputed", "withdrawn", "expired"}:
-        kind = "corrected"
+        kind = (
+            "source_updated"
+            if factual_comparison is not None
+            and factual_comparison["previous_factual_hash"]
+            == factual_comparison["current_factual_hash"]
+            else "corrected"
+        )
     sequence, decision_id = _decision(
         session,
         stream,
@@ -297,6 +308,7 @@ def publish(session, document, *, grant, registry, now, manual_approval=None):
             "manual_approval_id": manual_approval,
             "source_evidence": document["sources"],
             "accepted_observation": observation if document["source_key"] == "kev" else None,
+            "factual_comparison": factual_comparison,
         },
     )
     predecessor = previous.content_hash if previous is not None else None
@@ -331,7 +343,7 @@ def publish(session, document, *, grant, registry, now, manual_approval=None):
 
     register(session, identity, document, now=now)
     if document["source_key"] in SOURCE_IDS:
-        row.expires_at = row.first_seen_at + timedelta(days=90)
+        row.expires_at = row.first_seen_at.astimezone(UTC) + timedelta(days=90)
     session.flush()
     return {"bulletin_id": identity, "revision": row.revision, "sequence": sequence}
 

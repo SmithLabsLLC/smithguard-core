@@ -76,7 +76,7 @@ def test_operator_peer_connection_refuses_unsafe_identity(
 
 
 def test_operator_cli_transactions_use_fixed_connection_and_locked_authority(
-    database, tmp_path, monkeypatch
+    database, tmp_path, monkeypatch, capsys
 ):
     class Clock(datetime):
         @classmethod
@@ -178,12 +178,20 @@ def test_operator_cli_transactions_use_fixed_connection_and_locked_authority(
         for revision in (None, 1, 2):
             assert store.detail(session, identity, now=NOW, revision=revision)["content"] is None
     assert len(locks) == 7
+    capsys.readouterr()
+    assert runtime.main(["--observe"]) == 0
+    observation = json.loads(capsys.readouterr().out)
+    assert observation["hours"]["expected_elapsed_hours"] == 0
+    assert not observation["hours"]["complete"]
+    assert observation["event_counts"] == {}
+    assert len(locks) == 8
 
 
 def test_operator_cli_rejects_unprivileged_mutation_before_connection(monkeypatch):
     monkeypatch.setattr(runtime.os, "geteuid", lambda: 1000)
     monkeypatch.setattr(runtime, "create_engine", lambda *_, **__: pytest.fail("must not connect"))
     assert runtime.main(["--takedown", "a" * 64]) == 1
+    assert runtime.main(["--observe"]) == 1
 
 
 @pytest.mark.parametrize(

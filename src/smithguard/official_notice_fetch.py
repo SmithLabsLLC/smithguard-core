@@ -40,6 +40,21 @@ def selected_sources(value):
     return tuple(value)
 
 
+def configured_sources(body):
+    """Reviewed release configuration, independent of mutable runtime selection."""
+    from smithguard.identifiers import strict_json_loads
+
+    document = strict_json_loads(body)
+    if (
+        not isinstance(document, dict)
+        or set(document) != {"schema_version", "source_keys"}
+        or type(document["schema_version"]) is not int
+        or document["schema_version"] != 1
+    ):
+        raise ValueError("official_source_profile_invalid")
+    return selected_sources(document["source_keys"])
+
+
 class FetchError(ValueError):
     pass
 

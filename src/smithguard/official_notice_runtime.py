@@ -17,7 +17,7 @@ from sqlalchemy.pool import NullPool
 from smithguard.bulletin_intake import run
 from smithguard.bulletin_intake_status import status
 from smithguard.bulletin_publisher import processor
-from smithguard.identifiers import strict_json_loads, timestamp
+from smithguard.identifiers import parse_timestamp, strict_json_loads, timestamp
 from smithguard.official_notice_fetch import ENDPOINTS, selected_sources
 from smithguard.runtime import _validate_database_url
 from smithguard.source_rights import RightsRegistry
@@ -47,7 +47,15 @@ def rights_registry_path():
     return root / "contracts/v1/source-rights-register.json"
 
 
-def control_bytes(*, operation_id, artifact_commit, enabled=False, source_keys=None):
+def control_bytes(
+    *,
+    operation_id,
+    artifact_commit,
+    enabled=False,
+    source_keys=None,
+    enabled_at=None,
+    draining_at=None,
+):
     document = {
         "schema_version": 1,
         "operation_id": operation_id,
@@ -56,6 +64,10 @@ def control_bytes(*, operation_id, artifact_commit, enabled=False, source_keys=N
     }
     if source_keys is not None:
         document["source_keys"] = list(selected_sources(source_keys))
+    if enabled_at is not None:
+        document["enabled_at"] = timestamp(enabled_at)
+    if draining_at is not None:
+        document["draining_at"] = timestamp(draining_at)
     validate_control(document)
     return (json.dumps(document, sort_keys=True) + "\n").encode("ascii")
 
@@ -63,7 +75,7 @@ def control_bytes(*, operation_id, artifact_commit, enabled=False, source_keys=N
 def validate_control(document):
     if (
         not isinstance(document, dict)
-        or set(document) - {"source_keys"}
+        or set(document) - {"source_keys", "enabled_at", "draining_at"}
         != {"schema_version", "operation_id", "artifact_commit", "enabled"}
         or type(document["schema_version"]) is not int
         or document["schema_version"] != 1
@@ -79,6 +91,14 @@ def validate_control(document):
     ):
         raise ValueError("official_control_invalid")
     selected_sources(document.get("source_keys", tuple(ENDPOINTS)))
+    if "enabled_at" in document:
+        if not document["enabled"]:
+            raise ValueError("official_control_enabled_time_invalid")
+        parse_timestamp(document["enabled_at"])
+    if "draining_at" in document:
+        if document["enabled"]:
+            raise ValueError("official_control_drain_time_invalid")
+        parse_timestamp(document["draining_at"])
     return document
 
 

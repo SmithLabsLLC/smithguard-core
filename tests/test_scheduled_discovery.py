@@ -95,6 +95,19 @@ class TrackingStream(httpx.SyncByteStream):
             yield chunk
 
 
+@pytest.fixture
+def legacy_transport_scope(monkeypatch):
+    """Isolate retained API-parser/receipt regressions from current route policy.
+
+    These tests use only httpx.MockTransport. The production subscription-only
+    guard has separate negative tests; this fixture does not grant runtime API
+    authority or change the adapter's reported route.
+    """
+    monkeypatch.setattr(
+        scheduled_module, "_allowed_subscription_route", lambda route: route == "api_key"
+    )
+
+
 def _active_policy():
     return replace(
         load_spend_policy_path(POLICY_PATH),
@@ -102,6 +115,9 @@ def _active_policy():
         external_calls_allowed=True,
         unattended_collection_allowed=True,
         all_required_controls_pass=True,
+        # These synthetic tests exercise a qualified, available primary. The
+        # shipped ready policy separately records the real primary's trust hold.
+        primary_unavailable_reason=None,
     )
 
 
@@ -163,6 +179,7 @@ def _discovery_result(*candidates: dict[str, object]) -> ProviderResult:
     return ProviderResult(
         output_text=_discovery_output(*candidates),
         response_id="xai-synthetic-discovery",
+        credential_route="grok_build_subscription",
         server_side_tool_calls=1,
         citation_urls=tuple(
             str(candidate["sources"][0]["url"])  # type: ignore[index]
@@ -188,6 +205,7 @@ def _qualification_result(
             sort_keys=True,
         ),
         response_id="xai-synthetic-qualification",
+        credential_route="grok_build_subscription",
         server_side_tool_calls=0,
         citation_urls=(),
     )
@@ -270,8 +288,10 @@ def _x_search_alias_item(
 
 
 class SyntheticProvider:
+    credential_route = "grok_build_subscription"
+
     def __init__(self, discovery: ProviderResult) -> None:
-        self.discovery_result = discovery
+        self.discovery_result = replace(discovery, credential_route=self.credential_route)
         self.discovery_calls = 0
         self.qualification_calls = 0
         self.qualification_payloads = []
@@ -359,6 +379,8 @@ def test_schedule_uses_latest_window_across_midnight_without_backfill(database) 
 
 def test_durable_jobs_reject_changed_run_or_policy_before_provider_dispatch(database) -> None:
     class ProviderMustNotRun:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise AssertionError("changed discovery job must fail before dispatch")
 
@@ -987,6 +1009,7 @@ def test_scheduled_provider_accepts_observed_three_x_search_aliases() -> None:
     assert result.server_side_tool_calls == 3
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_accepted_x_search_alias_values_never_persist(database) -> None:
     forbidden = (
         "raw-accepted-alias-input-must-not-persist",
@@ -2051,6 +2074,8 @@ def test_expired_recorded_lease_cannot_dispatch_provider_again(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class ProviderMustNotRun:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise AssertionError("a recorded retry must stop before provider dispatch")
 
@@ -2295,6 +2320,7 @@ def test_warning_volume_gate_counts_immutable_receipts(database) -> None:
         assert not allowed and reason == "run_warning_limit"
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_rejected_semantic_output_records_usage_without_warning(database) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = _xai_discovery_response()
@@ -2407,6 +2433,7 @@ def test_rejected_semantic_output_records_usage_without_warning(database) -> Non
         assert session.scalar(select(func.count()).select_from(PreliminaryWarningRecord)) == 0
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 @pytest.mark.audit_ids("WL-08")
 def test_tool_usage_overage_settles_exact_cost_and_stops_dispatch(database) -> None:
     """Bound register name (WL-08); the body records usage without any cost."""
@@ -2449,6 +2476,7 @@ def test_tool_usage_overage_settles_exact_cost_and_stops_dispatch(database) -> N
         assert session.scalar(select(func.count()).select_from(PreliminaryWarningRecord)) == 0
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_input_token_usage_overage_is_attributed_and_stops_dispatch(database) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = _xai_discovery_response()
@@ -2491,6 +2519,8 @@ def test_input_token_usage_overage_is_attributed_and_stops_dispatch(database) ->
 
 def test_tool_free_qualification_rejection_records_usage(database) -> None:
     class QualificationRejectingProvider:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             return _discovery_result(_candidate())
 
@@ -2501,6 +2531,7 @@ def test_tool_free_qualification_rejection_records_usage(database) -> None:
                 usage_uncertain=False,
                 exact_usage=ProviderUsageSnapshot(
                     response_id="xai-synthetic-qualification-rejected",
+                    credential_route="grok_build_subscription",
                     server_side_tool_calls=0,
                     input_tokens=10,
                     output_tokens=5,
@@ -2557,13 +2588,15 @@ def test_tool_free_qualification_rejection_records_usage(database) -> None:
             "discovery",
             "qualification",
         ]
-        assert usage_receipts[1]["provider"]["server_side_tool_calls"] == 0
+        assert usage_receipts[1]["provider"]["tool_calls"] == 0
         assert session.scalar(select(func.count()).select_from(PreliminaryWarningRecord)) == 0
 
 
 @pytest.mark.audit_ids("WL-08")
 def test_known_uncharged_http_failure_retries_once_then_dead_letters(database) -> None:
     class FailingProvider:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise ScheduledProviderError(
                 "provider_http_error_uncharged",
@@ -2672,6 +2705,8 @@ def test_qualification_known_uncharged_failure_retries_once(database) -> None:
 @pytest.mark.parametrize("native_route", [False, True])
 def test_interrupted_dispatch_stops_retry_before_provider_dispatch(database, native_route) -> None:
     class ProviderMustNotRun:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise AssertionError("interrupted usage must stop before dispatch")
 
@@ -2701,7 +2736,7 @@ def test_interrupted_dispatch_stops_retry_before_provider_dispatch(database, nat
 
     provider = ProviderMustNotRun()
     if native_route:
-        from smithguard.grok_build import SubscriptionFirstProvider
+        from smithguard.subscription_provider import SubscriptionFirstProvider
 
         provider = SubscriptionFirstProvider(
             primary=provider,
@@ -2734,6 +2769,8 @@ def test_interrupted_dispatch_stops_retry_before_provider_dispatch(database, nat
 
 def test_run_request_limit_counts_existing_attempts(database) -> None:
     class ProviderMustNotRun:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise AssertionError("run limit must deny before provider dispatch")
 
@@ -2908,6 +2945,8 @@ def test_concurrent_dispatch_admission_stays_within_the_run_limit(database) -> N
 @pytest.mark.audit_ids("WL-08")
 def test_uncertain_failure_stops_without_retry(database) -> None:
     class FailingProvider:
+        credential_route = "grok_build_subscription"
+
         def discover(self, _payload):
             raise ScheduledProviderError(
                 "synthetic_provider_failure",
@@ -3172,8 +3211,8 @@ def test_usage_receipts_are_written_without_any_provider_cost(database) -> None:
             assert item["reason_code"] == "within_technical_envelope"
             assert item["public_metadata"]["attempt"] == 1
             _assert_usage_receipt_has_no_pricing(item)
-        assert usage_receipts[0]["provider"]["server_side_tool_calls"] == 1
-        assert usage_receipts[1]["provider"]["server_side_tool_calls"] == 0
+        assert usage_receipts[0]["provider"]["tool_calls"] == 1
+        assert usage_receipts[1]["provider"]["tool_calls"] == 0
         discovery_receipts = [
             item for item in receipts if item["receipt_type"] == "discovery_completed"
         ]
@@ -3247,6 +3286,7 @@ def test_bounded_json_reports_an_expired_lane_deadline_as_a_provider_failure() -
     assert isinstance(failure.value.__cause__, AcquisitionRejected)
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 @pytest.mark.parametrize(
     "case",
     (
@@ -3441,6 +3481,7 @@ def test_a_successful_provider_answer_keeps_its_output_privately(database) -> No
     assert rows[0].expires_at == NOW + timedelta(minutes=1) + timedelta(days=30)
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_rejected_answers_keep_their_output_privately(database) -> None:
     """A response rejected after usage is known (tool count mismatch) is not accepted,
     but its final text and citations are retained for diagnosis; no replay follows."""
@@ -3478,6 +3519,7 @@ def test_rejected_answers_keep_their_output_privately(database) -> None:
     assert any(item["receipt_type"] == "provider_cost_observed" for item in receipts)
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 @pytest.mark.parametrize("fault", ["usage_missing", "model", "tier"])
 def test_answers_failing_usage_validation_keep_their_output(database, fault) -> None:
     """Missing usage or an unexpected model or tier is charge-uncertain (no replay,
@@ -3578,6 +3620,7 @@ def test_unstorable_characters_are_escaped_and_never_cost_the_usage_receipt(
     assert len(costs) == 2
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_a_final_message_after_many_tool_items_is_retained(database) -> None:
     from smithguard.db.models import WarningLaneOutputRecord
 
@@ -3626,6 +3669,7 @@ def test_a_final_message_after_many_tool_items_is_retained(database) -> None:
     assert "https://x.com/i/status/1970000000000000000" in rows[0].citation_urls
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 @pytest.mark.parametrize("case", ["invalid_json", "known_usage"])
 def test_failure_receipts_carry_status_elapsed_and_failure_time(database, case) -> None:
     document = _xai_discovery_response()
@@ -3665,6 +3709,7 @@ def test_failure_receipts_carry_status_elapsed_and_failure_time(database, case) 
     assert "failed_at" in metadata
 
 
+@pytest.mark.usefixtures("legacy_transport_scope")
 def test_a_timeout_after_headers_keeps_the_status_and_timing(database) -> None:
     class TimesOut(httpx.SyncByteStream):
         def __iter__(self):

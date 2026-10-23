@@ -168,7 +168,16 @@ def read_grant(*, release, registry_path, now):
 def publication_rights(document, registry: RightsRegistry, *, now):
     """Stored evidence is subject to the current register, not a historical boolean."""
     validate_content(document, now=now)
+    from smithguard.bulletin_licenses import CVE_LICENSE_NOTICES, CVE_SOURCE
+
     for reference in document["sources"]:
+        if reference["source_id"] == CVE_SOURCE:
+            if reference.get(
+                "license_notice"
+            ) not in CVE_LICENSE_NOTICES.values() or not reference.get("cna_provider"):
+                raise BulletinError("bulletin_cve_notice_required")
+        elif "license_notice" in reference or "cna_provider" in reference:
+            raise BulletinError("bulletin_source_notice_unexpected")
         profile = registry.get(reference["source_id"])
         rights = profile.source["rights"]
         if (
@@ -209,10 +218,27 @@ def publication_rights(document, registry: RightsRegistry, *, now):
             manual_paths.get(parsed.hostname, r"(?!)"), parsed.path
         ):
             raise BulletinError("bulletin_source_url")
-        if reference["source_id"] == FEED_SOURCES["php"]:
+        if reference["source_id"] in {
+            FEED_SOURCES["php"],
+            "gbsec:source:php-reviewed-security-facts",
+        }:
             source_url("php", reference["record_url"])
         elif parsed.fragment:
             raise BulletinError("bulletin_source_fragment")
+        if reference["source_id"] == CVE_SOURCE:
+            match = re.fullmatch(
+                r"/CVEProject/cvelistV5/blob/(?:main|[a-f0-9]{40})/cves/"
+                r"([0-9]{4})/([0-9]+)xxx/(CVE-([0-9]{4})-([0-9]{4,19}))\.json",
+                parsed.path,
+            )
+            if (
+                parsed.hostname != "github.com"
+                or match is None
+                or match[1] != match[4]
+                or match[2] != match[5][:-3]
+                or match[3] not in document["aliases"]
+            ):
+                raise BulletinError("bulletin_cve_source_identity")
         if reference["source_id"] == FEED_SOURCES["node"] and not re.fullmatch(
             r"/en/blog/vulnerability/[a-z0-9-]+/?", parsed.path
         ):

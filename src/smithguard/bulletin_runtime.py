@@ -200,6 +200,8 @@ def main(argv=None):
     action.add_argument("--status-tick", action="store_true")
     action.add_argument("--status", action="store_true")
     action.add_argument("--review-queue", action="store_true")
+    action.add_argument("--observe", action="store_true")
+    action.add_argument("--repair-expiry", type=Path)
     action.add_argument("--resolve-review", type=Path)
     action.add_argument("--publish", type=Path)
     action.add_argument("--verify", metavar="BULLETIN_ID")
@@ -230,10 +232,24 @@ def main(argv=None):
         # Explicit operator mutations require the existing root/maintenance route.
         # The unprivileged timer may only append neutral status/takedown events.
         if (
-            args.publish or args.verify or args.takedown or args.review_queue or args.resolve_review
+            args.publish
+            or args.verify
+            or args.takedown
+            or args.review_queue
+            or args.resolve_review
+            or args.observe
+            or args.repair_expiry
         ) and os.geteuid() != 0:
             raise BulletinError("bulletin_operator_required")
-        if args.publish or args.verify or args.takedown or args.review_queue or args.resolve_review:
+        if (
+            args.publish
+            or args.verify
+            or args.takedown
+            or args.review_queue
+            or args.resolve_review
+            or args.observe
+            or args.repair_expiry
+        ):
             engine = create_engine(
                 "postgresql+psycopg://",
                 creator=operator_connection,
@@ -260,13 +276,30 @@ def main(argv=None):
                     or args.takedown
                     or args.review_queue
                     or args.resolve_review
+                    or args.observe
+                    or args.repair_expiry
                 ),
                 now=now,
             ),
             Session(engine) as session,
             session.begin(),
         ):
-            if args.review_queue:
+            if args.observe:
+                from sqlalchemy import text
+
+                from smithguard.bulletin_observation import observe
+
+                session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"))
+                session.execute(text("SET LOCAL statement_timeout='25s'"))
+                result = observe(session, now=now)
+            elif args.repair_expiry:
+                from smithguard.bulletin_expiry_repair import repair
+
+                request = strict_json_loads(
+                    _secure_file(args.repair_expiry, label="expiry repair", maximum=16384)
+                )
+                result = repair(session, request, grant=current_grant(now=now), now=now)
+            elif args.review_queue:
                 from smithguard.bulletin_review import queue
 
                 result = queue(session)
@@ -329,7 +362,7 @@ def main(argv=None):
                         manual_approval=args.approval_id,
                     )
                     result = {"verified": args.verify}
-        print(json.dumps(result, sort_keys=True))
+        print(json.dumps(result, sort_keys=True, default=timestamp))
         return 0
     except Exception as error:
         print(

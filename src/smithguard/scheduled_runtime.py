@@ -10,19 +10,18 @@ import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+from smithguard.claude_build import ClaudeBuildWarningProvider
 from smithguard.discovery import DISCOVERY_PROMPT_VERSION
-from smithguard.grok_build import GrokBuildWarningProvider, SubscriptionFirstProvider
+from smithguard.grok_build import GrokBuildWarningProvider
 from smithguard.identifiers import sha256_id
 from smithguard.runtime import (
     DEFAULT_SPEND_POLICY,
     RuntimeConfigurationError,
     _engine,
     _session_factory,
-    _xai_key,
     load_runtime_config,
 )
 from smithguard.scheduled_discovery import (
-    XaiScheduledWarningProvider,
     build_qualification_payload,
     enqueue_due_discovery,
     validate_candidates,
@@ -30,6 +29,7 @@ from smithguard.scheduled_discovery import (
     work_one,
 )
 from smithguard.spend import ExternalDispatchDisabled, load_spend_policy_path
+from smithguard.subscription_provider import SubscriptionFirstProvider
 from smithguard.warning_dispatch import dispatch_guard
 
 
@@ -149,28 +149,20 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 0
 
-        def fallback():
-            if config.xai_key_path is None:
-                raise RuntimeConfigurationError("scheduled fallback credential is missing")
-            return XaiScheduledWarningProvider(
-                api_key=_xai_key(config.xai_key_path),
-                maximum_request_bytes=policy.maximum_request_bytes,
-                maximum_response_bytes=policy.maximum_response_bytes,
-                maximum_elapsed_seconds=policy.maximum_elapsed_seconds,
-            )
-
         primary = GrokBuildWarningProvider()
+        fallback = ClaudeBuildWarningProvider()
         result = work_one(
             factory,
             policy=policy,
             provider=SubscriptionFirstProvider(
                 primary=primary,
-                fallback_factory=fallback,
+                fallback_factory=lambda: fallback,
+                primary_unavailable_reason=policy.primary_unavailable_reason,
             ),
             worker_id=f"{socket.gethostname()}:{os.getpid()}",
             now=now,
         )
-        if primary.cleanup_failed:
+        if primary.cleanup_failed or fallback.cleanup_failed:
             # Receipts have committed. Stop the oneshot before another ExecStart
             # so systemd tears down the private RAM mount immediately.
             sys.stderr.write("runtime_error:native_cleanup_failed\n")

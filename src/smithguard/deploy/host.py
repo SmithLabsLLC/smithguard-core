@@ -34,6 +34,7 @@ CONTROLLED_DIRECTORY_MODES = {
     "/var/lib/smithguard/catalog-health": 0o2750,
     "/var/lib/smithguard/api-health": 0o2750,
     "/var/lib/smithguard/grok-auth": 0o700,
+    "/var/lib/smithguard/claude-auth": 0o700,
 }
 
 

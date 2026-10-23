@@ -38,7 +38,11 @@ def test_native_cleanup_failure_stops_unit_after_receipts_commit(monkeypatch, ca
             spend_policy_path=tmp_path / "policy.json", xai_key_path=None
         ),
     )
-    monkeypatch.setattr(runtime, "load_spend_policy_path", lambda _path: object())
+    monkeypatch.setattr(
+        runtime,
+        "load_spend_policy_path",
+        lambda _path: SimpleNamespace(primary_unavailable_reason="trust_not_qualified"),
+    )
     monkeypatch.setattr(runtime, "_engine", lambda _config: object())
     monkeypatch.setattr(runtime, "_session_factory", lambda _engine: object())
     calls = []

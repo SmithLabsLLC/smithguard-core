@@ -154,6 +154,7 @@ class OperationalHealthInputs:
     supplemental_sources: Mapping[str, str] | None = None
     github_quarantined_records: int | None = 0
     bulletin_status: str | None = None
+    official_intake_status: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,6 +217,9 @@ class HealthConfig:
     spend_policy_path: Path
     rights_register_path: Path
     governance_policy_path: Path
+    official_intake_profile_path: Path = Path(
+        "/opt/SmithGuard/current/app/deploy/env/official-intake-profile.json"
+    )
     openssf_monitor_receipt_path: Path = Path("/var/lib/smithguard/openssf-health/latest.json")
     openssf_schedule_expected: bool = False
     openssf_catalog_schedule_expected: bool = False
@@ -348,6 +352,18 @@ def evaluate_operational_health(inputs: OperationalHealthInputs) -> OperationalH
             else "The expected migration is missing."
         ),
     )
+    if inputs.official_intake_status is not None:
+        _add(
+            checks,
+            code="official_intake_liveness",
+            status="healthy"
+            if inputs.official_intake_status in {"fresh", "contained"}
+            else "degraded"
+            if inputs.official_intake_status
+            in {"awaiting_first_closure", "initializing", "draining"}
+            else "critical",
+            summary=f"Official intake liveness is {inputs.official_intake_status}.",
+        )
     if inputs.bulletin_status is not None:
         _add(
             checks,
@@ -935,6 +951,46 @@ def _unit_result(
     return value if value in {"success", "exit-code", "timeout", "signal"} else "unknown"
 
 
+def _unit_enabled(unit: str, *, runner: CommandRunner) -> bool | None:
+    try:
+        result = runner(
+            ["/usr/bin/systemctl", "is-enabled", unit],
+            check=False,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=SYSTEMCTL_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    state = result.stdout.strip()
+    if result.returncode == 0 and state == "enabled":
+        return True
+    if result.returncode == 1 and state == "disabled":
+        return False
+    return None
+
+
+def _intake_timer_active(unit: str, *, runner: CommandRunner) -> bool | None:
+    """A liveness timer must actually be active; transition/failure is unknown."""
+    try:
+        result = runner(
+            ["/usr/bin/systemctl", "is-active", unit],
+            check=False,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=SYSTEMCTL_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode == 0 and result.stdout.strip() == "active":
+        return True
+    if result.returncode == 3 and result.stdout.strip() == "inactive":
+        return False
+    return None
+
+
 def _warning_unit_active(unit: str, *, runner: CommandRunner) -> bool | None:
     """Unlike ordinary active checks, unknown must not be mistaken for containment."""
     try:
@@ -1103,6 +1159,7 @@ def collect_operational_inputs(
     )
     supplemental_sources = dict.fromkeys(SOURCE_NAMES, "missing")
     bulletin_status = "unavailable"
+    official_intake_status = "unavailable"
     database_available = False
     migration_current = False
     updates = _missing_freshness("updates")
@@ -1130,6 +1187,33 @@ def collect_operational_inputs(
                 from smithguard.bulletin_intake_status import health as bulletin_health
 
                 bulletin_status = bulletin_health(session, now=measured_at)
+                from smithguard.bulletin_intake_health import health as intake_health
+                from smithguard.official_notice_fetch import configured_sources
+                from smithguard.official_notice_runtime import read_control
+
+                try:
+                    official_control = read_control()
+                    expected_sources = configured_sources(
+                        config.official_intake_profile_path.read_bytes()
+                    )
+                except (OSError, ValueError, TypeError):
+                    official_control, expected_sources = None, ()
+                official_intake_status = intake_health(
+                    session,
+                    now=measured_at,
+                    control=official_control,
+                    expected_sources=expected_sources,
+                    timer_active=_intake_timer_active(
+                        "smithguard-official-notices.timer", runner=runner
+                    ),
+                    timer_enabled=_unit_enabled("smithguard-official-notices.timer", runner=runner),
+                    service_active=_warning_unit_active(
+                        "smithguard-official-notices.service", runner=runner
+                    ),
+                    service_result=_unit_result(
+                        "smithguard-official-notices.service", runner=runner
+                    ),
+                )
                 github_quarantined_records = actionable_quarantine_count(
                     session, source_id=GITHUB_ADVISORY
                 )
@@ -1206,6 +1290,7 @@ def collect_operational_inputs(
         overdue_warning_count=warning_count,
         supplemental_sources=supplemental_sources,
         bulletin_status=bulletin_status,
+        official_intake_status=official_intake_status,
         github_quarantined_records=github_quarantined_records,
         openssf_monitor=openssf_monitor,
         openssf_monitor_source=config.openssf_monitor_source,

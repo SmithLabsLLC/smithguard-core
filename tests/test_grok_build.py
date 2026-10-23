@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from smithguard import grok_build as native
 from smithguard.grok_build_stream import NATIVE_MODEL, NATIVE_ROUTE, NativeStream
 from smithguard.scheduled_discovery import ScheduledProviderError, enqueue_due_discovery, work_one
+from smithguard.subscription_provider import SubscriptionFirstProvider
 from smithguard.warning_lane_receipts import ProviderUsage, _provider_document
 from tests.test_scheduled_discovery import (
     NOW,
@@ -594,17 +595,22 @@ def test_subscription_first_and_only_proven_uncharged_fallback(database, primary
             return replace(super().discover(payload), credential_route=NATIVE_ROUTE)
 
     class Fallback(SyntheticProvider):
-        credential_route = "api_key"
+        credential_route = "claude_code_subscription"
 
         def discover(self, payload):
-            calls.append("api")
-            return super().discover(payload)
+            calls.append("opus_subscription")
+            return replace(
+                super().discover(payload),
+                response_id="claude-code:11111111-1111-4111-8111-111111111111:22222222-2222-4222-8222-222222222222",
+                native_search_requests=1,
+                native_model_turns=2,
+            )
 
     def fallback():
-        calls.append("load_api_credential")
+        calls.append("load_subscription_credential")
         return Fallback(_discovery_result())
 
-    provider = native.SubscriptionFirstProvider(
+    provider = SubscriptionFirstProvider(
         primary=Primary(_discovery_result()), fallback_factory=fallback
     )
     policy = _active_policy()
@@ -629,14 +635,14 @@ def test_subscription_first_and_only_proven_uncharged_fallback(database, primary
             now=NOW + timedelta(minutes=7),
         )
         assert second.outcome == "succeeded"
-        assert calls == ["subscription", "load_api_credential", "api"]
+        assert calls == ["subscription", "load_subscription_credential", "opus_subscription"]
         with factory() as session:
             routes = [
                 r["public_metadata"].get("credential_route")
                 for r in _receipts(session)
                 if r["receipt_type"] == "provider_request_started"
             ]
-        assert routes == [NATIVE_ROUTE, "api_key"]
+        assert routes == [NATIVE_ROUTE, "claude_code_subscription"]
     elif primary_error:
         assert first.outcome == "dead_letter"
     else:
@@ -644,7 +650,7 @@ def test_subscription_first_and_only_proven_uncharged_fallback(database, primary
 
 
 def test_second_attempt_without_proven_native_failure_cannot_load_api():
-    provider = native.SubscriptionFirstProvider(
+    provider = SubscriptionFirstProvider(
         primary=object(), fallback_factory=lambda: pytest.fail("paid route")
     )
     with pytest.raises(ValueError):
@@ -663,7 +669,7 @@ def test_missing_fallback_key_closes_without_dispatch(database):
     def missing_key():
         raise FileNotFoundError("synthetic absent credential")
 
-    provider = native.SubscriptionFirstProvider(primary=Primary(), fallback_factory=missing_key)
+    provider = SubscriptionFirstProvider(primary=Primary(), fallback_factory=missing_key)
     policy = _active_policy()
     factory = sessionmaker(database.engine)
     with factory() as session, session.begin():
@@ -691,7 +697,7 @@ def test_missing_fallback_key_closes_without_dispatch(database):
     with factory() as session:
         receipts = _receipts(session)
     assert sum(r["receipt_type"] == "provider_request_started" for r in receipts) == 1
-    assert receipts[-1]["reason_code"] == "api_preflight_uncharged"
+    assert receipts[-1]["reason_code"] == "claude_preflight_uncharged"
 
 
 def test_native_rejects_synthetic_snake_case_usage_alias():
@@ -868,17 +874,21 @@ def test_x_search_call_counts_but_query_is_not_a_citation(tool_name, operation):
         )
 
 
-def test_pinned_installer_verifies_bytes_and_never_replaces_unknown_file(tmp_path, monkeypatch):
+@pytest.mark.parametrize("tool", ["grok", "claude"])
+def test_pinned_installer_verifies_bytes_and_never_replaces_unknown_file(
+    tmp_path, monkeypatch, tool
+):
     import hashlib
     import io
     import os
+    from importlib import import_module
 
-    from smithguard import grok_build_install as installer
+    installer = import_module(f"smithguard.{tool}_build_install")
 
-    binary = tmp_path / "tool-dir" / "grok"
+    binary = tmp_path / "tool-dir" / tool
     payload = b"synthetic public binary"
-    monkeypatch.setattr(installer, "GROK_BINARY", binary)
-    monkeypatch.setattr(installer, "GROK_SHA256", hashlib.sha256(payload).hexdigest())
+    monkeypatch.setattr(installer, f"{tool.upper()}_BINARY", binary)
+    monkeypatch.setattr(installer, f"{tool.upper()}_SHA256", hashlib.sha256(payload).hexdigest())
     monkeypatch.setattr(installer, "BINARY_BYTES", len(payload))
     monkeypatch.setattr(installer.os, "geteuid", lambda: 0)
     original = Path.stat
@@ -908,7 +918,7 @@ def test_pinned_installer_verifies_bytes_and_never_replaces_unknown_file(tmp_pat
     with pytest.raises(ValueError, match="no replacement"):
         installer.install()
     assert binary.read_bytes() == b"unknown"
-    assert not list(binary.parent.glob(".grok-download-*"))
+    assert not list(binary.parent.glob(f".{tool}-download-*"))
 
 
 def test_old_api_retry_is_not_native_fallback_authority(database):
@@ -929,14 +939,14 @@ def test_old_api_retry_is_not_native_fallback_authority(database):
     first = work_one(
         factory, policy=policy, provider=OldApi(), worker_id="old", now=NOW + timedelta(minutes=1)
     )
-    assert first.outcome == "retry_wait"
-    provider = native.SubscriptionFirstProvider(
+    assert first.outcome == "dead_letter"
+    provider = SubscriptionFirstProvider(
         primary=object(), fallback_factory=lambda: calls.append("api")
     )
     second = work_one(
         factory, policy=policy, provider=provider, worker_id="new", now=NOW + timedelta(minutes=7)
     )
-    assert second.outcome == "dead_letter" and calls == []
+    assert second.outcome == "idle" and calls == []
 
 
 def test_process_bounds_output_and_always_reaps(tmp_path, monkeypatch):
@@ -1463,17 +1473,22 @@ def test_native_structured_quota_request_routes_through_durable_fallback(
     monkeypatch.setattr(primary, "_start", start)
 
     class Fallback(SyntheticProvider):
-        credential_route = "api_key"
+        credential_route = "claude_code_subscription"
 
         def discover(self, payload):
-            calls.append("paid_request")
-            return super().discover(payload)
+            calls.append("opus_request")
+            return replace(
+                super().discover(payload),
+                response_id="claude-code:11111111-1111-4111-8111-111111111111:22222222-2222-4222-8222-222222222222",
+                native_search_requests=1,
+                native_model_turns=2,
+            )
 
     def fallback():
-        calls.append("paid_credential")
+        calls.append("opus_credential")
         return Fallback(_discovery_result())
 
-    provider = native.SubscriptionFirstProvider(primary=primary, fallback_factory=fallback)
+    provider = SubscriptionFirstProvider(primary=primary, fallback_factory=fallback)
     factory = sessionmaker(database.engine)
     policy = _active_policy()
     with factory() as session, session.begin():
@@ -1501,14 +1516,14 @@ def test_native_structured_quota_request_routes_through_durable_fallback(
         now=NOW + timedelta(minutes=7),
     )
     assert second.outcome == "succeeded"
-    assert calls == ["native_request", "paid_credential", "paid_request"]
+    assert calls == ["native_request", "opus_credential", "opus_request"]
     with factory() as session:
         routes = [
             r["public_metadata"].get("credential_route")
             for r in _receipts(session)
             if r["receipt_type"] == "provider_request_started"
         ]
-    assert routes == [NATIVE_ROUTE, "api_key"]
+    assert routes == [NATIVE_ROUTE, "claude_code_subscription"]
 
 
 def test_non_acp_commands_receive_eof_instead_of_an_open_stdin(tmp_path):
@@ -1601,7 +1616,7 @@ def test_expired_lease_without_dispatch_is_documented_fail_closed(database):
         def discover(self, _payload):
             pytest.fail("missing prior dispatch cannot silently restart native")
 
-    provider = native.SubscriptionFirstProvider(
+    provider = SubscriptionFirstProvider(
         primary=Primary(), fallback_factory=lambda: pytest.fail("paid route")
     )
     factory = sessionmaker(database.engine)
@@ -2016,7 +2031,7 @@ def test_uncertain_native_diagnostics_survive_durable_failure_without_paid_fallb
     diagnostic_native_provider, database, tmp_path
 ):
     primary, process = diagnostic_native_provider
-    provider = native.SubscriptionFirstProvider(
+    provider = SubscriptionFirstProvider(
         primary=primary, fallback_factory=lambda: pytest.fail("uncertain run cannot fall back")
     )
     factory = sessionmaker(database.engine)

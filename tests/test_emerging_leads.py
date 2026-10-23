@@ -344,6 +344,8 @@ def test_source_context_updates_are_append_only(database):
 
 
 class LeadProvider:
+    credential_route = "grok_build_subscription"
+
     def __init__(
         self,
         raw=None,
@@ -363,6 +365,7 @@ class LeadProvider:
         assert payload["max_tool_calls"] == 4
         assert json.loads(payload["input"])["prompt_version"] == PROMPT_VERSION
         return ProviderResult(
+            credential_route=self.credential_route,
             output_text=output(self.raw),
             response_id=f"synthetic-lead-search-{self.discovery_calls}",
             server_side_tool_calls=1,
@@ -374,6 +377,7 @@ class LeadProvider:
         self.qualification_payloads.append(payload)
         assert payload["tools"] == []
         return ProviderResult(
+            credential_route=self.credential_route,
             output_text=json.dumps({"decision": self.decision, "reason_code": self.reason}),
             response_id=f"synthetic-lead-triage-{self.qualification_calls}",
             server_side_tool_calls=0,

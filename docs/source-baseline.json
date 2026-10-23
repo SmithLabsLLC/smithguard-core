@@ -105,6 +105,10 @@
       "prepared_sha256": "e2bb74e75a044d1c011284baead44021ded81804779d6612570f3afc94de1e33",
       "shared": true
     },
+    "deploy/env/official-intake-profile.json": {
+      "prepared_sha256": "5b67ca38562bcbc5c7ce05457556d01632a849181e98c3ef11f45cb989808101",
+      "shared": true
+    },
     "deploy/env/openssf-shadow.env.example": {
       "prepared_sha256": "d294296bf84f16ce395618f55ae916292c54ea4f2f41cc92e5940449f9483c2e",
       "shared": true
@@ -401,6 +405,14 @@
       "prepared_sha256": "f96a3b567deade1ad5d5e9bac7c031a00dd2d5f640054315d81c7e2e7b9e3b41",
       "shared": true
     },
+    "migrations/versions/0036_bulletin_source_updates.py": {
+      "prepared_sha256": "127cfa74a0819096e0dd767c604170ee48df04f5dc4629813105612d776de031",
+      "shared": true
+    },
+    "migrations/versions/0037_bulletin_intake_health.py": {
+      "prepared_sha256": "619ac5932939809aa08c1d3ffd75a16b595aff009931a27f8d85062d70ac8902",
+      "shared": true
+    },
     "pyproject.toml": {
       "prepared_sha256": "9ee1f2f0266ce6bf928bfef9c8a1b726bd4de608fb346e6693b3c94a4bb8bf68",
       "shared": false
@@ -457,6 +469,10 @@
       "prepared_sha256": "b3737418db6bfde896fad6ece6f4ba96a0cd09e620e4419375c3e40493fd2a87",
       "shared": true
     },
+    "src/smithguard/bulletin_expiry_repair.py": {
+      "prepared_sha256": "4bdf2c1788e1e03a1d7e0d4740338fa3b007f1a84b11df4e2106aeae9742bb86",
+      "shared": true
+    },
     "src/smithguard/bulletin_facts.py": {
       "prepared_sha256": "f523309805663921dea2ae726db7dfa25576dd085ed9950c1c3c8d66b8103b96",
       "shared": true
@@ -471,6 +487,14 @@
     },
     "src/smithguard/bulletin_intake.py": {
       "prepared_sha256": "02f7dfb39e671a1247814d035199bbf50352d34cf6f767c95a9413ed24d4ace0",
+      "shared": true
+    },
+    "src/smithguard/bulletin_intake_diagnostics.py": {
+      "prepared_sha256": "1d5b4bedcd48f60443643fefe5a829e603d52ba7c99910879ef2ae43edc811fe",
+      "shared": true
+    },
+    "src/smithguard/bulletin_intake_health.py": {
+      "prepared_sha256": "9ffe749d48fb8c9e565c170ace53038821b66a0782c637d4e4a0438e5528e446",
       "shared": true
     },
     "src/smithguard/bulletin_intake_parser.py": {
@@ -1161,12 +1185,24 @@
       "prepared_sha256": "2d7e9001bcd7a5b99ebd3c66edf35200cc2514dc6ca2385e44a2822432332433",
       "shared": false
     },
+    "tests/test_bulletin_expiry_repair.py": {
+      "prepared_sha256": "7992ac25db83c14b34564040a20750a5eb4c60c61368111a37c5384fd82850c5",
+      "shared": true
+    },
     "tests/test_bulletin_grants.py": {
       "prepared_sha256": "09ab99a90a6cb05b214b909267f68aa50290f486d7784d15c05cdba9c60c173b",
       "shared": true
     },
     "tests/test_bulletin_intake.py": {
       "prepared_sha256": "d3d9231e034149c6c83c3739e1ad52cecf83ff81351eb38d8fe478ba555be5dd",
+      "shared": true
+    },
+    "tests/test_bulletin_intake_diagnostics.py": {
+      "prepared_sha256": "59e057c4f05b8d0a3b8432566ab9b0a6ad4b530c02ee6a1eee9f63989644f0f9",
+      "shared": true
+    },
+    "tests/test_bulletin_intake_liveness.py": {
+      "prepared_sha256": "42711b7ba4e7e854fb339a9b436369e0ce579f7e18453a3eef6ecdc71bdea16f",
       "shared": true
     },
     "tests/test_bulletin_intake_parser.py": {

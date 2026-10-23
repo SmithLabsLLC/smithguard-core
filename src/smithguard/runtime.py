@@ -833,6 +833,7 @@ def signals_main(argv: list[str] | None = None) -> int:
         if config.xai_key_path is None or config.spend_policy_path is None:
             raise RuntimeConfigurationError("warning recheck configuration is missing")
         policy = load_spend_policy_path(config.spend_policy_path)
+        policy.assert_preliminary_warning_recheck_allowed()
         provider = XaiWarningRecheckProvider(
             api_key=_xai_key(config.xai_key_path),
             maximum_request_bytes=policy.maximum_request_bytes,

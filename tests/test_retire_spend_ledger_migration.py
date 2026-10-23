@@ -29,6 +29,8 @@ POLICY_PATH = Path(__file__).resolve().parents[1] / "contracts/v1/xai-spend-poli
 def _active_policy():
     return replace(
         load_spend_policy_path(POLICY_PATH),
+        # Historical API migration evidence, not current subscription authority.
+        subscription_first=False,
         policy_state="active",
         external_calls_allowed=True,
         unattended_collection_allowed=True,

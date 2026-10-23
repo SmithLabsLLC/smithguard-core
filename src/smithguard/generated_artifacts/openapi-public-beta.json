@@ -48,6 +48,7 @@
                   "enum": [
                     "published",
                     "corrected",
+                    "source_updated",
                     "disputed",
                     "withdrawn",
                     "expired",
@@ -345,6 +346,31 @@
                             "properties": {
                               "attribution": {
                                 "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "cna_provider": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "organization_id": {
+                                    "format": "uuid",
+                                    "maxLength": 36,
+                                    "type": "string"
+                                  },
+                                  "short_name": {
+                                    "maxLength": 200,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "organization_id",
+                                  "short_name"
+                                ],
+                                "type": "object"
+                              },
+                              "license_notice": {
+                                "maxLength": 5000,
                                 "minLength": 1,
                                 "type": "string"
                               },
@@ -866,6 +892,31 @@
                       "properties": {
                         "attribution": {
                           "maxLength": 300,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "cna_provider": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "organization_id": {
+                              "format": "uuid",
+                              "maxLength": 36,
+                              "type": "string"
+                            },
+                            "short_name": {
+                              "maxLength": 200,
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "organization_id",
+                            "short_name"
+                          ],
+                          "type": "object"
+                        },
+                        "license_notice": {
+                          "maxLength": 5000,
                           "minLength": 1,
                           "type": "string"
                         },

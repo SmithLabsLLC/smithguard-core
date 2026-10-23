@@ -18,6 +18,7 @@ from smithguard.official_notice_parser import ATOM, BoundedTree, html_text, inst
 CVE = re.compile(r"\bCVE-[12][0-9]{3}-[0-9]{4,19}\b", re.I)
 LEVELS = frozenset({"low", "moderate", "medium", "high", "critical", "unknown"})
 PARSER_VERSION = "official-facts-v1"
+CISCO_DATE_BASIS = "cisco_advisory_gmt_v1"
 
 
 def safe_text(value, maximum=200):
@@ -375,12 +376,17 @@ def feed(source, body, *, now):
         raw_date = one("published" if atom else "pubDate")
         precision = "exact"
         if source == "cisco-advisories":
-            # Cisco omits the zone. Preserve its calendar day, not an invented instant.
+            # Cisco's changing, zoneless pubDate is only a discovery-day hint.
+            # The advisory detail supplies authoritative publication/update dates.
             if not re.fullmatch(
                 r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.0", raw_date
             ):
                 raise BulletinError("cisco_feed_date")
-            published = datetime.fromisoformat(raw_date[:10]).replace(tzinfo=UTC)
+            try:
+                datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S.0")
+                published = datetime.fromisoformat(raw_date[:10]).replace(tzinfo=UTC)
+            except ValueError as error:
+                raise BulletinError("cisco_feed_date") from error
             precision = "day"
         else:
             published = instant(raw_date, rss=not atom)
@@ -410,7 +416,12 @@ def feed(source, body, *, now):
         if len(aliases) > 100:
             raise BulletinError("bulletin_alias_budget")
         # Keep only a content commitment, not headlines/body or personal fields.
-        digest = sha256_id(canonical_json_bytes([title, context]))
+        # A Cisco feed-date change requests a fresh detail check; the hint never
+        # replaces the original publication date in the accepted document.
+        commitment = (
+            [title, context, raw_date] if source == "cisco-advisories" else [title, context]
+        )
+        digest = sha256_id(canonical_json_bytes(commitment))
         facts = basic_facts(
             record_id=record_id, aliases=aliases, body_hash=digest, precision=precision
         )
@@ -430,6 +441,66 @@ def parse_index(source, body, *, now):
     return feed(source, body, now=now)
 
 
+def cisco_encoding(body, *, maximum):
+    # The observed Cisco template mixes UTF-8 with lone Windows NBSP bytes.
+    # Normalize precisely that whitespace byte; any other bad encoding fails.
+    if not isinstance(body, bytes) or not 0 < len(body) <= maximum:
+        raise BulletinError("bulletin_source_bytes")
+    decoded = body.decode("utf-8", errors="surrogateescape")
+    try:
+        body = decoded.replace("\udca0", "\xa0").encode("utf-8")
+    except UnicodeError as error:
+        raise BulletinError("bulletin_source_encoding") from error
+    return body
+
+
+def cisco_dates(root, region, *, now):
+    """Require the observed, explicitly GMT Cisco advisory date metadata."""
+    dates = []
+    for identity, label in (
+        ("ud-published", "First Published:"),
+        ("ud-last-updated", "Last Updated:"),
+    ):
+        matches = [node for node in root.walk() if node.attrs.get("id") == identity]
+        if identity == "ud-last-updated" and not matches:
+            # Initial Cisco advisories omit this row entirely. Absence is unknown,
+            # never an invented update time; a stray label fails closed.
+            if re.search(r"\bLast\s+Updated\b", root.text(), re.I):
+                raise BulletinError("cisco_detail_dates")
+            dates.append(None)
+            continue
+        if len(matches) != 1 or not any(node is matches[0] for node in region.walk()):
+            raise BulletinError("cisco_detail_dates")
+        children = [node for node in matches[0].children if isinstance(node, Element)]
+        if (
+            len(children) != 2
+            or len(matches[0].children) != 2
+            or children[0].tag != "div"
+            or children[1].tag != "div"
+            or "ud-divHeaderLabelSpacing" not in children[0].attrs.get("class", "").split()
+            or " ".join(children[0].text().split()) != label
+            or "divLabelContent" not in children[1].attrs.get("class", "").split()
+        ):
+            raise BulletinError("cisco_detail_dates")
+        value = " ".join(children[1].text().split())
+        if not re.fullmatch(
+            r"[0-9]{4} (?:January|February|March|April|May|June|July|August|September|"
+            r"October|November|December) [0-9]{1,2} [0-9]{2}:[0-9]{2} GMT",
+            value,
+        ):
+            raise BulletinError("cisco_detail_dates")
+        try:
+            parsed = datetime.strptime(value, "%Y %B %d %H:%M GMT").replace(tzinfo=UTC)
+        except ValueError as error:
+            raise BulletinError("cisco_detail_dates") from error
+        if parsed > now:
+            raise BulletinError("bulletin_source_future")
+        dates.append(parsed)
+    if dates[1] is not None and dates[1] < dates[0]:
+        raise BulletinError("cisco_detail_dates")
+    return tuple(dates)
+
+
 def publisher_detail(candidate, body, *, now):
     """Recheck a retained publisher URL independently of finite feed membership."""
     if candidate.source == "mozilla-mfsa":
@@ -437,10 +508,7 @@ def publisher_detail(candidate, body, *, now):
     source = candidate.source
     spec = NETWORK_SOURCES[source]
     if source == "cisco-advisories":
-        # The observed Cisco template mixes UTF-8 with lone Windows NBSP bytes.
-        # Normalize precisely that whitespace byte; any other bad encoding fails.
-        decoded = body.decode("utf-8", errors="surrogateescape")
-        body = decoded.replace("\udca0", "\xa0").encode("utf-8")
+        body = cisco_encoding(body, maximum=spec.detail_bytes)
     root = parse_html(body, maximum=spec.detail_bytes)
     canonicals = [
         n.attrs.get("href", "").strip()
@@ -487,8 +555,12 @@ def publisher_detail(candidate, body, *, now):
     if source == "zdi-published":
         facts["aliases"] += sorted(set(re.findall(r"\bZDI-CAN-[0-9]{1,12}\b", region.text())))
     facts["index_hash"] = candidate.facts.get("index_hash", candidate.facts["body_hash"])
-    modified = candidate.modified
-    if source == "ubuntu-usn":
+    published, modified = candidate.published, candidate.modified
+    if source == "cisco-advisories":
+        published, modified = cisco_dates(root, region, now=now)
+        facts["time_precision"] = "exact"
+        facts["date_basis"] = CISCO_DATE_BASIS
+    elif source == "ubuntu-usn":
         headers = [n.text() for n in region.walk() if n.tag == "h1"]
         if len(headers) != 1 or not headers[0].startswith(candidate.facts["record_id"] + ":"):
             raise BulletinError("ubuntu_detail_identity")
@@ -589,7 +661,7 @@ def publisher_detail(candidate, body, *, now):
         retained = [identity] + others[:99]
         facts["alias_omissions"] = len(set(facts["aliases"]) - set(retained))
         facts["aliases"] = sorted(retained)
-    return SourceCandidate(source, candidate.url, candidate.published, modified, facts)
+    return SourceCandidate(source, candidate.url, published, modified, facts)
 
 
 def structured_index(source, body, *, now):

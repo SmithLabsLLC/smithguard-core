@@ -199,6 +199,13 @@ def known_urls(session, source):
     return frozenset(current) | frozenset(pending)
 
 
+def reset_detail_failures(pending):
+    """A completed or newly qualified work slot starts a fresh failure history."""
+    pending.failure_count = 0
+    pending.failure_category = None
+    pending.first_failure_at = pending.last_failure_at = None
+
+
 def stage(session, source, notices, *, now, baseline):
     """Retain the pending tail before the transaction can claim a complete fetch."""
     lock_stream(session, now=now)
@@ -260,6 +267,8 @@ def stage(session, source, notices, *, now, baseline):
             unchanged.append(previous)
             if pending is not None:
                 pending.processed_at = now  # Source reverted before an unaccepted update.
+                pending.qualification_required, pending.next_attempt_at = False, None
+                reset_detail_failures(pending)
             continue
         if pending is not None and pending.processed_at is None:
             old = session.get(OfficialNoticeEvidence, pending.evidence_id)
@@ -267,6 +276,8 @@ def stage(session, source, notices, *, now, baseline):
                 # A retained tail is freshly observed only after a successful
                 # complete response, not merely because it is drained later.
                 pending.updated_at = now
+                pending.qualification_required, pending.next_attempt_at = False, None
+                reset_detail_failures(pending)
                 continue
         kind = "withdrawn" if notice.withdrawn else "corrected" if previous else "new"
         changes.append((kind, notice.published, key, doc, previous, pending))
@@ -302,6 +313,8 @@ def stage(session, source, notices, *, now, baseline):
             session.add(pending)
         pending.evidence_id, pending.kind = evidence_id, kind
         pending.updated_at, pending.processed_at = now, None
+        pending.qualification_required, pending.next_attempt_at = False, None
+        reset_detail_failures(pending)
         pending_count += int(new_slot)
         mark_stale(session, bulletin_id(source, doc["url"]), reason="verification_pending", now=now)
     session.flush()

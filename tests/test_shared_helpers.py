@@ -203,7 +203,9 @@ def test_fsio_writes_and_reads_privately(tmp_path: Path) -> None:
     fsio.fsync_directory(tmp_path, nofollow=True)
 
 
-def test_strict_json_and_timestamp_errors_carry_typed_reasons() -> None:
+def test_strict_json_and_timestamp_errors_carry_typed_reasons(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     cases = {
         "{": "invalid",
         '{"a":1,"a":2}': "duplicate_key",
@@ -225,8 +227,18 @@ def test_strict_json_and_timestamp_errors_carry_typed_reasons() -> None:
     assert identifiers.strict_json_loads(surrogate) == json.loads(surrogate)
     with pytest.raises(UnicodeDecodeError):
         identifiers.strict_json_loads(b'"\xff"')
-    with pytest.raises(RecursionError):
-        identifiers.strict_json_loads("[" * 100_000 + "]" * 100_000, max_depth=1_000_000)
+    # Native parser recursion limits vary across Python builds and runner stacks.
+    # Check propagation deterministically; real depth/node bounds are tested above.
+    recursion_error = RecursionError("synthetic parser recursion limit")
+
+    def exhausted_parser(*args, **kwargs):
+        raise recursion_error
+
+    with monkeypatch.context() as patch:
+        patch.setattr(identifiers.json, "loads", exhausted_parser)
+        with pytest.raises(RecursionError) as recursion_failure:
+            identifiers.strict_json_loads("[]")
+        assert recursion_failure.value is recursion_error
     assert identifiers.REGISTER_JSON_MAX_NODES == 200_000
     assert identifiers.REGISTER_JSON_MAX_DEPTH == 32
     for value, reason in (

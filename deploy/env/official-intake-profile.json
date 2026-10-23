@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source_keys": [
+    "php",
+    "mozilla",
+    "mozilla-mfsa",
+    "ubuntu-usn",
+    "node-releases",
+    "gitlab-releases",
+    "zdi-published",
+    "cisco-advisories",
+    "fortinet-advisories",
+    "aws-bulletins",
+    "apple-releases",
+    "paloalto-advisories",
+    "zdi-upcoming",
+    "oss-security",
+    "linux-security",
+    "ghsa-bulletin",
+    "go-bulletin",
+    "rustsec-bulletin"
+  ]
+}

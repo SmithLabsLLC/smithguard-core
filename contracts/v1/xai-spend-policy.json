@@ -1,5 +1,5 @@
 {
-  "schema_version": "6.0.0",
+  "schema_version": "7.0.0",
   "policy_id": "gbsec:control:xai-spend-policy",
   "policy_state": "ready",
   "stage_limits": {
@@ -119,12 +119,12 @@
     "contract_only": false,
     "executable_enforcement_present": true,
     "checklist_item_may_be_closed": false,
-    "notes": "Version 6 carries request, schedule and activation limits only; provider cost is monitored through billing. Source state remains ready, so external calls and publication stay prohibited until the exact shadow and public-activation gates pass."
+    "notes": "Version 7 carries request, schedule and activation limits only; provider cost is monitored through billing. Source state remains ready, so external calls and publication stay prohibited until the exact shadow and public-activation gates pass."
   },
   "subscription_contract": {
     "primary": "grok_build_subscription",
-    "fallback": "api_key",
-    "fallback_requires": "proven_uncharged_primary_receipt",
+    "fallback": "claude_code_subscription",
+    "fallback_requires": "policy_bound_primary_unavailability_or_proven_uncharged_receipt",
     "model": "grok-4.7",
     "actual_model": "grok-4.7-build",
     "reasoning_effort": "high",
@@ -147,6 +147,17 @@
     "retained_reasoning": false,
     "automatic_retries": 0,
     "maximum_output_tokens_per_attempt": null,
-    "maximum_qualification_output_tokens": null
+    "maximum_qualification_output_tokens": null,
+    "fallback_model": "claude-opus-5-5",
+    "fallback_reasoning_effort": "high",
+    "fallback_harness_version": "2.1.309",
+    "fallback_tools": [
+      "WebSearch"
+    ],
+    "fallback_search_coverage": "public_web_index_only_not_native_x_search",
+    "fallback_usage_basis": "aggregate_modelUsage_including_search_helpers",
+    "fallback_search_helpers": "same_model_required_effort_not_independently_observable",
+    "fallback_certificate_store": "system",
+    "primary_unavailable_reason": "trust_not_qualified"
   }
 }
