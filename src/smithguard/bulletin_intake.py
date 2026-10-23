@@ -35,6 +35,8 @@ def no_publication(session, row, *, now):
 
 
 def reason(error):
+    if isinstance(error, TimeoutError):
+        return "source_timeout"
     message = str(error)
     if isinstance(error, ValueError) and re.fullmatch("[a-z][a-z0-9_]{0,70}", message):
         return message

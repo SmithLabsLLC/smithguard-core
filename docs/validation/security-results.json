@@ -1,0 +1,53 @@
+{
+  "semgrep": {
+    "findings": 0,
+    "errors": 0,
+    "targets_scanned": 178,
+    "scope": "Four Python rules for dynamic evaluation, shell use, disabled TLS verification and unsafe YAML. This is a limited source check, not a full security audit."
+  },
+  "gitleaks": {
+    "findings": [
+      {
+        "file": "tests/test_record_accounting_schema.py",
+        "line": 51,
+        "rule": "generic-api-key",
+        "sha256": "2df001c2fddfe52a4371a0a52583a96a9db502b59936ca0215f26dd1b4f733f6",
+        "disposition": "non-secret test data",
+        "reason": "Public GHSA record identifier"
+      },
+      {
+        "file": "tests/test_ingestion.py",
+        "line": 352,
+        "rule": "generic-api-key",
+        "sha256": "1446da1a7eb7f2ed7cbc28b5d8bee9756a279b731b782c3a797e8e84a240b889",
+        "disposition": "non-secret test data",
+        "reason": "Synthetic idempotency label"
+      },
+      {
+        "file": "tests/test_advisory_catalog.py",
+        "line": 647,
+        "rule": "generic-api-key",
+        "sha256": "4f882b5f9fc03228e2d4800928efe466b299ccba72e336f458f1a219aa357630",
+        "disposition": "non-secret test data",
+        "reason": "Public GHSA identifier"
+      },
+      {
+        "file": "tests/test_advisory_catalog.py",
+        "line": 726,
+        "rule": "generic-api-key",
+        "sha256": "4f882b5f9fc03228e2d4800928efe466b299ccba72e336f458f1a219aa357630",
+        "disposition": "non-secret test data",
+        "reason": "Synthetic GHSA identifier"
+      },
+      {
+        "file": "tests/test_collectors.py",
+        "line": 174,
+        "rule": "generic-api-key",
+        "sha256": "435f633c20514b5766d6902c2b91187f11a98dfd5dcf7ef50ed2f7adee408dbb",
+        "disposition": "non-secret test data",
+        "reason": "Synthetic pagination cursor"
+      }
+    ],
+    "scope": "Unignored working tree; all five redacted matches are non-secret test identifiers. Exact file hashes must match these dispositions."
+  }
+}

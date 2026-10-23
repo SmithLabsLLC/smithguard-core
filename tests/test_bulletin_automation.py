@@ -900,3 +900,53 @@ def test_large_official_rollup_keeps_identity_and_discloses_alias_omissions():
     assert accepted.facts["alias_omissions"] == 351
     public = project_facts(envelope(accepted, now=NOW, retrospective=False), REGISTRY, now=NOW)
     assert any("351 additional identifiers" in value for value in public["unknowns"])
+
+
+def test_archive_fetches_share_pacing_across_hosts_and_failures(monkeypatch):
+    elapsed = [0.0]
+    calls = []
+    monkeypatch.setattr(automation.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(
+        automation.time, "sleep", lambda seconds: elapsed.__setitem__(0, elapsed[0] + seconds)
+    )
+
+    def fetch(source, **kwargs):
+        calls.append((source, elapsed[0]))
+        if len(calls) == 2:
+            raise TimeoutError("untrusted network diagnostics")
+        return source
+
+    budget = automation.FetchBudget(fetch, seconds=60)
+    assert budget("oss-security") == "oss-security"
+    with pytest.raises(TimeoutError):
+        budget("linux-security")
+    assert budget("ubuntu-usn") == "ubuntu-usn"
+    assert budget("linux-security") == "linux-security"
+    assert calls == [
+        ("oss-security", 0.0),
+        ("linux-security", 5.0),
+        ("ubuntu-usn", 5.0),
+        ("linux-security", 10.0),
+    ]
+    assert budget.attempts == 4
+
+
+def test_archive_pacing_does_not_extend_deadline_or_consume_unsent_attempt(monkeypatch):
+    elapsed = [0.0]
+    monkeypatch.setattr(automation.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(
+        automation.time, "sleep", lambda seconds: pytest.fail("slept beyond deadline")
+    )
+    calls = []
+    budget = automation.FetchBudget(lambda source: calls.append(source), seconds=4)
+    budget("oss-security")
+    with pytest.raises(BulletinError, match="bulletin_network_budget"):
+        budget("linux-security")
+    assert calls == ["oss-security"]
+    assert budget.attempts == 1
+
+
+def test_source_timeout_reason_does_not_publish_exception_text():
+    from smithguard.bulletin_intake import reason
+
+    assert reason(TimeoutError("untrusted network diagnostics")) == "source_timeout"

@@ -37,12 +37,29 @@ class FetchBudget:
         self.deadline = time.monotonic() + seconds
         self.maximum = maximum
         self.attempts = 0
+        self.archive_ready_at = 0.0
 
     def __call__(self, source, **kwargs):
         if self.attempts >= self.maximum or time.monotonic() >= self.deadline:
             raise BulletinError("bulletin_network_budget")
+        # These two archives share an upstream service. A burst across their
+        # different hostnames can time out the later source. Space requests,
+        # including failures, without retrying or extending the shared budget.
+        archive = source in {"oss-security", "linux-security"}
+        if archive:
+            delay = max(0.0, self.archive_ready_at - time.monotonic())
+            if time.monotonic() + delay >= self.deadline:
+                raise BulletinError("bulletin_network_budget")
+            if delay:
+                time.sleep(delay)
+            if time.monotonic() >= self.deadline:
+                raise BulletinError("bulletin_network_budget")
         self.attempts += 1
-        return self.fetch(source, **kwargs)
+        try:
+            return self.fetch(source, **kwargs)
+        finally:
+            if archive:
+                self.archive_ready_at = time.monotonic() + 5.0
 
 
 def active_known(session, source, *, now):

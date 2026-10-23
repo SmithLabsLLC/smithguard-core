@@ -442,7 +442,7 @@
       "shared": true
     },
     "src/smithguard/bulletin_automation.py": {
-      "prepared_sha256": "20d04c7945f41876e17240c5628c7fe8f9e6356272b8d92fdce5dbc0c7aad7dd",
+      "prepared_sha256": "5053551260bb86bbb51ea8101f8843e94117c53cf66b5f963f211f72e87e9dcc",
       "shared": true
     },
     "src/smithguard/bulletin_catalog.py": {
@@ -470,7 +470,7 @@
       "shared": true
     },
     "src/smithguard/bulletin_intake.py": {
-      "prepared_sha256": "5e0c2f300a72ca263ef6fe6c06f448b169cb040426a3c55eefd28bb8d3bc53bf",
+      "prepared_sha256": "02f7dfb39e671a1247814d035199bbf50352d34cf6f767c95a9413ed24d4ace0",
       "shared": true
     },
     "src/smithguard/bulletin_intake_parser.py": {
@@ -1158,7 +1158,7 @@
       "shared": true
     },
     "tests/test_bulletin_automation.py": {
-      "prepared_sha256": "b8feabdc418d3c5fa120ac296a141256d3ebf64a18764ad8a2584632bfa5dea3",
+      "prepared_sha256": "2d7e9001bcd7a5b99ebd3c66edf35200cc2514dc6ca2385e44a2822432332433",
       "shared": false
     },
     "tests/test_bulletin_grants.py": {
