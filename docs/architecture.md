@@ -25,6 +25,16 @@ bulletins. The API and hosted MCP expose the same underlying service results.
 | Contracts and generated output | `contracts/v1/`, `src/smithguard/generated_artifacts/` |
 | Synthetic behavior tests | `tests/` |
 
+Bulletin detail qualification records bounded failure categories, consecutive counts
+and retry deadlines without retaining raw error messages. Storage pressure preserves
+existing cooldown and stale-state bookkeeping while withholding new diagnostic
+receipts. Intake liveness compares a packaged expected source profile, checked
+control, actual timer/service state and matching hourly closure; bounded planned
+transitions remain visibly degraded. Closure deadlines follow the hourly run epoch
+and allow the next scheduled run to finish within its bounded runtime. The
+maintenance expiry repair requires exact
+live record identities and an active grant, and preserves original content and dates.
+
 ## Important boundaries
 
 External content and model output are untrusted data. They cannot select arbitrary

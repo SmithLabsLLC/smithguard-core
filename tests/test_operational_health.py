@@ -460,8 +460,8 @@ def test_public_readiness_requires_a_current_openssf_catalog(public_runtime_data
 
 def test_reviewed_migration_matches_the_candidate_runtime_release() -> None:
     journal = json.loads(MIGRATION_JOURNAL.read_text(encoding="ascii"))
-    assert journal["migrations"][-1]["revision"] == "0036_bulletin_source_updates"
-    assert EXPECTED_MIGRATION == "0036_bulletin_source_updates"
+    assert journal["migrations"][-1]["revision"] == "0037_bulletin_intake_health"
+    assert EXPECTED_MIGRATION == "0037_bulletin_intake_health"
     files = {"app/migrations/journal.json": MIGRATION_JOURNAL.read_bytes()}
     for entry in journal["migrations"]:
         files[f"app/migrations/{entry['file']}"] = (
@@ -1208,4 +1208,73 @@ def test_bulletin_status_uses_existing_health_alarm(state, expected):
     assert (
         next(check.status for check in report.checks if check.code == "bulletin_publication")
         == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "code,state,expected",
+    [
+        (0, "active", True),
+        (3, "inactive", False),
+        (3, "failed", None),
+        (3, "activating", None),
+        (3, "deactivating", None),
+        (4, "unknown", None),
+        (0, "", None),
+    ],
+)
+def test_intake_timer_requires_actual_active_state(code, state, expected):
+    import subprocess
+
+    def runner(command, **kwargs):
+        return subprocess.CompletedProcess(command, code, stdout=state + "\n")
+
+    assert (
+        operational_health_module._intake_timer_active("synthetic.timer", runner=runner) is expected
+    )
+
+
+@pytest.mark.parametrize("control_available", [True, False])
+def test_health_collector_uses_packaged_profile_and_checked_control(
+    database, monkeypatch, tmp_path, control_available
+):
+    from smithguard import official_notice_runtime
+    from smithguard.official_notice_fetch import configured_sources
+
+    sources = configured_sources(
+        (POLICY_ROOT.parent.parent / "deploy/env/official-intake-profile.json").read_bytes()
+    )
+
+    def read_control():
+        if not control_available:
+            raise ValueError("unsafe_control")
+        return {
+            "enabled": True,
+            "artifact_commit": "a" * 40,
+            "source_keys": list(sources),
+            "enabled_at": NOW.isoformat(),
+        }
+
+    monkeypatch.setattr(official_notice_runtime, "read_control", read_control)
+    monkeypatch.setattr(operational_health_module, "_unit_active", lambda *a, **k: True)
+    monkeypatch.setattr(operational_health_module, "_unit_result", lambda *a, **k: "success")
+    monkeypatch.setattr(operational_health_module, "_unit_enabled", lambda *a, **k: True)
+    monkeypatch.setattr(operational_health_module, "_intake_timer_active", lambda *a, **k: True)
+    monkeypatch.setattr(operational_health_module, "_warning_unit_active", lambda *a, **k: False)
+    config = HealthConfig(
+        database_url=database.url.render_as_string(hide_password=False),
+        base_url="https://guard.smithlabs.ai",
+        report_path=tmp_path / "health.json",
+        metric_receipt_path=tmp_path / "metrics.json",
+        warning_lane_metric_receipt_path=tmp_path / "warning.json",
+        disk_path=tmp_path,
+        spend_policy_path=POLICY_ROOT / "xai-spend-policy.json",
+        rights_register_path=POLICY_ROOT / "source-rights-register.json",
+        official_intake_profile_path=POLICY_ROOT.parent.parent
+        / "deploy/env/official-intake-profile.json",
+        governance_policy_path=POLICY_ROOT / "source-governance-policy.json",
+    )
+    result = collect_operational_inputs(config, measured_at=NOW, probe=lambda url: True)
+    assert result.official_intake_status == (
+        "awaiting_first_closure" if control_available else "control_unavailable"
     )

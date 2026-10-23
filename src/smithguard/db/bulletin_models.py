@@ -231,6 +231,12 @@ class OfficialNoticePending(Base):
     __tablename__ = "official_notice_pending"
     __table_args__ = (
         CheckConstraint("kind IN ('new','corrected','withdrawn','recheck')", name="kind"),
+        CheckConstraint("failure_count BETWEEN 0 AND 65535", name="failures"),
+        CheckConstraint(
+            "failure_category IN ('rights','timeout','transport','http_status',"
+            "'source_dates','source_identity','source_shape','budget','storage','unknown')",
+            name="failure_category",
+        ),
         Index("ix_official_pending_work", "source_key", "processed_at", "kind", "first_seen_at"),
     )
     source_key: Mapped[str] = mapped_column(String(40), primary_key=True)
@@ -240,6 +246,12 @@ class OfficialNoticePending(Base):
     kind: Mapped[str] = mapped_column(String(12), nullable=False)
     qualification_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failure_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    failure_category: Mapped[str | None] = mapped_column(String(24))
+    first_failure_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_failure_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

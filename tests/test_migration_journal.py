@@ -544,6 +544,14 @@ def test_committed_migration_journal_matches_sources() -> None:
             "rollback_mode": "forward_only",
             "source_sha256": journal["migrations"][35]["source_sha256"],
         },
+        {
+            "description": "Add bounded detail-failure diagnostics and intake health access",
+            "down_revision": "0036_bulletin_source_updates",
+            "file": "versions/0037_bulletin_intake_health.py",
+            "revision": "0037_bulletin_intake_health",
+            "rollback_mode": "forward_only",
+            "source_sha256": journal["migrations"][36]["source_sha256"],
+        },
     ]
     assert journal["migrations"][0]["source_sha256"].startswith("sha256:")
 
@@ -916,7 +924,7 @@ def test_one_maintenance_command_migrates_and_records_the_verified_journal(
         with engine.connect() as connection:
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0036_bulletin_source_updates"
+                == "0037_bulletin_intake_health"
             )
             assert connection.scalar(
                 text("SELECT count(*) FROM smithguard.migration_journal")
@@ -924,7 +932,7 @@ def test_one_maintenance_command_migrates_and_records_the_verified_journal(
             notes = connection.scalar(
                 text(
                     "SELECT notes FROM smithguard.migration_journal "
-                    "WHERE revision = '0036_bulletin_source_updates'"
+                    "WHERE revision = '0037_bulletin_intake_health'"
                 )
             )
             assert notes == {"backup_restore_policy": "not_required_by_owner_20260911"}
@@ -938,7 +946,7 @@ def test_one_maintenance_command_migrates_and_records_the_verified_journal(
             replayed_notes = connection.scalar(
                 text(
                     "SELECT notes FROM smithguard.migration_journal "
-                    "WHERE revision = '0036_bulletin_source_updates'"
+                    "WHERE revision = '0037_bulletin_intake_health'"
                 )
             )
         assert replayed_notes == notes
@@ -957,10 +965,10 @@ def test_later_head_preserves_prior_migration_recovery_notes(
     future_notes = {"backup_restore_policy": "not_required_by_owner_20260911"}
     future_root = tmp_path / "future-migrations"
     shutil.copytree(PACKAGE_ROOT / "migrations", future_root)
-    future_source = future_root / "versions/0037_test_notes.py"
+    future_source = future_root / "versions/0038_test_notes.py"
     future_source.write_text(
-        'revision: str = "0037_test_notes"\n'
-        'down_revision: str | None = "0036_bulletin_source_updates"\n'
+        'revision: str = "0038_test_notes"\n'
+        'down_revision: str | None = "0037_bulletin_intake_health"\n'
         'migration_description: str = "Test later migration notes"\n'
         'rollback_mode: str = "forward_only"\n',
         encoding="ascii",
@@ -969,9 +977,9 @@ def test_later_head_preserves_prior_migration_recovery_notes(
     future_document = json.loads(future_journal.read_text(encoding="ascii"))
     future_document["migrations"].append(
         {
-            "revision": "0037_test_notes",
-            "down_revision": "0036_bulletin_source_updates",
-            "file": "versions/0037_test_notes.py",
+            "revision": "0038_test_notes",
+            "down_revision": "0037_bulletin_intake_health",
+            "file": "versions/0038_test_notes.py",
             "source_sha256": file_sha256(future_source),
             "description": "Test later migration notes",
             "rollback_mode": "forward_only",
@@ -991,7 +999,7 @@ def test_later_head_preserves_prior_migration_recovery_notes(
             )
         with handle.engine.begin() as connection:
             connection.execute(
-                text("UPDATE public.alembic_version SET version_num = '0037_test_notes'")
+                text("UPDATE public.alembic_version SET version_num = '0038_test_notes'")
             )
         with Session(handle.engine) as session, session.begin():
             record_migration_journal(
@@ -1007,13 +1015,13 @@ def test_later_head_preserves_prior_migration_recovery_notes(
                     text(
                         "SELECT revision, notes FROM smithguard.migration_journal "
                         "WHERE revision IN "
-                        "('0036_bulletin_source_updates', '0037_test_notes')"
+                        "('0037_bulletin_intake_health', '0038_test_notes')"
                     )
                 )
             }
         assert notes == {
-            "0036_bulletin_source_updates": prior_notes,
-            "0037_test_notes": future_notes,
+            "0037_bulletin_intake_health": prior_notes,
+            "0038_test_notes": future_notes,
         }
     finally:
         handle.engine.dispose()
@@ -1071,7 +1079,7 @@ def test_restored_revision_0018_migrates_to_smithguard_without_rewriting_evidenc
             ) == len(load_migration_journal(MIGRATION_JOURNAL)["migrations"])
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0036_bulletin_source_updates"
+                == "0037_bulletin_intake_health"
             )
             assert (
                 connection.scalar(
@@ -1167,7 +1175,7 @@ def test_isolated_restore_migration_requires_the_explicit_rehearsal_scope(
         with engine.connect() as connection:
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0036_bulletin_source_updates"
+                == "0037_bulletin_intake_health"
             )
             assert connection.scalar(
                 text("SELECT count(*) FROM smithguard.migration_journal")
@@ -1242,7 +1250,7 @@ def test_legacy_owned_revision_seven_migrates_and_reaches_the_exact_role_boundar
         with maintenance_engine.connect() as connection:
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0036_bulletin_source_updates"
+                == "0037_bulletin_intake_health"
             )
             assert connection.scalar(
                 text("SELECT count(*) FROM smithguard.migration_journal")

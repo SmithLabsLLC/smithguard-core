@@ -4,4 +4,4 @@ Kept in a module with no dependencies so maintenance tools that must stay light
 can import it without loading the ORM.
 """
 
-EXPECTED_MIGRATION = "0036_bulletin_source_updates"
+EXPECTED_MIGRATION = "0037_bulletin_intake_health"

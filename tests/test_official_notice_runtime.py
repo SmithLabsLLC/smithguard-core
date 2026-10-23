@@ -131,3 +131,13 @@ def test_disabled_control_can_close_authority_without_a_release_identity(control
     assert m.control_state()["state"] == "paused"
     with pytest.raises(ValueError):
         m.control_bytes(operation_id="20261021-" + "1" * 32, artifact_commit=None, enabled=True)
+
+
+def test_control_transition_timestamps_are_state_bound():
+    arguments = dict(operation_id="20261021-" + "1" * 32, artifact_commit="a" * 40)
+    assert json.loads(m.control_bytes(**arguments, draining_at=NOW))["draining_at"]
+    assert json.loads(m.control_bytes(**arguments, enabled=True, enabled_at=NOW))["enabled_at"]
+    with pytest.raises(ValueError, match="drain_time"):
+        m.control_bytes(**arguments, enabled=True, draining_at=NOW)
+    with pytest.raises(ValueError, match="enabled_time"):
+        m.control_bytes(**arguments, enabled_at=NOW)

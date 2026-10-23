@@ -317,7 +317,8 @@ END $record_accounting_grants$;
 -- Bulletin private originals and publication decisions are never API-readable.
 DO $bulletin_grants$ BEGIN
     IF to_regclass('smithguard.bulletin_stream') IS NOT NULL THEN
-        GRANT SELECT ON TABLE smithguard.bulletin_stream, smithguard.bulletin_source_status TO "smithguard-health";
+        GRANT SELECT ON TABLE smithguard.bulletin_stream, smithguard.bulletin_source_status,
+            smithguard.official_intake_runs TO "smithguard-health";
         GRANT SELECT ON TABLE smithguard.bulletin_stream, smithguard.bulletin_current,
             smithguard.bulletin_public_versions, smithguard.bulletin_events,
             smithguard.bulletin_source_status TO "smithguard-api";

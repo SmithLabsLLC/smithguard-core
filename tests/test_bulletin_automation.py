@@ -675,7 +675,7 @@ def test_busy_source_reserves_detail_capacity_for_new_arrivals(database):
         result = automation.qualify_details(
             connection, "ubuntu-usn", now=NOW, fetch=fetch, registry=REGISTRY, enabled=lambda: True
         )
-    assert result == {"attempted": automation.DETAIL_LIMIT, "failed": 0}
+    assert result == {"attempted": automation.DETAIL_LIMIT, "failed": 0, "failure_categories": {}}
     assert URL in calls
     assert len(set(calls)) == automation.DETAIL_LIMIT
 

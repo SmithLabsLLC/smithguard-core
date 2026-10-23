@@ -287,6 +287,14 @@
       "revision": "0036_bulletin_source_updates",
       "rollback_mode": "forward_only",
       "source_sha256": "sha256:127cfa74a0819096e0dd767c604170ee48df04f5dc4629813105612d776de031"
+    },
+    {
+      "description": "Add bounded detail-failure diagnostics and intake health access",
+      "down_revision": "0036_bulletin_source_updates",
+      "file": "versions/0037_bulletin_intake_health.py",
+      "revision": "0037_bulletin_intake_health",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:619ac5932939809aa08c1d3ffd75a16b595aff009931a27f8d85062d70ac8902"
     }
   ],
   "schema_version": "1.0.0"

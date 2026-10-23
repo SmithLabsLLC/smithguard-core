@@ -1,6 +1,7 @@
 """Bounded private analyst work with immutable, optimistic resolution receipts."""
 
 import re
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 
@@ -15,7 +16,7 @@ from smithguard.db.bulletin_models import (
 from smithguard.identifiers import canonical_json_bytes, sha256_id, timestamp
 
 
-def queue(session, *, limit=50):
+def queue(session, *, limit=50, now=None):
     if type(limit) is not int or not 1 <= limit <= 100:
         raise BulletinError("bulletin_review_limit")
     rows = session.scalars(
@@ -44,7 +45,15 @@ def queue(session, *, limit=50):
         .select_from(BulletinReviewQueue)
         .where(BulletinReviewQueue.state == "pending")
     )
-    return {"pending": count, "returned": len(items), "items": items, "public": False}
+    from smithguard.bulletin_intake_diagnostics import pending_failures
+
+    return {
+        "pending": count,
+        "returned": len(items),
+        "items": items,
+        "public": False,
+        "detail_failures": pending_failures(session, now=now or datetime.now(UTC), limit=limit),
+    }
 
 
 def resolve(session, value, *, now):
