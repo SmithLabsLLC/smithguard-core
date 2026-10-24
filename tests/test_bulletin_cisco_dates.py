@@ -179,12 +179,43 @@ def test_initial_advisory_with_no_update_container_or_label_keeps_update_unknown
 
 
 @pytest.mark.parametrize(
+    "sample",
+    [
+        "<pre>Component Last Updated Never</pre>",
+        "<pre><code>Component Last <b>Updated</b> Never</code></pre>",
+    ],
+)
+def test_initial_advisory_command_output_is_not_update_metadata(sample):
+    body = detail().replace(
+        field("ud-last-updated", "Last Updated:", "2026 October 23 16:16 GMT").encode(), b""
+    )
+    accepted = publisher_detail(candidate(), body + sample.encode(), now=NOW)
+    assert accepted.published == datetime(2026, 10, 21, 19, 12, tzinfo=UTC)
+    assert accepted.modified is None
+
+
+@pytest.mark.parametrize("identity", ["ud-published", "ud-last-updated"])
+def test_actual_date_metadata_inside_command_output_fails_closed(identity):
+    label, value = (
+        ("First Published:", "2026 October 21 19:12 GMT")
+        if identity == "ud-published"
+        else ("Last Updated:", "2026 October 23 16:16 GMT")
+    )
+    metadata = field(identity, label, value).encode()
+    body = detail().replace(metadata, b"<pre>" + metadata + b"</pre>")
+    with pytest.raises(BulletinError, match="cisco_detail_dates"):
+        publisher_detail(candidate(), body, now=NOW)
+
+
+@pytest.mark.parametrize(
     "stray",
     [
         '<div class="ud-divHeaderLabelSpacing">Last Updated:</div>',
         '<div id="changed-update-id">Last Updated: 2026 October 23 16:16 GMT</div>',
         "<p>last updated</p>",
         "<p>Last <span>Updated:</span></p>",
+        "<code>Last Updated:</code>",
+        "<pre>example</pre><p>Last Updated:</p>",
     ],
 )
 def test_missing_update_container_with_stray_update_label_fails_closed(stray):

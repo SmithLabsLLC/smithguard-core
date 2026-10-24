@@ -454,6 +454,15 @@ def cisco_encoding(body, *, maximum):
     return body
 
 
+def cisco_date_text(node):
+    """Exclude preformatted command output from the stray metadata-label check."""
+    if node.tag == "pre":
+        return ""
+    return " ".join(
+        cisco_date_text(child) if isinstance(child, Element) else child for child in node.children
+    )
+
+
 def cisco_dates(root, region, *, now):
     """Require the observed, explicitly GMT Cisco advisory date metadata."""
     dates = []
@@ -465,11 +474,18 @@ def cisco_dates(root, region, *, now):
         if identity == "ud-last-updated" and not matches:
             # Initial Cisco advisories omit this row entirely. Absence is unknown,
             # never an invented update time; a stray label fails closed.
-            if re.search(r"\bLast\s+Updated\b", root.text(), re.I):
+            if re.search(r"\bLast\s+Updated\b", cisco_date_text(root), re.I):
                 raise BulletinError("cisco_detail_dates")
             dates.append(None)
             continue
         if len(matches) != 1 or not any(node is matches[0] for node in region.walk()):
+            raise BulletinError("cisco_detail_dates")
+        if any(
+            child is matches[0]
+            for node in root.walk()
+            if node.tag == "pre"
+            for child in node.walk()
+        ):
             raise BulletinError("cisco_detail_dates")
         children = [node for node in matches[0].children if isinstance(node, Element)]
         if (
