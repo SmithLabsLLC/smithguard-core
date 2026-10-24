@@ -269,11 +269,12 @@ def run(session, *, registry, grant_reader, now):
                 store.mark_stale(session, identity, reason="catalog_entry_absent", now=now)
             return True
         document = project_kev(value, registry, now=now)
-        digest = sha256_id(canonical_json_bytes(document))
         prior = session.get(BulletinRevision, (identity, current.revision)) if current else None
         try:
             # Preserve the immutable snapshot identity in each actual decision.
-            if prior is None or prior.content_hash != digest:
+            from smithguard.bulletin_policy import same_publication_content
+
+            if prior is None or not same_publication_content(prior.document, document, registry):
                 store.publish(
                     session, document, grant=grant_reader(now=now), registry=registry, now=now
                 )
@@ -285,7 +286,7 @@ def run(session, *, registry, grant_reader, now):
                 store.verify_unchanged(
                     session,
                     identity,
-                    content_hash=digest,
+                    content_hash=prior.content_hash,
                     grant=grant_reader(now=now),
                     registry=registry,
                     now=now,

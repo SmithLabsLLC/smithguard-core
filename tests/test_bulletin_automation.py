@@ -955,3 +955,28 @@ def test_source_timeout_reason_does_not_publish_exception_text():
     from smithguard.bulletin_intake import reason
 
     assert reason(TimeoutError("untrusted network diagnostics")) == "source_timeout"
+
+
+def test_date_only_rights_renewal_keeps_automatic_facts_bytes(database):
+    from smithguard.bulletin_sources import SOURCE_IDS
+
+    from .test_source_rights import renewed_register
+
+    run(database)
+    with Session(database.engine) as session:
+        before = session.scalar(select(BulletinRevision)).content_hash
+    registry = RightsRegistry(renewed_register(SOURCE_IDS["ubuntu-usn"]))
+    process = processor(registry=registry, grant_reader=lambda **_: AUTO)
+    later = NOW + timedelta(hours=23)
+    run(database, now=later, process=process)
+    with Session(database.engine) as session:
+        row = session.scalar(select(BulletinCurrent))
+        assert row.revision == 1 and row.verified_at == later
+        assert session.scalar(select(BulletinRevision)).content_hash == before
+        assert session.scalar(select(func.count()).select_from(BulletinMaintenanceReceipt)) == 1
+    # Actual changed evidence still creates an immutable new revision.
+    run(database, now=later + timedelta(hours=1), process=process, body=rss(body="CVE-2026-99999"))
+    with Session(database.engine) as session:
+        row = session.scalar(select(BulletinCurrent))
+        assert row.revision == 2
+        assert session.get(BulletinRevision, (row.bulletin_id, 1)).content_hash == before

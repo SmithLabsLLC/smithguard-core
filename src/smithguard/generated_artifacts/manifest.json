@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "src/smithguard/generated_artifacts/deploy-approval.schema.json": "sha256:3b6ea0336520aa381ac854818e2ec48cd6e4a74c043e52ee3ae534eec084cbf6",
-    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:8151dc8649824cf89e0ed34d2b55b7da4b492967aa0013dc6bfad507c4c9a2dc",
+    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:c031ef407ed831b4d04bc1b4bbbae2cef7ab6f8200e931e976dc74d50ba199a5",
     "src/smithguard/generated_artifacts/schemas/AffectedRange.schema.json": "sha256:a3103867ef21ce006f1bc8d893bbfe5df5b17a0b9016eb80632d26d673a4e8fa",
     "src/smithguard/generated_artifacts/schemas/ApprovalRecord.schema.json": "sha256:018adda1fba9146c37640e616f3317d1199d10d7b9fef0855fcd2db77ccf8faa",
     "src/smithguard/generated_artifacts/schemas/Artifact.schema.json": "sha256:78e0663210c1a6cb8a2e1488cd98632a6c8be981ae347655b623a3c10caabd31",

@@ -310,3 +310,30 @@ def test_expired_kev_rights_keep_one_stale_reason_and_event(database):
             runtime.status_tick(session, registry=expired, grant_reader=grant_reader, now=at)
             assert current.freshness_reason == "rights_review_due"
             assert session.scalar(select(func.count()).select_from(BulletinEvent)) == 2
+
+
+def test_date_only_rights_renewal_keeps_kev_bytes_during_real_sweep(database):
+    from smithguard.source_rights import RightsRegistry
+
+    from .test_source_rights import renewed_register
+
+    with Session(database.engine) as session, session.begin():
+        snapshot(session, {})
+        tick(session)
+        facts = {"CVE-2026-1001": "2026-10-21"}
+        snapshot(session, facts, now=NOW + timedelta(hours=1))
+        tick(session, now=NOW + timedelta(hours=1))
+        row = session.scalar(select(BulletinCurrent))
+        before = session.get(BulletinRevision, (row.bulletin_id, 1)).content_hash
+        later = NOW + timedelta(days=3)
+        snapshot(session, facts, now=later)
+        registry = RightsRegistry(renewed_register(KEV_SOURCE))
+        result = kev.run(session, registry=registry, grant_reader=grant_reader, now=later)
+        assert result["status"] == "fresh"
+        assert row.revision == 1 and row.verified_at == later
+        assert session.scalar(select(func.count()).select_from(BulletinRevision)) == 1
+        assert session.get(BulletinRevision, (row.bulletin_id, 1)).content_hash == before
+        assert set(session.scalars(select(BulletinEvent.kind))) == {
+            "published",
+            "freshness_verified",
+        }

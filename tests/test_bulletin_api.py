@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from smithguard import api
 from smithguard import bulletin_store as store
 from smithguard.anonymous_quota import AnonymousQuotaStore
+from smithguard.bulletin_contract import BulletinError
 from smithguard.feeds import SnapshotSigner
 from tests.api_client import TestClient, coverage_runtime
 from tests.test_bulletins import NOW, content, publish
@@ -85,6 +86,117 @@ def test_every_public_surface_purges_content(database, bulletin_client):
         assert "Synthetic unique content" not in response.text
 
 
+@pytest.mark.parametrize("cve", [False, True])
+def test_date_only_renewal_preserves_old_corrected_and_removed_public_versions(
+    database, bulletin_client, cve
+):
+    from copy import deepcopy
+
+    from smithguard.bulletin_policy import publication_rights
+    from smithguard.bulletin_runtime import status_tick
+    from smithguard.source_rights import RightsRegistry
+    from tests.test_bulletin_licenses import cve_content
+    from tests.test_bulletins import GRANT, REGISTRY
+    from tests.test_source_rights import renewed_register
+
+    client, clock = bulletin_client
+    original = cve_content() if cve else content()
+    with Session(database.engine) as session, session.begin():
+        record = store.publish(
+            session,
+            original,
+            registry=REGISTRY,
+            grant=GRANT,
+            now=NOW,
+            manual_approval="a" * 64,
+        )
+        corrected = deepcopy(original)
+        corrected["summary"] = "Corrected synthetic renewal evidence."
+        store.publish(
+            session,
+            corrected,
+            registry=REGISTRY,
+            grant=GRANT,
+            now=NOW,
+            manual_approval="b" * 64,
+        )
+        identity = record["bulletin_id"]
+        before = [store.detail(session, identity, revision=r, now=NOW) for r in (1, 2)]
+    register = renewed_register(original["sources"][0]["source_id"])
+    registry = RightsRegistry(register)
+    without_renewal = deepcopy(register)
+    del without_renewal["publication_renewals"]
+    now = NOW + timedelta(days=3)
+    clock[0] = now
+    with Session(database.engine) as session, session.begin():
+        with pytest.raises(BulletinError, match="bulletin_rights_not_current"):
+            store.verify_unchanged(
+                session,
+                identity,
+                content_hash=before[1]["content_hash"],
+                registry=RightsRegistry(without_renewal),
+                grant=GRANT,
+                now=now,
+                manual_approval="c" * 64,
+            )
+        for document in (original, corrected):
+            publication_rights(document, registry, now=now)
+        store.verify_unchanged(
+            session,
+            identity,
+            content_hash=before[1]["content_hash"],
+            registry=registry,
+            grant=GRANT,
+            now=now,
+            manual_approval="c" * 64,
+        )
+        status_tick(session, registry=registry, grant_reader=lambda **kw: GRANT, now=now)
+        for r in (1, 2):
+            after = store.detail(session, identity, revision=r, now=now)
+            for key in ("content", "content_hash", "sequence", "publication_decision_id"):
+                assert after[key] == before[r - 1][key]
+
+    routes = [
+        "/v1/bulletins.json",
+        f"/v1/bulletins/{identity}.json",
+        f"/v1/bulletins/{identity}.json?revision=1",
+        "/v1/bulletin-events.json",
+        "/v1/bulletins.atom",
+    ]
+    for route in routes:
+        response = client.get(route)
+        assert response.status_code == 200, response.text
+        assert identity in response.text
+    for tool, arguments in [
+        ("list_bulletins", {}),
+        ("get_bulletin", {"identity": identity}),
+        ("get_bulletin", {"identity": identity, "revision": 1}),
+        ("get_bulletin_changes", {}),
+    ]:
+        response = call(client, tool, arguments)
+        assert response.status_code == 200, response.text
+        assert not response.json()["result"]["isError"], response.text
+        assert identity in response.text
+    with Session(database.engine) as session, session.begin():
+        store.tombstone(session, identity, now=now)
+        status_tick(session, registry=registry, grant_reader=lambda **kw: GRANT, now=now)
+    for route in routes:
+        response = client.get(route)
+        assert response.status_code == 200, response.text
+        assert original["summary"] not in response.text
+        assert corrected["summary"] not in response.text
+    for tool, arguments in [
+        ("list_bulletins", {}),
+        ("get_bulletin", {"identity": identity}),
+        ("get_bulletin", {"identity": identity, "revision": 1}),
+        ("get_bulletin_changes", {}),
+    ]:
+        response = call(client, tool, arguments)
+        assert not response.json()["result"]["isError"], response.text
+        assert original["summary"] not in response.text
+        assert corrected["summary"] not in response.text
+
+
 def test_generated_schema_matches_bulletin_routes(database, bulletin_client):
     client, _clock = bulletin_client
     with Session(database.engine) as session, session.begin():
@@ -102,6 +214,29 @@ def test_generated_schema_matches_bulletin_routes(database, bulletin_client):
         Draft202012Validator(schemas[schema], format_checker=FormatChecker()).validate(
             response.json()
         )
+
+
+def test_newest_bulletins_rest_and_mcp_have_identical_order(database, bulletin_client):
+    client, _clock = bulletin_client
+    with Session(database.engine) as session, session.begin():
+        for i in range(4):
+            document = content(i)
+            document["source_published_at"] = store.timestamp(NOW - timedelta(days=4 - i))
+            publish(session, document, approval=i + 1)
+        store.status_tick(session, now=NOW)
+    response = client.get("/v1/bulletins.json?order=newest&limit=2")
+    assert response.status_code == 200, response.text
+    page = response.json()
+    dates = [r["content"]["source_published_at"] for r in page["items"]]
+    assert dates == sorted(dates, reverse=True)
+    response = call(client, "list_bulletins", {"order": "newest", "limit": 2})
+    assert response.status_code == 200, response.text
+    assert response.json()["result"]["structuredContent"]["data"] == page
+    cursor = page["next_cursor"]
+    response = client.get("/v1/bulletins.json", params={"order": "newest", "cursor": cursor})
+    assert response.status_code == 200, response.text
+    assert len(response.json()["items"]) == 2
+    assert client.get("/v1/bulletins.json?order=invalid").status_code == 400
 
 
 def test_worker_outage_stales_current_and_disables_changes(database, bulletin_client):

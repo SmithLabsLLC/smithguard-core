@@ -24,6 +24,123 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 RIGHTS_REGISTER = REPO_ROOT / "contracts/v1/source-rights-register.json"
 
 
+def renewed_register(source_id=GITHUB_ADVISORY):
+    """Synthetic date-only renewal; never changes the deployed register."""
+    from smithguard.identifiers import canonical_json_bytes, sha256_id
+
+    document = json.loads(RIGHTS_REGISTER.read_text())
+    profile = next(p for p in document["source_profiles"] if p["source"]["id"] == source_id)
+    historical = deepcopy(profile)
+    source = profile["source"]
+    source["revision"] += 1
+    source["updated_at"] = "2026-10-24T00:00:00Z"
+    source["rights"].update(reviewed_on="2026-10-24", review_due_on="2026-12-01")
+    history = next(h for h in document["source_revisions"] if h["source_id"] == source_id)
+    history["revisions"].append(
+        {"revision": source["revision"], "source_sha256": sha256_id(canonical_json_bytes(source))}
+    )
+    document["publication_renewals"] = [
+        {"historical_profile": historical, "current_revision": source["revision"]}
+    ]
+    return document
+
+
+def test_publication_renewal_requires_explicit_authentic_unchanged_policy():
+    document = renewed_register()
+    registry = RightsRegistry(document)
+    assert registry.permits_publication_revision(GITHUB_ADVISORY, 4)
+    assert registry.permits_publication_revision(GITHUB_ADVISORY, 5)
+    for revision in (1, 3, 6, True, "4"):
+        assert not registry.permits_publication_revision(GITHUB_ADVISORY, revision)
+    del document["publication_renewals"]
+    assert not RightsRegistry(document).permits_publication_revision(GITHUB_ADVISORY, 4)
+
+
+@pytest.mark.parametrize("change", ["hash", "fields", "activation", "target", "duplicate"])
+def test_publication_renewal_rejects_forged_or_ambiguous_relations(change):
+    document = renewed_register()
+    renewal = document["publication_renewals"][0]
+    if change == "hash":
+        renewal["historical_profile"]["source"]["rights"]["attribution_text"] = "Forged"
+    elif change == "fields":
+        renewal["historical_profile"]["field_rules"][0]["fields"].append("description")
+    elif change == "activation":
+        renewal["historical_profile"]["activation"] = "disabled"
+    elif change == "target":
+        renewal["current_revision"] = True
+    else:
+        document["publication_renewals"].append(deepcopy(renewal))
+    with pytest.raises(SourceRightsError, match="renewal"):
+        RightsRegistry(document)
+
+
+@pytest.mark.parametrize("change", ["attribution", "fields", "revoked", "disabled", "hosts"])
+def test_publication_renewal_does_not_infer_compatibility_after_terms_change(change):
+    from smithguard.identifiers import canonical_json_bytes, sha256_id
+
+    document = renewed_register()
+    profile = next(p for p in document["source_profiles"] if p["source"]["id"] == GITHUB_ADVISORY)
+    source = profile["source"]
+    if change == "attribution":
+        source["rights"]["attribution_text"] = "Different attribution"
+    elif change == "fields":
+        profile["field_rules"][0]["fields"].remove("ghsa_id")
+    elif change == "revoked":
+        source["rights"]["normalized_fact_redistribution"] = "prohibited"
+    elif change == "disabled":
+        source["kill_switch"] = False
+    else:
+        source["allowed_hosts"] = ["api.github.com"]
+    history = next(h for h in document["source_revisions"] if h["source_id"] == GITHUB_ADVISORY)
+    history["revisions"][-1]["source_sha256"] = sha256_id(canonical_json_bytes(source))
+    with pytest.raises(SourceRightsError, match="substantive"):
+        RightsRegistry(document)
+
+
+def test_publication_renewal_keeps_inclusive_collection_and_publication_deadlines():
+    from smithguard.bulletin_contract import BulletinError
+    from smithguard.bulletin_policy import publication_rights
+    from tests.test_bulletins import content
+
+    registry = RightsRegistry(renewed_register())
+    profile = registry.get(GITHUB_ADVISORY)
+    profile.authorize_collection(
+        method="rest_api",
+        canonical_url="https://api.github.com/advisories",
+        today=date(2026, 12, 1),
+    )
+    publication_rights(content(), registry, now=datetime(2026, 12, 1, 23, 59, 59, tzinfo=UTC))
+    with pytest.raises(SourceRightsError, match="stale"):
+        profile.authorize_gateway_dispatch(today=date(2026, 12, 2))
+    with pytest.raises(BulletinError, match="rights_not_current"):
+        publication_rights(content(), registry, now=datetime(2026, 12, 2, tzinfo=UTC))
+
+
+@pytest.mark.parametrize("change", ["revision", "attribution", "fields", "url"])
+def test_renewed_publication_still_checks_each_reference(change):
+    from smithguard.bulletin_contract import BulletinError
+    from smithguard.bulletin_policy import publication_rights
+    from tests.test_bulletins import NOW, content
+
+    document = content()
+    reference = document["sources"][0]
+    reference[
+        {
+            "revision": "rights_revision",
+            "attribution": "attribution",
+            "fields": "used_fields",
+            "url": "record_url",
+        }[change]
+    ] = {
+        "revision": 3,
+        "attribution": "Forged",
+        "fields": ["description"],
+        "url": "https://example.com/advisories/synthetic",
+    }[change]
+    with pytest.raises(BulletinError):
+        publication_rights(document, RightsRegistry(renewed_register()), now=NOW)
+
+
 def test_phase_1_registry_has_the_reviewed_paths() -> None:
     registry = RightsRegistry.from_path(RIGHTS_REGISTER)
     assert registry.register_id == "gbsec:rights-register:phase-0a-v1"

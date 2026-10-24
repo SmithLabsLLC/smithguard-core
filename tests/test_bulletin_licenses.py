@@ -80,3 +80,21 @@ def test_cve_license_survives_public_json_history_and_atom(database):
         atom = fromstring(atom_feed(session, page, now=NOW, query={}))
         assert atom.find(f"{{{ATOM}}}entry/{{{ATOM}}}rights").text == CVE_LICENSE_NOTICE
         assert store.detail(session, identity, now=NOW)["content_hash"] == old["content_hash"]
+
+
+@pytest.mark.parametrize("change", ["notice", "provider", "identity"])
+def test_renewed_cve_rights_keep_notice_provider_and_exact_identity_checks(change):
+    from smithguard.source_rights import RightsRegistry
+    from tests.test_source_rights import renewed_register
+
+    registry = RightsRegistry(renewed_register(CVE_SOURCE))
+    document = cve_content()
+    publication_rights(document, registry, now=NOW)
+    if change == "notice":
+        del document["sources"][0]["license_notice"]
+    elif change == "provider":
+        del document["sources"][0]["cna_provider"]
+    else:
+        document["aliases"] = ["CVE-2026-1000001"]
+    with pytest.raises(BulletinError, match="cve"):
+        publication_rights(document, registry, now=NOW)

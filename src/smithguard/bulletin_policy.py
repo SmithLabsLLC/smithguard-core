@@ -6,6 +6,7 @@ import json
 import os
 import re
 import stat
+from copy import deepcopy
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -26,6 +27,8 @@ from smithguard.source_rights import RightsRegistry
 CONTROL_DIRECTORY = Path("/etc/SmithGuard/policies")
 CONTROL_PATH = CONTROL_DIRECTORY / "bulletins.json"
 CONTROL_UID = 0
+
+
 POLICY_ID = "official-bulletins-v1"
 MAX_ADDITIONAL_BYTES = 512 * 1024 * 1024
 CORRECTION_RESERVE = MAX_ADDITIONAL_BYTES // 5
@@ -165,6 +168,32 @@ def read_grant(*, release, registry_path, now):
     return grant
 
 
+def same_publication_content(previous, current, registry):
+    """Compare exact projections allowing only explicitly renewed rights references.
+
+    This does not authorize either document: publish/verify still check current
+    policy and accepted source evidence. All non-revision bytes must match, and
+    the newly projected reference must name the current register head.
+    """
+    if previous == current:
+        return True
+    if len(previous["sources"]) != len(current["sources"]):
+        return False
+    retained = deepcopy(previous)
+    for old, new in zip(retained["sources"], current["sources"], strict=True):
+        if old["source_id"] != new["source_id"]:
+            return False
+        if old["rights_revision"] != new["rights_revision"]:
+            if new["rights_revision"] != registry.get(new["source_id"]).source[
+                "revision"
+            ] or not registry.permits_publication_revision(
+                old["source_id"], old["rights_revision"]
+            ):
+                return False
+            old["rights_revision"] = new["rights_revision"]
+    return retained == current
+
+
 def publication_rights(document, registry: RightsRegistry, *, now):
     """Stored evidence is subject to the current register, not a historical boolean."""
     validate_content(document, now=now)
@@ -184,7 +213,9 @@ def publication_rights(document, registry: RightsRegistry, *, now):
             not profile.is_public_output_approved
             or not profile.source["kill_switch"]
             or date.fromisoformat(rights["review_due_on"]) < now.date()
-            or profile.source["revision"] != reference["rights_revision"]
+            or not registry.permits_publication_revision(
+                reference["source_id"], reference["rights_revision"]
+            )
             or reference["attribution"] != rights["attribution_text"]
         ):
             raise BulletinError("bulletin_rights_not_current")
@@ -294,6 +325,6 @@ def authorize(document, grant, registry, *, now, manual_approval=None, accepted_
         expected = project_facts(accepted_input, registry, now=now)
     else:
         expected = project_notice(accepted_input, registry, now=now)
-    if document != expected:
+    if not same_publication_content(document, expected, registry):
         raise BulletinError("bulletin_projection_mismatch")
     return "automatic"

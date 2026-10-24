@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -114,7 +115,7 @@ class RightsRegistry:
     """A closed, validated view over the machine-readable source register."""
 
     def __init__(self, document: Mapping[str, Any]) -> None:
-        if set(document) != {
+        if set(document) - {"publication_renewals"} != {
             "schema_version",
             "register_id",
             "reviewed_on",
@@ -228,6 +229,77 @@ class RightsRegistry:
         self._revision_histories = histories
         self._register_id = register_id
         self._schema_version = "1.0.0"
+        self._publication_renewals = self._validate_publication_renewals(
+            document.get("publication_renewals", [])
+        )
+
+    def _validate_publication_renewals(self, entries):
+        """Permit only explicit, authentic date-only renewals to the current head.
+
+        Each entry supplies complete old Source bytes authenticated by their
+        historical hash. Field/activation rules are explicit reviewed declarations
+        equal to current rules; legacy hashes do not authenticate those fields.
+        No terms, attribution, host, field or other substantive change is inferred
+        compatible. Publication and verification check the full current policy;
+        the status worker separately enforces current approval, dates and fields.
+        """
+        if not isinstance(entries, list) or len(entries) > 10_000:
+            raise SourceRightsError("publication renewals are invalid")
+        accepted = set()
+        for entry in entries:
+            if not isinstance(entry, Mapping) or set(entry) != {
+                "historical_profile",
+                "current_revision",
+            }:
+                raise SourceRightsError("publication renewal has an invalid shape")
+            old = entry["historical_profile"]
+            if not isinstance(old, Mapping) or set(old) != {"activation", "source", "field_rules"}:
+                raise SourceRightsError("publication renewal profile is invalid")
+            source = parse_contract("Source", old["source"]).model_dump(
+                mode="json", exclude_none=False
+            )
+            profile = self.get(source["id"])
+            revision = source["revision"]
+            head = profile.source["revision"]
+            if (
+                type(entry["current_revision"]) is not int
+                or entry["current_revision"] != head
+                or revision >= head
+                or (revision, sha256_id(canonical_json_bytes(source)))
+                not in self.revision_history(source["id"])
+            ):
+                raise SourceRightsError("publication renewal history is not authentic")
+            key = (source["id"], revision)
+            if key in accepted:
+                raise SourceRightsError("publication renewal is duplicated")
+            previous = deepcopy(source)
+            current = deepcopy(profile.source)
+            for value in (previous, current):
+                value.pop("revision")
+                value.pop("updated_at")
+                value["rights"].pop("reviewed_on")
+                value["rights"].pop("review_due_on")
+            if (
+                previous != current
+                or old["activation"] != profile.activation
+                or old["field_rules"] != list(profile.field_rules)
+            ):
+                raise SourceRightsError("publication renewal changes substantive policy")
+            if (
+                source["rights"]["reviewed_on"] > profile.source["rights"]["reviewed_on"]
+                or profile.source["rights"]["reviewed_on"]
+                > profile.source["rights"]["review_due_on"]
+            ):
+                raise SourceRightsError("publication renewal dates are invalid")
+            accepted.add(key)
+        return frozenset(accepted)
+
+    def permits_publication_revision(self, source_id: str, revision: int) -> bool:
+        """Resolve a current revision or an explicitly reviewed date-only renewal."""
+        return type(revision) is int and (
+            self.get(source_id).source["revision"] == revision
+            or (source_id, revision) in self._publication_renewals
+        )
 
     @property
     def register_id(self) -> str:

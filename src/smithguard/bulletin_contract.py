@@ -270,6 +270,15 @@ EVENT_PAGE = closed(
     }
 )
 LIST_ARGUMENTS = {
+    "order": {
+        "type": "string",
+        "enum": ["identity", "newest"],
+        "default": "identity",
+        "description": "Identity order includes removal stubs. Newest orders visible bulletins "
+        "by original source publication date descending, unknown dates last; identity breaks "
+        "ties. Corrections are frozen at the snapshot watermark. Removed items are omitted "
+        "from newest browsing; detail and events retain their removal metadata.",
+    },
     "limit": {"type": "integer", "minimum": 1, "maximum": 100},
     "cursor": {"type": "string", "maxLength": 2048},
     "source": {"type": "string", "maxLength": 40, "minLength": 1},

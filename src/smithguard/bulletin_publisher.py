@@ -4,9 +4,9 @@ from datetime import timedelta
 
 from smithguard import bulletin_store as store
 from smithguard.bulletin_contract import BulletinError, bulletin_id
+from smithguard.bulletin_policy import same_publication_content
 from smithguard.bulletin_projection import project_notice
 from smithguard.db.bulletin_models import BulletinCurrent, BulletinRevision
-from smithguard.identifiers import canonical_json_bytes, sha256_id
 
 
 def processor(*, registry, grant_reader):
@@ -43,9 +43,8 @@ def processor(*, registry, grant_reader):
                 document = project_facts(value, registry, now=now)
             else:
                 document = project_notice(value, registry, now=now)
-            digest = sha256_id(canonical_json_bytes(document))
             prior = session.get(BulletinRevision, (identity, public.revision)) if public else None
-            if prior is not None and prior.content_hash == digest:
+            if prior is not None and same_publication_content(prior.document, document, registry):
                 # Retain hourly source receipts, but avoid hourly per-item events.
                 # A deadline renewal is a real decision at most once per 22 hours,
                 # unless a stale state needs an earlier explicit resolution.
@@ -61,7 +60,7 @@ def processor(*, registry, grant_reader):
                     store.verify_unchanged(
                         session,
                         identity,
-                        content_hash=digest,
+                        content_hash=prior.content_hash,
                         grant=grant,
                         registry=registry,
                         now=now,

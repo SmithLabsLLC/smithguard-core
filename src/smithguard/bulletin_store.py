@@ -11,7 +11,7 @@ import binascii
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select, text, update
+from sqlalchemy import DateTime, cast, func, select, text, tuple_, update
 from sqlalchemy.dialects.postgresql import insert
 
 from smithguard.bulletin_contract import BulletinError, content_id, require_id, validate_content
@@ -724,7 +724,22 @@ def decode_cursor(value, *, kind, filters, now, maximum):
             raise ValueError
         if now - issued > RETENTION:
             raise BulletinError("bulletin_cursor_expired")
-        if kind == "snapshot":
+        if kind == "snapshot_newest":
+            after = payload["after"]
+            if after is not None:
+                if not isinstance(after, dict) or set(after) != {"published_at", "identity"}:
+                    raise ValueError
+                require_id(after["identity"])
+                if not isinstance(after["published_at"], str):
+                    raise ValueError
+                published = datetime.fromisoformat(after["published_at"].replace("Z", "+00:00"))
+                require_aware_utc(published)
+                # A publish can commit after the first request clock but before
+                # its watermark read. Validate against this request's clock;
+                # the database may round accepted fractions up one microsecond.
+                if published > now + timedelta(microseconds=1):
+                    raise ValueError
+        elif kind == "snapshot":
             if payload["after"] != "":
                 require_id(payload["after"])
         elif type(payload["after"]) is not int or not 0 <= payload["after"] <= payload["upper"]:
@@ -747,31 +762,41 @@ def _filters(source, evidence_class, subject):
 
 
 def snapshot(
-    session, *, now, cursor=None, limit=50, source=None, evidence_class=None, subject=None
+    session,
+    *,
+    now,
+    cursor=None,
+    limit=50,
+    source=None,
+    evidence_class=None,
+    subject=None,
+    order="identity",
 ):
     if type(limit) is not int or not 1 <= limit <= 100:
         raise BulletinError("bulletin_limit_invalid")
+    if order not in {"identity", "newest"}:
+        raise BulletinError("bulletin_order_invalid")
+    newest = order == "newest"
+    kind = "snapshot_newest" if newest else "snapshot"
     status = stream_status(session, now=now)
     filters = _filters(source, evidence_class, subject)
     payload = (
         {
             "v": 1,
-            "kind": "snapshot",
+            "kind": kind,
             "filters": filters,
-            "after": "",
+            "after": None if newest else "",
             "upper": status["watermark"],
             "issued": timestamp(now),
         }
         if cursor is None
-        else decode_cursor(
-            cursor, kind="snapshot", filters=filters, now=now, maximum=status["watermark"]
-        )
+        else decode_cursor(cursor, kind=kind, filters=filters, now=now, maximum=status["watermark"])
     )
     latest = (
         select(BulletinPublicVersion.bulletin_id, BulletinPublicVersion.revision)
         .where(
             BulletinPublicVersion.sequence <= payload["upper"],
-            BulletinPublicVersion.bulletin_id > payload["after"],
+            True if newest else BulletinPublicVersion.bulletin_id > payload["after"],
         )
         .distinct(BulletinPublicVersion.bulletin_id)
         .order_by(
@@ -795,7 +820,39 @@ def snapshot(
         query = query.where(BulletinCurrent.evidence_class == evidence_class)
     if subject is not None:
         query = query.where(BulletinPublicVersion.document["subjects"].contains([subject]))
-    rows = session.execute(query.order_by(BulletinCurrent.bulletin_id).limit(limit + 1)).all()
+    if newest:
+        # Sort the complete filtered snapshot, never just one returned page.
+        # Versions at the watermark freeze source-date corrections. Takedown
+        # still wins immediately: removed bytes cannot be read to recover a date.
+        # Exclude removed items from browsing; default bootstrap/events retain
+        # their metadata stubs. Unknown dates sort last with a stable identity tie.
+        earliest = datetime.min.replace(tzinfo=UTC)
+        published = func.coalesce(
+            cast(
+                BulletinPublicVersion.document["source_published_at"].astext,
+                DateTime(timezone=True),
+            ),
+            earliest,
+        )
+        query = query.add_columns(
+            func.timezone("UTC", published).label("published_sort_key")
+        ).where(
+            BulletinCurrent.tombstoned.is_(False),
+            BulletinPublicVersion.tombstoned.is_(False),
+        )
+        if payload["after"] is not None:
+            after = payload["after"]
+            query = query.where(
+                tuple_(published, BulletinCurrent.bulletin_id)
+                < tuple_(
+                    datetime.fromisoformat(after["published_at"].replace("Z", "+00:00")),
+                    after["identity"],
+                )
+            )
+        query = query.order_by(published.desc(), BulletinCurrent.bulletin_id.desc())
+    else:
+        query = query.order_by(BulletinCurrent.bulletin_id)
+    rows = session.execute(query.limit(limit + 1)).all()
     items = [
         render(
             row,
@@ -804,7 +861,7 @@ def snapshot(
             mode=status["mode"],
             source_observation=_source_observation(session, row, now=now),
         )
-        for row, version in rows[:limit]
+        for row, version, *_ in rows[:limit]
     ]
     size = 0
     count = 0
@@ -815,7 +872,19 @@ def snapshot(
         count += 1
     items = items[:count]
     more = len(rows) > count
-    next_cursor = encode_cursor({**payload, "after": items[-1]["bulletin_id"]}) if more else None
+    after = None
+    if items:
+        after = items[-1]["bulletin_id"]
+        if newest:
+            # Use the selected immutable version, not current status or a
+            # freshness timestamp. Rendered facts remain independently revocable.
+            after = {
+                "identity": after,
+                # PostgreSQL rounds fractions beyond microsecond precision;
+                # use its selected key rather than reparsing with Python.
+                "published_at": timestamp(rows[count - 1].published_sort_key.replace(tzinfo=UTC)),
+            }
+    next_cursor = encode_cursor({**payload, "after": after}) if more and items else None
     # Changes are deliberately unfiltered. A client must apply its filter after
     # resolving current content, including removing records that leave a filter.
     changes = encode_cursor(

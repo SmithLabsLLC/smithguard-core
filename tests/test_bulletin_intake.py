@@ -373,3 +373,29 @@ def test_missing_publication_grant_preserves_intake_and_visible_pending_work(dat
         for source in ("php", "mozilla"):
             row = session.get(BulletinSourceStatus, source)
             assert row.state == "incomplete" and row.pending_count == 1
+
+
+def test_date_only_rights_renewal_keeps_automatic_notice_bytes(database):
+    from smithguard.source_rights import RightsRegistry
+
+    from .test_source_rights import renewed_register
+
+    seed(database)
+    process = processor(registry=REGISTRY, grant_reader=lambda **_: {**GRANT, "mode": "automatic"})
+    intake.run(database.engine, fetch=fetcher(), process=process, **options())
+    with Session(database.engine) as session:
+        before = {r.bulletin_id: r.content_hash for r in session.scalars(select(BulletinRevision))}
+    registry = RightsRegistry(renewed_register("gbsec:source:php-security-notices"))
+    later = NOW + timedelta(days=3)
+    process = processor(registry=registry, grant_reader=lambda **_: {**GRANT, "mode": "automatic"})
+    intake.run(database.engine, fetch=fetcher(), process=process, **options(later))
+    with Session(database.engine) as session:
+        rows = session.scalars(select(BulletinCurrent)).all()
+        assert all(row.revision == 1 and row.verified_at == later for row in rows)
+        assert {
+            r.bulletin_id: r.content_hash for r in session.scalars(select(BulletinRevision))
+        } == before
+        assert set(session.scalars(select(BulletinEvent.kind))) == {
+            "published",
+            "freshness_verified",
+        }

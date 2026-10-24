@@ -198,9 +198,10 @@ def register(local, *, session_factory, clock, run_bounded, headers):
         source: str | None = Query(None, min_length=1, max_length=40),
         evidence_class: str | None = Query(None, max_length=30),
         subject: str | None = Query(None, min_length=1, max_length=120),
+        order: str = Query("identity", max_length=8),
     ):
         def load(session, now):
-            _query(request, {"limit", "cursor", "source", "evidence_class", "subject"})
+            _query(request, {"limit", "cursor", "source", "evidence_class", "subject", "order"})
             return store.snapshot(
                 session,
                 now=now,
@@ -209,6 +210,7 @@ def register(local, *, session_factory, clock, run_bounded, headers):
                 source=source,
                 evidence_class=evidence_class,
                 subject=subject,
+                order=order,
             )
 
         return await read(request, load)

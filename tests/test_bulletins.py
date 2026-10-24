@@ -86,6 +86,120 @@ def publish(session, doc=None, *, approval=1, now=NOW):
     )
 
 
+def test_newest_snapshot_orders_full_collection_and_freezes_dates_across_pages(database):
+    records = []
+    with Session(database.engine) as session, session.begin():
+
+        def emit(document, *, approval, now=NOW):
+            return store.publish(
+                session,
+                document,
+                registry=REGISTRY,
+                grant={**GRANT, "mode": "automatic"},
+                now=now,
+                manual_approval=f"{approval:064x}",
+            )
+
+        for index in range(37):
+            document = content(index + 1)
+            document["source_published_at"] = (
+                store.timestamp(NOW - timedelta(days=index % 9, microseconds=index % 3))
+                if index < 34
+                else None
+            )
+            document["time_precision"] = "exact" if index < 34 else "unknown"
+            record = emit(document, approval=index + 1)
+            records.append((document, record))
+        store.status_tick(session, now=NOW)
+        expected = sorted(
+            records,
+            key=lambda pair: (
+                datetime.fromisoformat(pair[0]["source_published_at"].replace("Z", "+00:00"))
+                if pair[0]["source_published_at"]
+                else datetime.min.replace(tzinfo=UTC),
+                pair[1]["bulletin_id"],
+            ),
+            reverse=True,
+        )
+        page = store.snapshot(session, now=NOW, order="newest", limit=7)
+        seen = list(page["items"])
+        assert [r["bulletin_id"] for r in seen] == [r[1]["bulletin_id"] for r in expected[:7]]
+        watermark = page["watermark"]
+        cursor = page["next_cursor"]
+        # New arrivals and source-date corrections after this watermark must
+        # not change the order/membership of the ongoing page traversal.
+        later = NOW + timedelta(seconds=1)
+        emit(content(100), approval=100, now=later)
+        changed = deepcopy(expected[12][0])
+        changed["source_published_at"] = store.timestamp(later)
+        emit(changed, approval=101, now=later)
+        # Rechecks neither create a new version nor promote an old source date.
+        target = store.detail(session, expected[20][1]["bulletin_id"], now=later)
+        store.verify_unchanged(
+            session,
+            target["bulletin_id"],
+            content_hash=target["content_hash"],
+            grant=GRANT,
+            registry=REGISTRY,
+            now=later,
+            manual_approval="d" * 64,
+        )
+        # Removing an already-seen item cannot cause a second appearance at the
+        # unknown-date tail; an unseen removal is omitted immediately.
+        store.tombstone(session, expected[0][1]["bulletin_id"], now=later)
+        removed = expected[15][1]["bulletin_id"]
+        store.tombstone(session, removed, now=later)
+        while cursor:
+            page = store.snapshot(session, now=later, order="newest", cursor=cursor, limit=7)
+            assert page["watermark"] == watermark
+            seen.extend(page["items"])
+            cursor = page["next_cursor"]
+        assert [r["bulletin_id"] for r in seen] == [
+            r[1]["bulletin_id"] for r in expected if r[1]["bulletin_id"] != removed
+        ]
+        assert len({r["bulletin_id"] for r in seen}) == len(seen)
+        assert page["changes_cursor"]
+        assert store.events(session, now=later, cursor=page["changes_cursor"])["items"]
+        fresh = store.snapshot(session, now=later, order="newest")
+        assert fresh["items"][0]["bulletin_id"] == expected[12][1]["bulletin_id"]
+        # The existing default retains identity order and removal stubs.
+        default = store.snapshot(session, now=later)
+        ids = [r["bulletin_id"] for r in default["items"]]
+        assert ids == sorted(ids)
+        assert sum(r["tombstoned"] for r in default["items"]) == 2
+
+
+def test_newest_snapshot_cursor_binds_order_filters_and_valid_time(database):
+    with Session(database.engine) as session, session.begin():
+        for i in range(3):
+            publish(session, content(i), approval=i + 1)
+        store.status_tick(session, now=NOW)
+        cursor = store.snapshot(session, now=NOW, order="newest", limit=1)["next_cursor"]
+        for kwargs in ({}, {"order": "newest", "subject": "Other"}):
+            with pytest.raises(BulletinError, match="cursor_invalid"):
+                store.snapshot(session, now=NOW, cursor=cursor, **kwargs)
+        payload = store.decode_cursor(
+            cursor,
+            kind="snapshot_newest",
+            filters=store._filters(None, None, None),
+            now=NOW,
+            maximum=store.stream_status(session, now=NOW)["watermark"],
+        )
+        for after in (
+            "invalid",
+            {},
+            {"identity": "0" * 64, "published_at": "tomorrow"},
+            {"identity": "0" * 64, "published_at": "2027-01-01T00:00:00Z"},
+        ):
+            with pytest.raises(BulletinError, match="cursor_invalid"):
+                store.snapshot(
+                    session,
+                    now=NOW,
+                    order="newest",
+                    cursor=store.encode_cursor({**payload, "after": after}),
+                )
+
+
 def test_publication_correction_is_immutable_and_isolated(database):
     with Session(database.engine) as session, session.begin():
         initial = publish(session)
@@ -367,3 +481,74 @@ def test_same_day_burst_retains_tombstones_and_resource_bounds(database, monkeyp
                 now=NOW,
                 manual_approval=f"{35:064x}",
             )
+
+
+@pytest.mark.parametrize("fraction", ["1234567", "9999999", "123456789"])
+def test_newest_cursor_uses_database_fraction_precision_without_skipping(database, fraction):
+    with Session(database.engine) as session, session.begin():
+        expected = []
+        for index in range(3):
+            document = content(index)
+            document["source_published_at"] = f"2026-10-20T00:00:00.{fraction}Z"
+            expected.append(publish(session, document, approval=index + 1)["bulletin_id"])
+        seen, cursor = [], None
+        while True:
+            page = store.snapshot(session, now=NOW, order="newest", limit=1, cursor=cursor)
+            seen.extend(item["bulletin_id"] for item in page["items"])
+            cursor = page["next_cursor"]
+            if cursor is None:
+                break
+        assert seen == sorted(expected, reverse=True)
+
+
+def test_newest_fraction_rounding_at_snapshot_time_keeps_cursor_valid(database):
+    now = NOW.replace(microsecond=999999)
+    with Session(database.engine) as session, session.begin():
+        expected = []
+        for index in range(2):
+            document = content(index)
+            document["source_published_at"] = NOW.strftime("%Y-%m-%dT%H:%M:%S.9999999Z")
+            expected.append(
+                store.publish(
+                    session,
+                    document,
+                    registry=REGISTRY,
+                    grant=GRANT,
+                    now=now,
+                    manual_approval=f"{index + 1:064x}",
+                )["bulletin_id"]
+            )
+        first = store.snapshot(session, now=now, order="newest", limit=1)
+        second = store.snapshot(
+            session, now=now, order="newest", limit=1, cursor=first["next_cursor"]
+        )
+        assert [first["items"][0]["bulletin_id"], second["items"][0]["bulletin_id"]] == sorted(
+            expected, reverse=True
+        )
+        assert second["next_cursor"] is None
+
+
+def test_newest_cursor_survives_publication_after_request_clock_before_watermark(database):
+    # The API captures request time before reading the committed stream watermark.
+    # A concurrent publisher can commit a source date in that small interval.
+    request_started = NOW
+    published_at = NOW + timedelta(milliseconds=5)
+    next_request = published_at + timedelta(milliseconds=5)
+    with Session(database.engine) as session, session.begin():
+        expected = []
+        for index in range(2):
+            document = content(index)
+            document["source_published_at"] = store.timestamp(published_at)
+            expected.append(
+                publish(session, document, approval=index + 1, now=published_at)["bulletin_id"]
+            )
+    with Session(database.engine) as session, session.begin():
+        first = store.snapshot(session, now=request_started, order="newest", limit=1)
+        second = store.snapshot(
+            session, now=next_request, order="newest", limit=1, cursor=first["next_cursor"]
+        )
+        assert [first["items"][0]["bulletin_id"], second["items"][0]["bulletin_id"]] == sorted(
+            expected, reverse=True
+        )
+        assert first["watermark"] == second["watermark"]
+        assert second["next_cursor"] is None
