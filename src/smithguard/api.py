@@ -225,6 +225,45 @@ class UsageCounter:
                         self.usage.pressure.observe(status=0, seconds=elapsed)
 
 
+def _assessment_browser_headers(scope: dict[str, Any]) -> dict[str, str]:
+    """Allow only credential-free reads from the existing product origin."""
+    if scope.get("method") != "GET" or scope.get("path") != "/v1/artifacts/assess":
+        return {}
+    headers = {"Vary": "Origin"}
+    origins = [value for key, value in scope.get("headers", ()) if key.lower() == b"origin"]
+    if origins == [b"https://smithguard.io"]:
+        headers["Access-Control-Allow-Origin"] = "https://smithguard.io"
+    return headers
+
+
+class AssessmentBrowserRead:
+    """Add route-scoped response headers without changing requests, quotas or bodies."""
+
+    def __init__(self, app: Any) -> None:
+        self.app = app
+
+    async def __call__(self, scope: dict[str, Any], receive: Any, send: Any) -> None:
+        additions = _assessment_browser_headers(scope) if scope.get("type") == "http" else {}
+        if not additions:
+            await self.app(scope, receive, send)
+            return
+
+        async def browser_response(message: dict[str, Any]) -> None:
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", ()))
+                for name, value in additions.items():
+                    key = name.lower().encode("ascii")
+                    if key == b"vary":
+                        previous = [v.decode("latin-1") for k, v in headers if k == key]
+                        value = ", ".join([*previous, value])
+                    headers = [(k, v) for k, v in headers if k != key]
+                    headers.append((key, value.encode("latin-1")))
+                message = {**message, "headers": headers}
+            await send(message)
+
+        await self.app(scope, receive, browser_response)
+
+
 class HeadAsGet:
     """Answer HEAD like GET without a body, for read-only routes only.
 
@@ -1232,7 +1271,8 @@ def _register_public_errors(local: FastAPI, response_headers: dict[str, str]) ->
             code="service_unavailable",
             message="The service is temporarily unavailable.",
             retryable=True,
-            headers=response_headers,
+            # The outer server-error handler runs outside user middleware.
+            headers={**response_headers, **_assessment_browser_headers(_request.scope)},
         )
 
 
@@ -1304,6 +1344,7 @@ def create_public_beta_app(
     # Nginx normalizes every allowed public Host to the canonical one, but the process
     # must accept the canonical and legacy hosts whatever base URL its environment
     # still carries, so the host transition cannot 400 requests in either order.
+    local.add_middleware(AssessmentBrowserRead)
     local.add_middleware(HeadAsGet)
     local.add_middleware(UsageCounter, usage=runtime.usage)
     local.add_middleware(

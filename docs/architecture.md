@@ -61,3 +61,16 @@ A code contribution or successful unit test never grants that authority.
 The source-rights register is an application policy input. It is not a substitute
 for a third party's terms and does not relicense their content. Contributors adding
 sources must make acquisition, output rights and coverage limits explicit.
+
+### Product browser assessment reads
+
+The existing product origin `https://smithguard.io` may read anonymous GET
+responses from `/v1/artifacts/assess`, including application errors. The hosted
+Nginx origin also exposes its 429 rate-limit and 503 outage responses on that
+exact GET route, while retaining all security headers. This exact-origin,
+exact-route response policy grants no credential access or permission on other
+routes or methods. Responses vary by Origin. Inputs, quota, signed response
+bytes and assessment authority are unchanged. The product omits credentials,
+referrers, caching and redirects; it stores no coordinates in browser history or
+local storage. Public coordinate query strings can still appear in provider
+operational logs. Browser presentation does not verify response signatures.

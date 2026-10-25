@@ -14,6 +14,19 @@ is available at [smithguard.io](https://smithguard.io). Its current API and sour
 coverage are described by the [live API contract](https://api.smithguard.io/openapi.json)
 and [coverage document](https://api.smithguard.io/v1/coverage.json).
 
+## Use the agent skill
+
+The [assess-public-artifact skill](skills/assess-public-artifact/SKILL.md) teaches an
+agent to check one explicitly selected public package or image through the hosted
+SmithGuard service. Version 0.2.0 includes installation, result interpretation,
+before-addition and before-deployment workflows, and opt-in project policy templates.
+Read the [installation guide](skills/assess-public-artifact/references/install.md)
+and [release notes](docs/agent-skill.md). Keep all six files together.
+
+These are instructions, not a local scanner, server, automatic deployment gate or
+permission to inspect private inventories. The service runs remotely. Installing
+a skill and connecting its hosted tools are separate setup steps.
+
 ## Work on the code
 
 The supported contributor environment is Linux, including Linux under WSL, with

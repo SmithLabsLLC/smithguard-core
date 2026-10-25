@@ -15,6 +15,18 @@ map "$request_method:$uri" $smithguard_method_allowed {
     "HEAD:/mcp" 0;
 }
 
+# Only origin-generated assessment failures need these response headers. The
+# application supplies its own CORS headers for its normal and error responses.
+# Empty map values emit no header; other origins, methods and routes stay excluded.
+map "$http_origin:$request_method:$uri:$status:$upstream_http_access_control_allow_origin" $smithguard_assessment_error_origin {
+    default "";
+    ~^https://smithguard[.]io:GET:/v1/artifacts/assess:(?:429|503):$ "https://smithguard.io";
+}
+map "$request_method:$uri:$status:$upstream_http_vary" $smithguard_assessment_error_vary {
+    default "";
+    ~^GET:/v1/artifacts/assess:(?:429|503):$ "Origin";
+}
+
 server {
     listen unix:/run/smithguard-origin/nginx.sock default_server;
     server_name _;
@@ -55,6 +67,8 @@ server {
     add_header X-Frame-Options "DENY" always;
     add_header Referrer-Policy "no-referrer" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Access-Control-Allow-Origin $smithguard_assessment_error_origin always;
+    add_header Vary $smithguard_assessment_error_vary always;
     add_header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" always;
 
     location = /v1/artifacts/assess {
