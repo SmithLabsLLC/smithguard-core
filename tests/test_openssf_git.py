@@ -924,8 +924,20 @@ def test_repository_maintenance_repacks_synchronously_and_keeps_history(tmp_path
     from smithguard.openssf_shadow import maintain_repository
 
     def git(*arguments, cwd=None):
+        # Fixture setup must not race the explicit maintenance under test.
         return subprocess.run(
-            ["git", "-c", "user.name=t", "-c", "user.email=t@t", *arguments],
+            [
+                "git",
+                "-c",
+                "gc.auto=0",
+                "-c",
+                "maintenance.auto=false",
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                *arguments,
+            ],
             cwd=cwd,
             check=True,
             capture_output=True,
