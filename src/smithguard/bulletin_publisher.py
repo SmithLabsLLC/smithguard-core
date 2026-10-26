@@ -1,9 +1,8 @@
 """Connect accepted official facts to the separate, currently authorized publisher."""
 
-from datetime import timedelta
-
 from smithguard import bulletin_store as store
 from smithguard.bulletin_contract import BulletinError, bulletin_id
+from smithguard.bulletin_freshness import recheck_lead
 from smithguard.bulletin_policy import same_publication_content
 from smithguard.bulletin_projection import project_notice
 from smithguard.db.bulletin_models import BulletinCurrent, BulletinRevision
@@ -46,10 +45,11 @@ def processor(*, registry, grant_reader):
             prior = session.get(BulletinRevision, (identity, public.revision)) if public else None
             if prior is not None and same_publication_content(prior.document, document, registry):
                 # Retain hourly source receipts, but avoid hourly per-item events.
-                # A deadline renewal is a real decision at most once per 22 hours,
-                # unless a stale state needs an earlier explicit resolution.
-                if public.freshness_reason is None and public.verification_due_at > now + timedelta(
-                    hours=2
+                # Renew only inside the source's shared scheduling lead, unless
+                # a stale state needs an earlier explicit resolution.
+                if (
+                    public.freshness_reason is None
+                    and public.verification_due_at > now + recheck_lead(current.source_key)
                 ):
                     return True
                 if expanded:

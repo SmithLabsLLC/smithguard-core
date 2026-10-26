@@ -17,7 +17,15 @@ def due(source, published, verified):
     return verified + interval
 
 
+def recheck_lead(source):
+    # Hosted Red Hat uses DETAIL_LIMITS in bulletin_automation: 24/hour with
+    # one new-arrival slot. This lead is dormant where that source is absent.
+    # Give adjacent full cohorts an extra hourly opportunity despite timer jitter.
+    # This changes eligibility only, never the deadline or request/time budget.
+    return timedelta(hours=3 if source == "redhat-rhsa" else 2)
+
+
 def recheck_due(current, now):
     return due(
         current.source_key, current.document["document"]["published_at"], current.updated_at
-    ) <= now + timedelta(hours=2)
+    ) <= now + recheck_lead(current.source_key)

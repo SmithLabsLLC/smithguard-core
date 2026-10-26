@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from smithguard import bulletin_intake_store as store
 from smithguard.bulletin_contract import BulletinError, bulletin_id
 from smithguard.bulletin_facts import envelope, semantic_hash
-from smithguard.bulletin_freshness import recheck_due
+from smithguard.bulletin_freshness import recheck_due, recheck_lead
 from smithguard.bulletin_source_parser import (
     CISCO_DATE_BASIS,
     SourceCandidate,
@@ -236,7 +236,7 @@ def stage(session, source, candidates, *, now, baseline):
 
                 pending.next_attempt_at = due(
                     source, previous.document["document"]["published_at"], previous.updated_at
-                ) - timedelta(hours=2)
+                ) - recheck_lead(source)
             else:
                 pending.next_attempt_at = None
         count += int(new_slot)
