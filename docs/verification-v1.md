@@ -128,6 +128,8 @@ failures use `schema_validation_failed`; cryptographic mismatch uses
 `signature_mismatch`. Invalid caller configuration (timezone-naive evaluation
 clock or maximum age outside 1–3,600 seconds) is a caller error rather than a
 verification result.
+Key bytes and identifiers are checked at step 12, not eagerly during JSON parsing.
+For example, a revoked key with missing key bytes returns `key_revoked` at step 9.
 
 Historical mode still requires a current key-status read from the last 300 seconds
 to return `verified`; it only permits verification-only keys and selects the
@@ -148,12 +150,24 @@ Rejection inputs use exactly one of `input_utf8` (UTF-8 encode the string) or
 with exact signed-message bytes/digest and a fixed evaluation clock.
 `verification-cases-v1.json` supplies complete assessment/key input strings, exact
 coordinates, clocks and expected outcomes for language-independent test runners.
-Its signing key was generated temporarily and was
+`assessment_utf8` is always a string. `key_utf8` is either a string to UTF-8 encode
+or JSON `null`, which means no key document was supplied; it must not be encoded
+as the string `"null"`. Likewise, `key_fetched_at: null` means there is no observed
+key-fetch time. A `key_fetched_at` value without a timezone is the explicit
+`key_time_unknown` case. The fixture signing key was generated temporarily and was
 not saved. No production key or response is included. The companion
 `test_client_conformance.py` exercises current, offline, stale, future, revoked,
 historical, coordinate, schema and tampering outcomes using those fixed bytes.
 Vectors include inclusive freshness/depth boundaries, non-zero base64 pad bits
-and rejection of a noncanonical Ed25519 S scalar. Additional byte/depth/schema limits are covered by `test_client_verification.py`.
+and rejection of a noncanonical Ed25519 S scalar. They also include the first
+rejected depth (65), an exactly 4,300-digit accepted integer, future key-fetch time
+and every normative outcome reason above. Derived-key-ID cases reject a wrong ID
+in either document, including two matching claimed IDs that disagree with the
+actual key bytes. Cases with multiple failures pin the first applicable result:
+missing signature and invalid assessment schema precede the missing-key check;
+unsupported key format precedes key revocation. Existing signed fixtures are
+unchanged. Additional byte/depth/schema limits are covered by
+`test_client_verification.py`.
 
 Passing the Python tests establishes the reference behavior only. A Rust consumer
 must reproduce the supported bytes and rejection/verification outcomes before a

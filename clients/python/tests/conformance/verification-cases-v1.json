@@ -462,6 +462,336 @@
         "current_decision_eligible": false,
         "signature_valid": false
       }
+    },
+    {
+      "id": "future-key-fetch",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:01+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "key_status_not_current",
+        "signature_valid": true,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "key-time-without-timezone",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "key_time_unknown",
+        "signature_valid": true,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "missing-signature-before-key-check",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": null,
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "missing_signature",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "nonobject-signature",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":null,\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "missing_signature",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "unsupported-signature-algorithm",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"unsupported\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "unsupported_signature_format",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "unsupported-signature-canonicalization",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"unsupported\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "unsupported_signature_format",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "schema-failure-before-key-check",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": null,
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "schema_validation_failed",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "key-unavailable",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": null,
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "key_unavailable",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "unsupported-key-algorithm-before-revocation",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"unsupported\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"revoked\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "unsupported_key_format",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "unsupported-key-canonicalization",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"unsupported\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "unchecked",
+        "reason": "unsupported_key_format",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "derived-key-id-mismatch",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:0000000000000000000000000000000000000000\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "key_identity_mismatch",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "signature-key-id-mismatch",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:0000000000000000000000000000000000000000\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "key_identity_mismatch",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "matching-claimed-ids-still-fail-derivation",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:0000000000000000000000000000000000000000\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:0000000000000000000000000000000000000000\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "key_identity_mismatch",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "malformed-assessment-json",
+      "assessment_utf8": "{\"schema_version\":",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_base64\":\"tvhjHpylTW8p7fwz18MX9hoiC+gkdkVLgMVmIU/taoc=\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "malformed_document_or_key",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
+    },
+    {
+      "id": "malformed-key-missing-bytes",
+      "assessment_utf8": "{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"artifact\":{\"digest\":null,\"ecosystem\":\"npm\",\"name\":\"event-stream\",\"public_visibility\":\"asserted_public\",\"registry_host\":\"registry.npmjs.org\",\"version\":\"3.3.6\"},\"coverage\":{\"as_of\":\"2026-08-05T00:00:00Z\",\"ecosystem\":\"npm\",\"result\":\"supported\",\"stage\":\"matched\"},\"created_at\":\"2026-08-05T00:00:00Z\",\"cve_context\":[],\"data_classification\":\"public\",\"evidence_maturity\":{\"composition\":\"present\",\"deployment\":\"unknown\",\"provenance\":\"present\",\"runtime\":\"unknown\",\"signature\":\"unsupported\",\"vex\":\"missing\"},\"feed_revision\":\"feed-2026-08-05-001\",\"id\":\"gbsec:assessment:public-artifact-001\",\"identity_assurance\":\"caller_asserted\",\"incident_ids\":[\"gbsec:incident:event-stream-2018\"],\"incidents\":[{\"affected_range_ids\":[\"gbsec:range:event-stream-3.3.6\"],\"aliases\":[\"GHSA-2345-6789-cfgh\"],\"applies_to_version\":true,\"confidence\":\"confirmed\",\"fix_evidence_incomplete\":false,\"fixed_versions\":[],\"incident_id\":\"gbsec:incident:event-stream-2018\",\"last_changed_at\":\"2026-08-05T00:00:00Z\",\"local_applicability\":\"not_evaluated\",\"relationship_basis\":\"catalog_assignment\",\"report_relationship\":\"single_report\",\"revision\":1,\"source_fixed_versions\":[],\"source_reports\":[{\"fix_evidence\":[],\"fix_evidence_incomplete\":false,\"historical_metadata_incomplete\":false,\"local_applicability\":\"not_evaluated\",\"observed_at\":\"2026-08-05T00:00:00Z\",\"range_bound_evidence\":[],\"source_context\":null,\"source_context_state\":\"unavailable\",\"source_fixed_versions\":[],\"source_id\":\"gbsec:source:github-advisory-database\",\"source_name\":\"GitHub Advisory Database\",\"source_updated_at\":\"2026-08-05T00:00:00Z\",\"state\":\"active\",\"upstream_record_id\":\"GHSA-2345-6789-cfgh\"}],\"source_reports_truncated\":false,\"status\":\"confirmed\",\"title\":\"Malicious event-stream package release\",\"upstream_urls\":[\"https://github.com/advisories/GHSA-2345-6789-cfgh\"]}],\"incidents_truncated\":false,\"kind\":\"public_artifact_assessment\",\"local_applicability\":\"not_evaluated\",\"not_applicable_incident_count\":0,\"preliminary_warnings\":[],\"preliminary_warnings_truncated\":false,\"reason_codes\":[\"identity_unverified\"],\"recommended_action_ids\":[\"gbsec:action:event-stream-check\"],\"registry_project_context\":null,\"registry_state\":\"removed\",\"relationship_state\":\"single_incident_record\",\"result\":\"affected\",\"revision\":1,\"schema_version\":\"2.2.0\",\"signature\":{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"value\":\"q+ZDgUXeazBQoVpz3tenCDZlhuyFTOHMI4QjKwmR3PD0lVFid6vd2DXewLqk76d0u9hvfxxlg/YQMhZuvJSiDw==\"},\"source_freshness\":[{\"freshness_state\":\"fresh\",\"last_success_at\":\"2026-08-05T00:00:00Z\",\"record_type\":\"malware_advisory\",\"source_id\":\"gbsec:source:github-advisory-database\"}],\"unknowns\":[\"Deployment and runtime use are customer-local questions.\"],\"updated_at\":\"2026-10-26T12:00:00Z\"}",
+      "key_utf8": "{\"algorithm\":\"Ed25519\",\"canonicalization\":\"smithguard-canonical-json-v1\",\"public_key_id\":\"gbsec:snapshot-public-key:bb49a6def0745ac78919ea259bccbb605fb11816\",\"status\":\"active\"}",
+      "expected_artifact": {
+        "digest": null,
+        "ecosystem": "npm",
+        "name": "event-stream",
+        "public_visibility": "asserted_public",
+        "registry_host": "registry.npmjs.org",
+        "version": "3.3.6"
+      },
+      "now": "2026-10-26T12:00:00+00:00",
+      "key_fetched_at": "2026-10-26T12:00:00+00:00",
+      "historical": false,
+      "expected": {
+        "status": "invalid",
+        "reason": "malformed_document_or_key",
+        "signature_valid": false,
+        "current_decision_eligible": false
+      }
     }
   ]
 }

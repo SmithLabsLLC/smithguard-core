@@ -35,7 +35,7 @@ def test_verification_outcomes(row):
     result = verify_assessment(
         row["assessment_utf8"].encode(),
         expected_artifact=row["expected_artifact"],
-        key_raw=row["key_utf8"].encode(),
+        key_raw=row["key_utf8"].encode() if row["key_utf8"] is not None else None,
         now=datetime.fromisoformat(row["now"]),
         key_fetched_at=(
             datetime.fromisoformat(row["key_fetched_at"]) if row["key_fetched_at"] else None
