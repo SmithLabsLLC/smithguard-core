@@ -87,10 +87,10 @@
       "title": "LocalArtifactInput",
       "type": "object"
     },
-    "ReasonCode": {
+    "ReasonCode1": {
       "maxLength": 120,
       "pattern": "^[a-z0-9_]+$",
-      "title": "ReasonCode",
+      "title": "ReasonCode1",
       "type": "string"
     },
     "RecheckTrigger": {
@@ -199,7 +199,7 @@
     },
     "reason_codes": {
       "items": {
-        "$ref": "#/$defs/ReasonCode"
+        "$ref": "#/$defs/ReasonCode1"
       },
       "maxItems": 20,
       "minItems": 1,

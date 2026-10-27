@@ -89,7 +89,7 @@ def test_context_joins_only_exact_cves_from_listed_incident_aliases(database):
         snapshot(session)
         snapshot(session, KEV_SOURCE, facts={CVE: {"date_added": "2021-12-10"}})
         result = assessment(session)
-    assert result["schema_version"] == "2.2.0"
+    assert result["schema_version"] == "2.4.0"
     assert result["result"] == "affected"
     assert result["not_applicable_incident_count"] == 1
     assert [item["cve"] for item in result["cve_context"]] == [CVE]

@@ -134,7 +134,7 @@ def test_renewed_publication_still_checks_each_reference(change):
     ] = {
         "revision": 3,
         "attribution": "Forged",
-        "fields": ["description"],
+        "fields": ["credits"],
         "url": "https://example.com/advisories/synthetic",
     }[change]
     with pytest.raises(BulletinError):

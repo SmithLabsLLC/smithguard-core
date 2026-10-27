@@ -114,7 +114,7 @@ def test_input_integrity_and_transport_fail_closed():
 
 def test_manual_approval_does_not_override_prohibited_source_fields(database):
     doc = content()
-    doc["sources"][0]["used_fields"] = ["description"]
+    doc["sources"][0]["used_fields"] = ["credits"]
     with (
         Session(database.engine) as session,
         session.begin(),

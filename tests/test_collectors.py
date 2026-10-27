@@ -1771,7 +1771,7 @@ def test_github_accepts_a_valid_high_reference_advisory(
         batch = session.scalar(select(IngestionBatchRecord))
         assert batch is not None
         assert batch.outcome == "accepted"
-        assert batch.processing_version == "github-advisory-catalog-6-malware"
+        assert batch.processing_version == "github-advisory-catalog-7-malware"
 
 
 def test_github_accepts_a_high_reference_unreviewed_advisory_without_packages(
@@ -2057,7 +2057,7 @@ def test_github_catalog_version_retries_a_preserved_unicode_reference_quarantine
     monkeypatch.setattr(
         collector,
         "_catalog_processing_version",
-        "github-advisory-catalog-6-unreviewed",
+        "github-advisory-catalog-7-unreviewed",
     )
     with Session(database.engine) as session, session.begin():
         repaired = collector.backfill_advisory(
@@ -2075,7 +2075,7 @@ def test_github_catalog_version_retries_a_preserved_unicode_reference_quarantine
         )
         assert [item.processing_version for item in batches] == [
             "github-advisory-catalog-4-unreviewed",
-            "github-advisory-catalog-6-unreviewed",
+            "github-advisory-catalog-7-unreviewed",
         ]
         assert [item.outcome for item in batches] == ["quarantined", "accepted"]
 
@@ -3488,8 +3488,8 @@ def test_catalog_patch_backfill_preserves_history_and_package_boundaries(
             assert retained[0]["vulnerabilities"][0]["first_patched_version"] == "4.0.0"
             decision = session.get(SourceGovernanceDecisionRecord, current.governance_decision_id)
             assert decision.accepted_sha256 == evidence.sha256
-            assert decision.policy_version == "1.2.0"
-            assert decision.field_policy_id == "gbsec:field-policy:github-advisory-catalog-v3"
+            assert decision.policy_version == "1.3.0"
+            assert decision.field_policy_id == "gbsec:field-policy:github-advisory-catalog-v4"
             for id, digest in old_evidence:
                 assert (
                     session.scalar(select(EvidenceRecord.sha256).where(EvidenceRecord.id == id))

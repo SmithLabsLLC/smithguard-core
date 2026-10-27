@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "src/smithguard/generated_artifacts/deploy-approval.schema.json": "sha256:3b6ea0336520aa381ac854818e2ec48cd6e4a74c043e52ee3ae534eec084cbf6",
-    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:c031ef407ed831b4d04bc1b4bbbae2cef7ab6f8200e931e976dc74d50ba199a5",
+    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:8a38102ecd44c5d466aa3feef407acb50a24e9edc59bf121c366233bb3b75c56",
     "src/smithguard/generated_artifacts/schemas/AffectedRange.schema.json": "sha256:a3103867ef21ce006f1bc8d893bbfe5df5b17a0b9016eb80632d26d673a4e8fa",
     "src/smithguard/generated_artifacts/schemas/ApprovalRecord.schema.json": "sha256:018adda1fba9146c37640e616f3317d1199d10d7b9fef0855fcd2db77ccf8faa",
     "src/smithguard/generated_artifacts/schemas/Artifact.schema.json": "sha256:78e0663210c1a6cb8a2e1488cd98632a6c8be981ae347655b623a3c10caabd31",
@@ -14,10 +14,10 @@
     "src/smithguard/generated_artifacts/schemas/IncidentEvent.schema.json": "sha256:faa864a60e541afe63b2c33c5878e859ae7ad2cd840372849192ac931afb8179",
     "src/smithguard/generated_artifacts/schemas/InventorySnapshot.schema.json": "sha256:7fcde5c949f1da2108ca7b077ea2598f006cac128f50fa6a77ddb26471298c58",
     "src/smithguard/generated_artifacts/schemas/McpOperation.schema.json": "sha256:11fa9d1a5ea76eddd211d2b80c9c5f2c607d98bf22052cb423ea41def48e4a0c",
-    "src/smithguard/generated_artifacts/schemas/PolicyDecision.schema.json": "sha256:c35efe7c851bb2b990f16ef4de77df1b888fa76272f94825dfd7aef6a88d651b",
+    "src/smithguard/generated_artifacts/schemas/PolicyDecision.schema.json": "sha256:5e916cbf98ad581a844b53ee95cfc7903eda374ba1b99c1cb95920a97112b48d",
     "src/smithguard/generated_artifacts/schemas/PolicyException.schema.json": "sha256:fa9c845d24d6219840c6a5d26be597f21bc1cb7d2a5d5278589fbfc7d0949b02",
     "src/smithguard/generated_artifacts/schemas/PreliminaryWarning.schema.json": "sha256:9ab267a9ccccd7f2d8e20df689a4547c3b8c87688348f44ee87fc32d5ef1fe68",
-    "src/smithguard/generated_artifacts/schemas/PublicArtifactAssessment.schema.json": "sha256:c862c3818a328a5a7c60b1ffb1d7bb282bbc57320e5dade904604783de61a7e7",
+    "src/smithguard/generated_artifacts/schemas/PublicArtifactAssessment.schema.json": "sha256:33ffbf4f555d4b416ef52e5a4f0c130be384d65d698de91561c884b240418394",
     "src/smithguard/generated_artifacts/schemas/PublicArtifactAssessmentRequest.schema.json": "sha256:32582b4d2536474ba59b82c7f3b275009d63c795acba50399427d462580cc944",
     "src/smithguard/generated_artifacts/schemas/RawEvidence.schema.json": "sha256:358b4e4b7b418ad70eface71aa49fa4056300c4f3b6ebb305d06f7a796ef0cd6",
     "src/smithguard/generated_artifacts/schemas/RecommendedAction.schema.json": "sha256:3e97b8180d8cf3261951509e3cfbe9053b8948a624d8b68aa7e49b97c8b24e68",
@@ -26,15 +26,15 @@
     "src/smithguard/generated_artifacts/schemas/ReplayCase.schema.json": "sha256:476d6a53398c3c98cd20d11de8ca8797f96dda9777aa8d432518056fadfd23d9",
     "src/smithguard/generated_artifacts/schemas/RestOperation.schema.json": "sha256:c8d588d2d5bc7ab5b1ce80fb0dad73b47712f68a2fa8afce66c15834858401af",
     "src/smithguard/generated_artifacts/schemas/Source.schema.json": "sha256:ff551dab79553780a7b742b500248496c702b89f23656d1e42b6229d14170763",
-    "src/smithguard/generated_artifacts/schemas/contract-models.schema.json": "sha256:74ca3729ecb20eef3ad336371faf48889f370f2acab4b668486581b6da7eff54",
-    "src/smithguard/generated_artifacts/source-contract-bundle.schema.json": "sha256:2f620892c8862ce3b12385e1270f2e25fc055689907a8587991f9bba01a88d5f"
+    "src/smithguard/generated_artifacts/schemas/contract-models.schema.json": "sha256:9c442a395794adc14379529e957b697f603dabc58b209142a240d120b94120d7",
+    "src/smithguard/generated_artifacts/source-contract-bundle.schema.json": "sha256:0e91c0fbfdff63c7eaace891a1fe0f8a6ad3b21fcf7c1d957043c8dcb6fc7b75"
   },
   "generator": {
     "name": "datamodel-code-generator",
     "version": "0.82.0"
   },
   "inputs": {
-    "contracts/v1/contract-bundle.schema.json": "sha256:b19aca1276ff0d357f54d44ea2cb533ff90bddc94e600635e6c738f17a41421d",
+    "contracts/v1/contract-bundle.schema.json": "sha256:e6f4bab66397892b3b3b59177a22010b43e4bd86bfa50245214b37c6232b0527",
     "contracts/v1/deploy-approval.schema.json": "sha256:3b6ea0336520aa381ac854818e2ec48cd6e4a74c043e52ee3ae534eec084cbf6",
     "contracts/v1/operation-catalog.json": "sha256:340e9e6ff80060b95014c356b00bbcb4fbefeef84ad55a906fdb772d7d23ce77"
   },

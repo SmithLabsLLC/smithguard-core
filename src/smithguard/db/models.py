@@ -2038,7 +2038,11 @@ class SupplementalSnapshotRecord(Base):
 
 
 class SupplementalPayloadRecord(Base):
-    """One exact immutable document, shared by future snapshot memberships."""
+    """Content-addressed immutable documents for snapshots and catalog context.
+
+    Catalog projections use their complete canonical source hash as the key;
+    historical supplemental memberships and payloads keep their original bytes.
+    """
 
     __tablename__ = "supplemental_payloads"
     __table_args__ = (

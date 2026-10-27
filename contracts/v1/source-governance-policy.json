@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
   "policy_id": "gbsec:source-governance-policy:mx-007-v1",
-  "policy_version": "1.2.0",
+  "policy_version": "1.3.0",
   "rights_register_id": "gbsec:rights-register:phase-0a-v1",
   "publication_decision": {
     "state": "active",
-    "decision_id": "gbsec:qualified-publication-decision:authoritative-feeds-20261006-v1",
-    "decided_at": "2026-10-06T23:42:00Z",
+    "decision_id": "gbsec:qualified-publication-decision:product-context-20261026-v1",
+    "decided_at": "2026-10-26T20:50:00Z",
     "source_ids": [
       "gbsec:source:github-advisory-database",
       "gbsec:source:openssf-malicious-packages",
@@ -70,7 +70,7 @@
           ]
         }
       ],
-      "field_policy_id": "gbsec:field-policy:github-advisory-catalog-v3",
+      "field_policy_id": "gbsec:field-policy:github-advisory-catalog-v4",
       "authenticated_upstream_source_ids": [],
       "accepted_field_paths": [
         "ghsa_id",
@@ -84,7 +84,10 @@
         "vulnerabilities.first_patched_version",
         "vulnerabilities.vulnerable_version_range",
         "cwes.cwe_id",
-        "withdrawn_at"
+        "withdrawn_at",
+        "summary",
+        "description",
+        "severity"
       ],
       "attribution_text": "GitHub Advisory Database",
       "license_expression": "CC-BY-4.0",

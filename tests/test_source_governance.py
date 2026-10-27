@@ -75,7 +75,7 @@ def test_tracked_policy_is_active_and_projects_nested_fields_before_storage() ->
                         "first_patched_version": "1.0.1",
                     }
                 ],
-                "summary": "must not be retained",
+                "summary": "Source-attributed title",
                 "credits": [{"user": {"login": "must-not-be-retained"}}],
             }
         ],
@@ -84,11 +84,11 @@ def test_tracked_policy_is_active_and_projects_nested_fields_before_storage() ->
     projected = json.loads(authorization.project_body(body))
     assert projected[0]["ghsa_id"] == "GHSA-aaaa-bbbb-9999"
     assert "withdrawn_at" in projected[0] and projected[0]["withdrawn_at"] is None
-    assert "summary" not in projected[0]
+    assert projected[0]["summary"] == "Source-attributed title"
     assert "credits" not in projected[0]
     assert projected[0]["vulnerabilities"][0]["first_patched_version"] == "1.0.1"
-    assert authorization.field_policy_id == "gbsec:field-policy:github-advisory-catalog-v3"
-    assert authorization.policy_version == "1.2.0"
+    assert authorization.field_policy_id == "gbsec:field-policy:github-advisory-catalog-v4"
+    assert authorization.policy_version == "1.3.0"
     enveloped = json.loads(
         authorization.project_body(
             json.dumps({"schema_version": "1.0.0", "records": json.loads(body)}).encode("ascii")
@@ -97,7 +97,7 @@ def test_tracked_policy_is_active_and_projects_nested_fields_before_storage() ->
     assert enveloped == {"records": projected}
     assert (
         authorization.qualified_publication_decision_id
-        == "gbsec:qualified-publication-decision:authoritative-feeds-20261006-v1"
+        == "gbsec:qualified-publication-decision:product-context-20261026-v1"
     )
     assert authorization.rights_evidence_verified
     assert governance_policy_sha256() == policy.policy_sha256

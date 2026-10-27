@@ -41,6 +41,7 @@ def main():
     run(uv, "run", "--locked", "ruff", "format", "--check", "src", "tests", "tools", "migrations")
     run(uv, "run", "--locked", "pytest", "-q", "-n", workers, "-p", "no:cacheprovider", "tests")
     run(uv, "audit", "--locked", "--preview-features", "audit-command")
+    run(uv, "run", "--locked", "python", "tools/check_client.py")
     run("git", "diff", "--check")
     print("Contributor checks passed.")
 

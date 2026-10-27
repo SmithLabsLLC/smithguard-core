@@ -27,3 +27,9 @@ conditions remain defined by each upstream provider and the source-rights regist
 The Apache License text is reproduced from the Apache Software Foundation's
 published license at https://www.apache.org/licenses/LICENSE-2.0.txt. The foundation
 is not affiliated with or endorsing this project.
+
+The dated interpretation boundary fixture contains minimal version/range facts
+and identifiers derived from the GitHub Advisory Database under CC-BY-4.0
+(https://creativecommons.org/licenses/by/4.0/). Each record retains its source URL,
+update/observation times and source digest. It omits full advisory prose and is
+a finite regression corpus, not a redistributed advisory database.

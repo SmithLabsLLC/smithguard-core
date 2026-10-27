@@ -10,8 +10,11 @@ from datetime import datetime
 from typing import Any, Literal
 
 from sqlalchemy import and_, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session, aliased
 
+from smithguard.advisory_context import github_public_context
+from smithguard.assessment_evidence import HISTORICAL_GITHUB_POLICIES, source_fix_evidence
 from smithguard.collection_records import actionable_quarantines_statement
 from smithguard.db.locks import advisory_xact_lock
 from smithguard.db.models import (
@@ -19,6 +22,8 @@ from smithguard.db.models import (
     AdvisoryCatalogManifestRecord,
     AdvisoryCatalogRecord,
     AdvisoryPackageRecord,
+    SourceGovernanceDecisionRecord,
+    SupplementalPayloadRecord,
 )
 from smithguard.db.package_lookup import package_name_predicate
 from smithguard.identifiers import (
@@ -313,7 +318,7 @@ def _github_projection(document: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(canonical_url, str) or not canonical_url.startswith("https://github.com/"):
         raise AdvisoryCatalogError("GitHub canonical URL is invalid")
     state = "withdrawn" if document.get("withdrawn_at") is not None else "active"
-    return {
+    projection = {
         "upstream_record_id": upstream_id,
         "source_type": source_type,
         "claim_type": claim_type,
@@ -327,6 +332,10 @@ def _github_projection(document: Mapping[str, Any]) -> dict[str, Any]:
         "source_updated_at": updated_at,
         "packages": packages,
     }
+    context = github_public_context(document)
+    if context is not None:
+        projection["public_context"] = context
+    return projection
 
 
 def _openssf_projection(
@@ -467,13 +476,13 @@ def _openssf_projection(
     }
 
 
-def _projection_source_hash(
+def _projection_source_document(
     projection: Mapping[str, Any],
     source_identity_omits: frozenset[str] = frozenset(),
     *,
     source_id: str | None = None,
-) -> str:
-    """One semantic identity algorithm shared by append and pre-ingestion checks."""
+) -> dict[str, Any]:
+    """Canonical projection; unchanged for historical inputs lacking new fields."""
     if source_id is not None and projection.get("source_type") == "rustsec":
         from smithguard.origin_advisories import _origin_semantic_projection
 
@@ -499,6 +508,8 @@ def _projection_source_hash(
         source_document["omitted_inputs_sha256"] = projection["omitted_inputs_sha256"]
     if "origin_context" in projection:
         source_document["origin_context"] = projection["origin_context"]
+    if "public_context" in projection:
+        source_document["public_context"] = projection["public_context"]
     source_hash_document = {
         **{
             key: value for key, value in source_document.items() if key not in source_identity_omits
@@ -510,7 +521,21 @@ def _projection_source_hash(
         ),
         "source_updated_at": timestamp(source_document["source_updated_at"]),
     }
-    return sha256_id(canonical_json_bytes(source_hash_document))
+    return source_hash_document
+
+
+def _projection_source_hash(
+    projection: Mapping[str, Any],
+    source_identity_omits: frozenset[str] = frozenset(),
+    *,
+    source_id: str | None = None,
+) -> str:
+    """One semantic identity algorithm shared by append and pre-ingestion checks."""
+    return sha256_id(
+        canonical_json_bytes(
+            _projection_source_document(projection, source_identity_omits, source_id=source_id)
+        )
+    )
 
 
 def _append_projection(
@@ -555,6 +580,20 @@ def _append_projection(
             "older GitHub source revision cannot replace newer evidence"
         )
     revision = 1 if latest is None else latest.revision + 1
+    if "public_context" in projection:
+        # The existing append-only content-addressed document store is shared by
+        # supplemental facts and catalog projections. Its key remains the hash of
+        # the WHOLE stored canonical document; no synthetic key or history rewrite.
+        payload = _projection_source_document(
+            projection, source_identity_omits, source_id=source_id
+        )
+        session.execute(
+            pg_insert(SupplementalPayloadRecord)
+            .values(payload_sha256=source_sha256, document=payload)
+            .on_conflict_do_nothing(index_elements=["payload_sha256"])
+        )
+        if session.get(SupplementalPayloadRecord, source_sha256).document != payload:
+            raise AdvisoryCatalogError("catalog context payload identity conflict")
     catalog_event_id = stable_id("advisory-catalog", source_id, upstream_id, str(revision))
     values = {
         "catalog_event_id": catalog_event_id,
@@ -1146,6 +1185,7 @@ def catalog_evidence_for_package(
                 unresolved.c.record_key,
                 unresolved.c.outcome_id,
                 unresolved.c.record_hash,
+                SourceGovernanceDecisionRecord.field_policy_id,
             )
             .select_from(relevant)
             .join(AdvisoryCatalogRecord, AdvisoryCatalogRecord.catalog_event_id == newest_id)
@@ -1161,6 +1201,11 @@ def catalog_evidence_for_package(
                         name=name,
                     ),
                 ),
+            )
+            .outerjoin(
+                SourceGovernanceDecisionRecord,
+                SourceGovernanceDecisionRecord.decision_id
+                == AdvisoryCatalogRecord.governance_decision_id,
             )
             .outerjoin(
                 unresolved,
@@ -1183,13 +1228,13 @@ def catalog_evidence_for_package(
         )
     gap_keys = {
         record_key
-        for _catalog, _package, record_key, _outcome, _hash in rows
+        for _catalog, _package, record_key, _outcome, _hash, _policy in rows
         if record_key is not None
     }
     gap_refs = sorted(
         {
             (outcome_id, record_hash)
-            for _catalog, _package, _key, outcome_id, record_hash in rows
+            for _catalog, _package, _key, outcome_id, record_hash, _policy in rows
             if outcome_id is not None
         }
     )
@@ -1198,7 +1243,9 @@ def catalog_evidence_for_package(
         ("unresolved_collection", outcome_id, record_hash) for outcome_id, record_hash in gap_refs
     ]
     seen_members = set()
-    for catalog, package, _record_key, _outcome_id, _record_hash in rows:
+    field_policies = {}
+    for catalog, package, _record_key, _outcome_id, _record_hash, field_policy in rows:
+        field_policies[catalog.governance_decision_id] = field_policy
         member_key = (catalog.catalog_event_id, package.package_event_id if package else None)
         if member_key in seen_members:
             continue
@@ -1290,6 +1337,11 @@ def catalog_evidence_for_package(
                 "state": catalog.state,
                 "source_updated_at": timestamp(catalog.source_updated_at),
                 "observed_at": timestamp(catalog.observed_at),
+                "catalog_source_sha256": catalog.source_sha256,
+                "catalog_event_id": catalog.catalog_event_id,
+                "source_revision": catalog.revision,
+                "evidence_id": catalog.evidence_id,
+                "field_policy_id": field_policies.get(catalog.governance_decision_id),
             }
             if evaluation is True:
                 matched_ids.append(package.package_event_id)
@@ -1308,6 +1360,19 @@ def catalog_evidence_for_package(
                     []
                     if report_key[0] == GITHUB_SOURCE_ID and report_key[1] in gap_keys
                     else [package for package, _evaluation in entries],
+                )
+            )
+            report = reports[report_key]
+            report.update(
+                source_fix_evidence(
+                    [package for package, _evaluation in entries],
+                    ecosystem=ecosystem,
+                    github_match=lambda expression: _github_range_matches(
+                        ecosystem, version, expression
+                    ),
+                    osv_match=lambda affected: _openssf_range_matches(ecosystem, version, affected),
+                    historical=report["field_policy_id"] in HISTORICAL_GITHUB_POLICIES,
+                    unresolved=report_key[0] == GITHUB_SOURCE_ID and report_key[1] in gap_keys,
                 )
             )
         families.append(

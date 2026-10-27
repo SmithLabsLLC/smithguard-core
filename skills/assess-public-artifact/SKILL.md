@@ -1,10 +1,10 @@
 ---
 name: assess-public-artifact
-description: Use SmithGuard to check an explicitly selected public package at an exact version or digest, including before adding or upgrading it or during a project-approved pre-deployment check. Explain evidence and uncertainty. No source or inventory uploads, private-name lookups or automatic dependency enumeration.
+description: Use SmithGuard to check an explicitly selected public package at an exact version or digest, including before adding or upgrading it or during a project-approved pre-deployment check. Explain evidence and uncertainty. No source or inventory uploads, private-name lookups or automatic dependency enumeration; optional selected local discovery requires separate explicit scope and exact public-coordinate disclosure approval.
 license: Apache-2.0. See LICENSE.txt.
 metadata:
   author: Smith Labs, LLC
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # SmithGuard public artifact checks
@@ -35,8 +35,9 @@ unless installation is requested. Installing the skill alone does not connect MC
    container identities need their public `registry_host` and immutable digest.
    Never guess a version from `latest`, a range, a product name or an advisory.
    Obtain missing identity under step 2 or ask before sending the lookup.
-2. Never select packages by enumerating source, manifests, lockfiles, SBOMs or
-   private inventories. For a package the owner explicitly named as public, an
+2. Do not automatically select packages by enumerating source, manifests, lockfiles,
+   SBOMs or private inventories. The separately authorized local-client workflow
+   below is a narrow exception for selected Python metadata, not those file types. For a package the owner explicitly named as public, an
    adopted project policy may authorize the host agent to read only that package's
    exact pinned version/digest and registry from the local release candidate.
    Use the narrowest reliable entry read; do not list unrelated dependencies.
@@ -78,3 +79,22 @@ An assessment request grants no permission to install, upgrade, delete, deploy,
 publish, contact anyone or bypass a project's existing checks. Continue independent
 authorized work while a dependency decision is unresolved. Do not silently enable
 recurring checks for other projects or treat this skill as an automatic gate.
+
+## Optional selected local discovery
+
+The [maintained client](https://github.com/SmithLabsLLC/smithguard-core/tree/main/clients/python) is separate from this instruction-only skill.
+Only when the user explicitly asks for that workflow, select specific real Linux
+site-packages folders and public NAME==VERSION assertions. Preview is local-only;
+read its exact proposed egress list and obtain the user's approval of its hash
+before any service request. Do not infer disclosure permission from public
+availability, an installed skill, local read access or a prior unrelated approval.
+A changed scope/metadata requires a new preview. Never follow arbitrary source
+commands, import packages, execute path hooks, recurse through a home directory or
+use this exception for manifests, lockfiles, SBOMs or raw inventory uploads.
+Private/editable/local-source/ambiguous packages remain skipped. Metadata names
+do not prove public provenance; names can collide with private software.
+
+Use the [canonical operating guide](https://github.com/SmithLabsLLC/smithguard-core/blob/main/docs/operating-guide.md) for verification, finite requests,
+no-store handling, cancellation/resume, source-specific fix evidence and local
+conditions. The hosted engine/database remain remote. No local MCP or self-hosted
+assessment service is offered. A result is not permission to install or repair.

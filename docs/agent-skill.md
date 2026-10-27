@@ -1,4 +1,49 @@
-# SmithGuard agent skill 0.2.0
+# SmithGuard agent skill 0.3.0
+
+The six-file instruction-only skill remains separate from the optional
+[Linux/Python client](../clients/python/README.md). Version 0.3.0 adds the narrow
+explicitly authorized local-preview workflow and links the maintained
+[operating guide](operating-guide.md). Installing the skill does not install the
+client, approve local discovery, permit disclosure, connect hosted MCP or enable
+an automatic release gate.
+
+The new result guidance distinguishes complete-response signature verification,
+current key/freshness eligibility, source-listed fixes and incomplete evidence.
+Local conditions use explicit dated target facts. A candidate must meet every
+advisory/branch, identity, source, registry, coverage and application-compatibility
+qualification; the skill never automatically changes software.
+
+## October 26 checks for version 0.3.0
+
+Codex CLI 0.164.0 and Claude Code 2.1.310 each loaded the installed skill in a
+disposable synthetic project. Both opened all four installed references, called
+hosted coverage once and assessed the deliberately selected public npm package
+`event-stream` version `3.3.6` once. Both reported the affected evidence, held the
+addition under the adopted test policy, preserved unchecked scope and correctly
+reported that no cryptographic signature verification ran. Neither installed
+software or read the private decoy. Saved settings and installed skill hashes
+remained unchanged.
+
+Each client also passed nineteen existing synthetic interpretation cases and
+seven new semantic cases: preview versus disclosure authority, approved exact
+egress, unknown target OS, an insufficient single-advisory fix, compact evidence,
+a hash without signature verification, and stale unused local facts. Synthetic
+scenarios supplied verification status; those cases did not call the service or
+perform signature verification. Responses were parsed from text/Markdown where
+needed; these results do not claim strict JSON-only output compliance.
+
+These are finite observations, not a guarantee for every model, run, platform or
+client. Live failures, other workflows and signature verification have separate
+evidence. The separate maintained client passed its own installed-wheel tests;
+that proof does not turn an agent's unverified result into a verified one. There
+is no accepted marketplace-listing claim. Use a fresh check for every new decision.
+
+## Preserved version 0.2.0 qualification
+
+The following historical observations retain their original scope and dates.
+They are not reused as proof for version 0.3.0.
+
+# Historical SmithGuard agent skill 0.2.0
 
 The maintained skill source is in `skills/assess-public-artifact/`. The six-file
 instruction-only distribution contains SKILL.md, the Apache-2.0 license, and four

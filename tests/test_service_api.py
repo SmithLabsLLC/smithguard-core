@@ -294,7 +294,7 @@ def test_public_artifact_assessment_uses_the_same_canonical_incident(
         assert result["incident_ids"] == [incident["id"]]
         assert affected_range["id"] in result["affected_range_ids"]
         assert len(result["affected_range_ids"]) == 2
-        assert result["schema_version"] == "2.2.0"
+        assert result["schema_version"] == "2.4.0"
         assert result["relationship_state"] == "single_incident_record"
         assert len(result["incidents"]) == 1
         projected = result["incidents"][0]

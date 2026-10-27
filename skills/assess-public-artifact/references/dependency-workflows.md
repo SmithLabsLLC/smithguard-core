@@ -94,3 +94,15 @@ and continue independent permitted work. The project's adopted policy decides
 whether the release waits or a named exception is required. Do not silently
 override that policy to make a deployment succeed. Conversely, do not impose a
 new global blocking policy merely because the service is unavailable.
+
+## Separately authorized local-client workflow
+
+The default named-package workflow above does not authorize inventory discovery.
+A user may separately select the maintained Linux/Python client's exact local
+metadata scopes and public coordinate assertions, review its local preview, and
+approve that exact egress hash. This narrow route does not permit manifest,
+lockfile, SBOM, source or private-inventory uploads, guessed public identities or
+broader enumeration. Paths, relationships, activity and target facts stay local.
+Read the [canonical operating guide](https://github.com/SmithLabsLLC/smithguard-core/blob/main/docs/operating-guide.md); preserve incomplete scope, unverified
+identity, source limits and fresh rechecks after interruption. Any upgrade or
+release decision still follows the project's independently adopted authority.

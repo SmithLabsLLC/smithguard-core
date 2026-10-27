@@ -20,6 +20,8 @@ from smithguard.advisory_catalog import (
     CatalogMatchFamily,
     catalog_evidence_for_package,
 )
+from smithguard.assessment_evidence import assessment_reason_codes, incident_fix_evidence
+from smithguard.catalog_context import attach_catalog_context
 from smithguard.contracts.runtime import parse_contract
 from smithguard.coverage import build_coverage_report, refresh_coverage_report
 from smithguard.db.models import (
@@ -54,7 +56,7 @@ from smithguard.supplemental_store import (
 )
 from smithguard.version_order import is_exact_version
 
-ASSESSMENT_SCHEMA_VERSION = "2.2.0"
+ASSESSMENT_SCHEMA_VERSION = "2.4.0"
 MAX_LISTED_INCIDENTS = 100
 SHORT_REQUEST_FIELDS = frozenset({"ecosystem", "name", "version", "digest", "registry_host"})
 # Range syntax and floating names that never identify one exact published version.
@@ -679,8 +681,9 @@ def _evidence_unknowns(
         for item in listed
     ):
         unknowns.append(
-            "Sources disagree about whether this version is affected. Fix versions are "
-            "source-reported candidates; assess the exact version before choosing an upgrade."
+            "Sources disagree about whether this version is affected. Legacy fix candidates "
+            "can include inferred range ends; inspect explicit source fixes and assess the "
+            "exact version before choosing an upgrade."
         )
     if active_warning_count:
         unknowns.append(
@@ -901,6 +904,25 @@ class SmithGuardService:
         projected_incidents, not_applicable_count, incidents_truncated = _listed_incidents(
             all_incidents
         )
+        listed_reports = [r for i in projected_incidents for r in i["source_reports"]]
+        attach_catalog_context(session, listed_reports)
+        for report in listed_reports:
+            # Legacy incident-only records did not retain structured patch context.
+            report.setdefault("source_fixed_versions", [])
+            report.setdefault("fix_evidence", [])
+            report.setdefault("range_bound_evidence", [])
+            report.setdefault("fix_evidence_incomplete", True)
+            report.setdefault("historical_metadata_incomplete", False)
+            report["local_applicability"] = "not_evaluated"
+        for incident in projected_incidents:
+            incident.update(
+                incident_fix_evidence(
+                    incident["source_reports"],
+                    identity["ecosystem"],
+                    reports_truncated=incident["source_reports_truncated"],
+                )
+            )
+            incident["local_applicability"] = "not_evaluated"
         now = self._clock()
         origin_context, origin_fingerprint = origin_context_for_reports(
             session,
@@ -988,6 +1010,17 @@ class SmithGuardService:
                 "as_of": lane.as_of,
             },
             "registry_state": "unknown",
+            "identity_assurance": "caller_asserted",
+            "local_applicability": "not_evaluated",
+            "reason_codes": assessment_reason_codes(
+                incidents=projected_incidents,
+                result=result,
+                range_evaluation=lane.version_range_evaluation,
+                artifact_evidence=bool(correlation.artifacts or catalog_families),
+                freshness=freshness,
+                truncated=incidents_truncated or warnings_truncated,
+            ),
+            "registry_project_context": None,
             "unknowns": [
                 *lane.unknowns,
                 *_source_unknowns(freshness),

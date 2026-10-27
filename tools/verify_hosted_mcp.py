@@ -225,7 +225,7 @@ def validate_result(name, result, args):
     if name == "assess_public_artifact":
         require(
             data.get("kind") == "public_artifact_assessment"
-            and data.get("schema_version") in {"2.1.0", "2.2.0"},
+            and data.get("schema_version") in {"2.1.0", "2.2.0", "2.3.0", "2.4.0"},
             "assessment_contract_changed",
         )
         require(
@@ -236,7 +236,7 @@ def validate_result(name, result, args):
             isinstance(data.get("incidents"), list) and "signature" in data,
             "assessment_unsigned_or_invalid",
         )
-        if data["schema_version"] == "2.2.0":
+        if data["schema_version"] in {"2.2.0", "2.3.0", "2.4.0"}:
             require(
                 isinstance(data.get("cve_context"), list) and len(data["cve_context"]) <= 2000,
                 "assessment_cve_context_invalid",

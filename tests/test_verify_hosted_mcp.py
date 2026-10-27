@@ -31,7 +31,7 @@ def assessment_result(value):
     )
 
 
-@pytest.mark.parametrize("schema", ["2.1.0", "2.2.0"])
+@pytest.mark.parametrize("schema", ["2.1.0", "2.2.0", "2.3.0", "2.4.0"])
 def test_assessment_verifier_accepts_only_reviewed_versions(contract_examples, schema):
     value = deepcopy(
         next(
@@ -42,8 +42,33 @@ def test_assessment_verifier_accepts_only_reviewed_versions(contract_examples, s
     )
     value["schema_version"] = schema
     value.pop("cve_context", None)
-    if schema == "2.2.0":
+    if schema in {"2.2.0", "2.3.0", "2.4.0"}:
         value["cve_context"] = []
+    if schema in {"2.3.0", "2.4.0"}:
+        value["registry_project_context"] = None
+    if schema == "2.4.0":
+        value.update(
+            reason_codes=["identity_unverified", "results_incomplete"],
+            identity_assurance="caller_asserted",
+            local_applicability="not_evaluated",
+        )
+        for incident in value["incidents"]:
+            incident.update(
+                source_fixed_versions=[],
+                fix_evidence_incomplete=True,
+                local_applicability="not_evaluated",
+            )
+            for report in incident["source_reports"]:
+                report.update(
+                    source_fixed_versions=[],
+                    fix_evidence_incomplete=True,
+                    local_applicability="not_evaluated",
+                    fix_evidence=[],
+                    range_bound_evidence=[],
+                    historical_metadata_incomplete=False,
+                    source_context=None,
+                    source_context_state="unavailable",
+                )
     args = {key: value["artifact"][key] for key in ("ecosystem", "name", "version")}
     assert (
         verifier.validate_result("assess_public_artifact", assessment_result(value), args) == value
@@ -73,7 +98,7 @@ def test_unknown_assessment_version_or_missing_v22_context_is_refused(contract_e
             if example["definition"] == "PublicArtifactAssessment"
         )
     )
-    value["schema_version"] = "2.3.0" if fault == "unknown_version" else "2.2.0"
+    value["schema_version"] = "2.5.0" if fault == "unknown_version" else "2.2.0"
     value.pop("cve_context", None)
     with pytest.raises(verifier.Refusal, match="assessment_(cve_context_invalid|contract_changed)"):
         verifier.validate_result("assess_public_artifact", assessment_result(value), {})

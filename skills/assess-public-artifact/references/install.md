@@ -1,6 +1,6 @@
 # Install and maintain the SmithGuard skill
 
-Package version: 0.2.0. Instructions checked October 25, 2026.
+Package version: 0.3.0. Instructions checked October 26, 2026.
 
 There are two separate pieces: this skill folder teaches the workflow; a hosted
 MCP connection supplies live tools. No SmithGuard account or API key is required
@@ -79,7 +79,7 @@ remote Streamable HTTP connection with the same exact URL.
 
 ## Verify before relying on it
 
-1. Confirm the installed skill is visible, its version is 0.2.0, and all four
+1. Confirm the installed skill is visible, its version is 0.3.0, and all four
    reference files open from the installed folder. Confirm the actual loaded copy
    when multiple installations exist.
 2. Confirm the connection is active and the assessment/coverage tools are present.
@@ -125,3 +125,14 @@ Official references checked for these installation conventions:
 - https://code.claude.com/docs/en/skills
 - https://code.claude.com/docs/en/mcp
 - https://agentskills.io/specification
+
+## Optional local client
+
+Skill installation does not install or authorize the separate
+[smithguard-client](https://github.com/SmithLabsLLC/smithguard-core/tree/main/clients/python). Its initial adapter requires a Linux Python 3.14
+runtime, verified release bytes and a dedicated environment. Follow its versioned
+README and the [operating guide](https://github.com/SmithLabsLLC/smithguard-core/blob/main/docs/operating-guide.md). Read-only selected metadata discovery and
+network disclosure are distinct approvals; no automatic home/repository scan,
+configuration change, package upgrade, local MCP server or private-data upload.
+The current skill's release qualification is dated and separate from historical
+0.2.0 harness observations; do not transfer an older test claim to an untested version.

@@ -1,0 +1,94 @@
+{
+  "id": "gbsec:assessment:public-artifact-001",
+  "kind": "public_artifact_assessment",
+  "schema_version": "2.2.0",
+  "revision": 1,
+  "created_at": "2026-08-05T00:00:00Z",
+  "updated_at": "2026-08-05T00:00:00Z",
+  "data_classification": "public",
+  "artifact": {
+    "ecosystem": "npm",
+    "registry_host": "registry.npmjs.org",
+    "name": "event-stream",
+    "version": "3.3.6",
+    "digest": null,
+    "public_visibility": "asserted_public"
+  },
+  "result": "affected",
+  "relationship_state": "single_incident_record",
+  "incidents": [
+    {
+      "incident_id": "gbsec:incident:event-stream-2018",
+      "revision": 1,
+      "status": "confirmed",
+      "confidence": "confirmed",
+      "title": "Malicious event-stream package release",
+      "last_changed_at": "2026-08-05T00:00:00Z",
+      "report_relationship": "single_report",
+      "relationship_basis": "catalog_assignment",
+      "source_reports": [
+        {
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_name": "GitHub Advisory Database",
+          "upstream_record_id": "GHSA-2345-6789-cfgh",
+          "state": "active",
+          "source_updated_at": "2026-08-05T00:00:00Z",
+          "observed_at": "2026-08-05T00:00:00Z"
+        }
+      ],
+      "source_reports_truncated": false,
+      "applies_to_version": true,
+      "affected_range_ids": [
+        "gbsec:range:event-stream-3.3.6"
+      ],
+      "fixed_versions": [],
+      "aliases": [
+        "GHSA-2345-6789-cfgh"
+      ],
+      "upstream_urls": [
+        "https://github.com/advisories/GHSA-2345-6789-cfgh"
+      ]
+    }
+  ],
+  "cve_context": [],
+  "preliminary_warnings": [],
+  "preliminary_warnings_truncated": false,
+  "incident_ids": [
+    "gbsec:incident:event-stream-2018"
+  ],
+  "affected_range_ids": [
+    "gbsec:range:event-stream-3.3.6"
+  ],
+  "recommended_action_ids": [
+    "gbsec:action:event-stream-check"
+  ],
+  "evidence_maturity": {
+    "composition": "present",
+    "provenance": "present",
+    "signature": "unsupported",
+    "vex": "missing",
+    "deployment": "unknown",
+    "runtime": "unknown"
+  },
+  "coverage": {
+    "ecosystem": "npm",
+    "stage": "matched",
+    "result": "supported",
+    "as_of": "2026-08-05T00:00:00Z"
+  },
+  "registry_state": "removed",
+  "unknowns": [
+    "Deployment and runtime use are customer-local questions."
+  ],
+  "feed_revision": "feed-2026-08-05-001",
+  "not_applicable_incident_count": 0,
+  "incidents_truncated": false,
+  "source_freshness": [
+    {
+      "source_id": "gbsec:source:github-advisory-database",
+      "record_type": "malware_advisory",
+      "freshness_state": "fresh",
+      "last_success_at": "2026-08-05T00:00:00Z"
+    }
+  ]
+}

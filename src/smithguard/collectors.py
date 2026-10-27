@@ -747,7 +747,10 @@ def transform_github_advisories(
 
 
 def filter_github_advisory(
-    advisory: Mapping[str, Any], *, preserve_patched_versions: bool = False
+    advisory: Mapping[str, Any],
+    *,
+    preserve_patched_versions: bool = False,
+    preserve_public_context: bool = False,
 ) -> dict[str, Any]:
     """Keep only the reviewed provider fields needed for evidence and policy."""
     required = {
@@ -846,6 +849,11 @@ def filter_github_advisory(
                 ):
                     raise NormalizationRejected("invalid_github_first_patched_version")
                 filtered["first_patched_version"] = patched
+    context = {}
+    if preserve_public_context:
+        from smithguard.advisory_context import permitted_github_context
+
+        context = permitted_github_context(advisory)
     return {
         "ghsa_id": advisory["ghsa_id"],
         "type": advisory["type"],
@@ -857,6 +865,7 @@ def filter_github_advisory(
         "cwes": filtered_cwes,
         "references": filtered_references,
         "vulnerabilities": filtered_vulnerabilities,
+        **context,
     }
 
 
@@ -1278,7 +1287,7 @@ class GitHubAdvisoryRestCollector:
         self._segment = advisory_type
         self._provider_type = "malware" if advisory_type == "legacy-malware" else advisory_type
         self._catalog_mode = catalog_mode
-        self._catalog_processing_version = f"github-advisory-catalog-6-{self._provider_type}"
+        self._catalog_processing_version = f"github-advisory-catalog-7-{self._provider_type}"
         if historical_cutoff is not None:
             if historical_cutoff.tzinfo is None or historical_cutoff.utcoffset() is None:
                 raise CollectorBoundaryError("GitHub historical cutoff must be timezone-aware")
@@ -1664,7 +1673,9 @@ class GitHubAdvisoryRestCollector:
         if advisory.get("type") != self._provider_type:
             raise CollectorBoundaryError("GitHub advisory crossed its type segment")
         if self._catalog_mode:
-            accepted_advisory = filter_github_advisory(advisory, preserve_patched_versions=True)
+            accepted_advisory = filter_github_advisory(
+                advisory, preserve_patched_versions=True, preserve_public_context=True
+            )
             scope_exclusion_reasons: tuple[tuple[str, int], ...] = ()
         else:
             accepted_advisory, scope_exclusion_reasons = (

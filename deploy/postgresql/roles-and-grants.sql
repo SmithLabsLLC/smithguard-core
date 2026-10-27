@@ -182,6 +182,11 @@ GRANT SELECT ON TABLE
     smithguard.sources
 TO "smithguard-api";
 
+-- Only processing-policy identities, needed to distinguish historical omissions.
+-- Full governance records remain outside the public reader's privileges.
+GRANT SELECT (decision_id, field_policy_id)
+    ON TABLE smithguard.source_governance_decisions TO "smithguard-api";
+
 GRANT SELECT, INSERT ON TABLE
     smithguard.advisory_catalog_inventory,
     smithguard.advisory_catalog_manifests,

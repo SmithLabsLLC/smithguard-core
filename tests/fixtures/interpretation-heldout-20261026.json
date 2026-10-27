@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "labeled_at": "2026-10-26T23:04:30.987469+00:00",
+  "source": "GitHub Advisory Database",
+  "license_expression": "CC-BY-4.0",
+  "label_method": "Host independently read source ranges and explicit first_patched_version; fixed literal boundary expectations before running implementation. No output-derived labels. Versions are semantic boundary probes, not claims of installed identity or artifact availability.",
+  "references": [
+    {
+      "id": "GHSA-jqc4-5cvw-7w85",
+      "url": "https://github.com/advisories/GHSA-jqc4-5cvw-7w85",
+      "updated_at": "2026-10-23T22:28:42Z",
+      "observed_at": "2026-10-26T23:02:37.687048+00:00",
+      "source_sha256": "c02214eb970919e0c6a2c044b4aed1f6ec63d5b66e670a35a5ad0d50ece9380f",
+      "ecosystem": "pypi",
+      "name": "filelock",
+      "expression": ">= 4.1.0, <= 4.2.0",
+      "expected_explicit_fix": "4.2.1",
+      "cases": [
+        {
+          "version": "4.0.0",
+          "expected_applies": false
+        },
+        {
+          "version": "4.1.0",
+          "expected_applies": true
+        },
+        {
+          "version": "4.2.0",
+          "expected_applies": true
+        },
+        {
+          "version": "4.2.1",
+          "expected_applies": false
+        }
+      ],
+      "expected_condition_state": "unknown",
+      "condition_label_basis": "No reviewed structured extraction exists for these source identities; prose alone must not become a local exclusion."
+    },
+    {
+      "id": "GHSA-4f8h-vr72-p32c",
+      "url": "https://github.com/advisories/GHSA-4f8h-vr72-p32c",
+      "updated_at": "2026-10-23T22:26:58Z",
+      "observed_at": "2026-10-26T23:02:37.687048+00:00",
+      "source_sha256": "85a2721f880419c8b0df73493b3614c5e3ed0fbb0a107d7be238b7c7b88d4e59",
+      "ecosystem": "pypi",
+      "name": "virtualenv",
+      "expression": ">= 21.14.8, < 21.14.10",
+      "expected_explicit_fix": "21.14.10",
+      "cases": [
+        {
+          "version": "21.14.7",
+          "expected_applies": false
+        },
+        {
+          "version": "21.14.8",
+          "expected_applies": true
+        },
+        {
+          "version": "21.14.9",
+          "expected_applies": true
+        },
+        {
+          "version": "21.14.10",
+          "expected_applies": false
+        }
+      ],
+      "expected_condition_state": "unknown",
+      "condition_label_basis": "No reviewed structured extraction exists for these source identities; prose alone must not become a local exclusion."
+    },
+    {
+      "id": "GHSA-2wqp-q3c6-ccj5",
+      "url": "https://github.com/advisories/GHSA-2wqp-q3c6-ccj5",
+      "updated_at": "2026-10-23T22:07:27Z",
+      "observed_at": "2026-10-26T23:02:37.687048+00:00",
+      "source_sha256": "9d1bb65d5021d998c2bae652d89b72b46a7a4e30e6a98cbc0d3a83e054002830",
+      "ecosystem": "pypi",
+      "name": "mlflow",
+      "expression": ">= 3.12.0rc0, < 3.17.0",
+      "expected_explicit_fix": "3.17.0",
+      "cases": [
+        {
+          "version": "3.11.0",
+          "expected_applies": false
+        },
+        {
+          "version": "3.12.0rc0",
+          "expected_applies": true
+        },
+        {
+          "version": "3.12.0",
+          "expected_applies": true
+        },
+        {
+          "version": "3.17.0",
+          "expected_applies": false
+        }
+      ],
+      "expected_condition_state": "unknown",
+      "condition_label_basis": "No reviewed structured extraction exists for these source identities; prose alone must not become a local exclusion."
+    },
+    {
+      "id": "GHSA-5x8w-8jj5-q52h",
+      "url": "https://github.com/advisories/GHSA-5x8w-8jj5-q52h",
+      "updated_at": "2026-10-23T21:55:22Z",
+      "observed_at": "2026-10-26T23:02:37.687048+00:00",
+      "source_sha256": "2a04ff9c0b53eb737d5f03f761681673a0e714febd6cda3146c8a5e5035dfe52",
+      "ecosystem": "pypi",
+      "name": "pillow",
+      "expression": "<= 12.3.0",
+      "expected_explicit_fix": "13.0.0",
+      "cases": [
+        {
+          "version": "12.2.0",
+          "expected_applies": true
+        },
+        {
+          "version": "12.3.0",
+          "expected_applies": true
+        },
+        {
+          "version": "13.0.0",
+          "expected_applies": false
+        }
+      ],
+      "expected_condition_state": "unknown",
+      "condition_label_basis": "No reviewed structured extraction exists for these source identities; prose alone must not become a local exclusion."
+    },
+    {
+      "id": "GHSA-xmj3-9gf7-h52w",
+      "url": "https://github.com/advisories/GHSA-xmj3-9gf7-h52w",
+      "updated_at": "2026-10-23T21:44:13Z",
+      "observed_at": "2026-10-26T23:02:37.687048+00:00",
+      "source_sha256": "cadac39f2cc2cb7f589218b5754e151e086ccaccd96c64b46e5fe3ec04842fcd",
+      "ecosystem": "pypi",
+      "name": "setuptools",
+      "expression": ">= 38.2.2, < 84.1.0",
+      "expected_explicit_fix": "84.1.0",
+      "cases": [
+        {
+          "version": "38.2.1",
+          "expected_applies": false
+        },
+        {
+          "version": "38.2.2",
+          "expected_applies": true
+        },
+        {
+          "version": "84.0.0",
+          "expected_applies": true
+        },
+        {
+          "version": "84.1.0",
+          "expected_applies": false
+        }
+      ],
+      "expected_condition_state": "unknown",
+      "condition_label_basis": "No reviewed structured extraction exists for these source identities; prose alone must not become a local exclusion."
+    }
+  ],
+  "scope": "19 boundary cases across five independently selected public PyPI advisories; finite regression corpus, not an accuracy or recall estimate."
+}

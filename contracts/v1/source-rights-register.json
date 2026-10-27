@@ -569,15 +569,16 @@
             "vulnerabilities.first_patched_version",
             "vulnerabilities.vulnerable_version_range",
             "cwes.cwe_id",
-            "references"
+            "references",
+            "summary",
+            "description",
+            "severity"
           ],
           "storage": "immutable",
           "public_output": "allowed_with_attribution"
         },
         {
           "fields": [
-            "summary",
-            "description",
             "cvss",
             "cwes.cwe_name"
           ],

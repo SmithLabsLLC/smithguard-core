@@ -1764,6 +1764,231 @@
           "expired"
         ]
       },
+      "PublicAdvisoryContext": {
+        "additionalProperties": false,
+        "description": "Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit.",
+        "properties": {
+          "attribution": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/PublicApplicabilityConditions"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description_sha256": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description_truncated": {
+            "type": "boolean"
+          },
+          "license_expression": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_url": {
+            "$ref": "#/components/schemas/PublicIncidentUri"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title_sha256": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title_truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "severity",
+          "attribution",
+          "license_expression",
+          "source_url",
+          "title_sha256",
+          "description_sha256",
+          "title_truncated",
+          "description_truncated",
+          "conditions"
+        ],
+        "type": "object"
+      },
+      "PublicApplicabilityConditions": {
+        "additionalProperties": false,
+        "description": "OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation.",
+        "properties": {
+          "any_of": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "all_of": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "fact": {
+                        "maxLength": 80,
+                        "minLength": 1,
+                        "pattern": "^[a-z][a-z0-9_]*$",
+                        "type": "string"
+                      },
+                      "values": {
+                        "items": {
+                          "maxLength": 200,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "maxItems": 32,
+                        "minItems": 1,
+                        "type": "array",
+                        "uniqueItems": true
+                      }
+                    },
+                    "required": [
+                      "fact",
+                      "values"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 16,
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "all_of"
+              ],
+              "type": "object"
+            },
+            "maxItems": 16,
+            "type": "array"
+          },
+          "coverage": {
+            "enum": [
+              "partial",
+              "unknown"
+            ]
+          },
+          "extraction_method": {
+            "anyOf": [
+              {
+                "enum": [
+                  "reviewed_source_text",
+                  "structured_source_fields"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "local_applicability": {
+            "const": "not_evaluated"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_field": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_text_sha256": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "recorded",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "state",
+          "coverage",
+          "extraction_method",
+          "source_field",
+          "source_text_sha256",
+          "reviewed_on",
+          "any_of",
+          "local_applicability"
+        ],
+        "type": "object"
+      },
       "PublicArtifactAssessment": {
         "allOf": [
           {
@@ -1773,7 +1998,11 @@
             "if": {
               "properties": {
                 "schema_version": {
-                  "const": "2.2.0"
+                  "enum": [
+                    "2.2.0",
+                    "2.3.0",
+                    "2.4.0"
+                  ]
                 }
               },
               "required": [
@@ -1788,6 +2017,168 @@
               },
               "required": [
                 "cve_context"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "schema_version": {
+                  "enum": [
+                    "2.3.0",
+                    "2.4.0"
+                  ]
+                }
+              },
+              "required": [
+                "schema_version"
+              ]
+            },
+            "then": {
+              "required": [
+                "registry_project_context"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "schema_version": {
+                  "const": "2.4.0"
+                }
+              },
+              "required": [
+                "schema_version"
+              ]
+            },
+            "then": {
+              "properties": {
+                "identity_assurance": {
+                  "const": "caller_asserted",
+                  "description": "The coordinate and public identity are supplied by the caller; matching an advisory or registry listing does not verify an installed artifact."
+                },
+                "incidents": {
+                  "items": {
+                    "properties": {
+                      "fix_evidence_incomplete": {
+                        "type": "boolean"
+                      },
+                      "local_applicability": {
+                        "const": "not_evaluated"
+                      },
+                      "source_fixed_versions": {
+                        "description": "Explicit source patch versions and OSV fixed events only, across branches. Empty can mean absent historical metadata or a source null; it does not prove no fix exists. This union is not an upgrade recommendation.",
+                        "items": {
+                          "maxLength": 200,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "maxItems": 20,
+                        "type": "array",
+                        "uniqueItems": true
+                      },
+                      "source_reports": {
+                        "items": {
+                          "properties": {
+                            "fix_evidence": {
+                              "items": {
+                                "$ref": "#/components/schemas/PublicSourceFixEvidence"
+                              },
+                              "maxItems": 40,
+                              "type": "array"
+                            },
+                            "fix_evidence_incomplete": {
+                              "type": "boolean"
+                            },
+                            "historical_metadata_incomplete": {
+                              "type": "boolean"
+                            },
+                            "local_applicability": {
+                              "const": "not_evaluated"
+                            },
+                            "range_bound_evidence": {
+                              "items": {
+                                "$ref": "#/components/schemas/PublicSourceRangeBound"
+                              },
+                              "maxItems": 40,
+                              "type": "array"
+                            },
+                            "source_context": {
+                              "anyOf": [
+                                {
+                                  "$ref": "#/components/schemas/PublicAdvisoryContext"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "source_context_state": {
+                              "enum": [
+                                "available",
+                                "unavailable",
+                                "omitted_budget"
+                              ]
+                            },
+                            "source_fixed_versions": {
+                              "description": "Explicit source patch versions and OSV fixed events only, across branches. Empty can mean absent historical metadata or a source null; it does not prove no fix exists. This union is not an upgrade recommendation.",
+                              "items": {
+                                "maxLength": 200,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "type": "array",
+                              "uniqueItems": true
+                            }
+                          },
+                          "required": [
+                            "source_fixed_versions",
+                            "fix_evidence_incomplete",
+                            "local_applicability",
+                            "fix_evidence",
+                            "range_bound_evidence",
+                            "historical_metadata_incomplete",
+                            "source_context",
+                            "source_context_state"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "source_fixed_versions",
+                      "fix_evidence_incomplete",
+                      "local_applicability"
+                    ]
+                  }
+                },
+                "local_applicability": {
+                  "const": "not_evaluated"
+                },
+                "reason_codes": {
+                  "items": {
+                    "enum": [
+                      "no_matching_advisory",
+                      "identity_unverified",
+                      "ecosystem_not_covered",
+                      "artifact_evidence_missing",
+                      "source_stale",
+                      "source_unavailable",
+                      "version_not_evaluable",
+                      "source_conflict",
+                      "historical_metadata_incomplete",
+                      "results_incomplete"
+                    ]
+                  },
+                  "maxItems": 10,
+                  "type": "array",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "reason_codes",
+                "identity_assurance",
+                "local_applicability"
               ]
             }
           },
@@ -1824,6 +2215,17 @@
                 "minLength": 8,
                 "type": "string"
               },
+              "identity_assurance": {
+                "anyOf": [
+                  {
+                    "const": "caller_asserted",
+                    "description": "The coordinate and public identity are supplied by the caller; matching an advisory or registry listing does not verify an installed artifact."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "incident_ids": {
                 "$ref": "#/components/schemas/StableIdList"
               },
@@ -1841,6 +2243,16 @@
               "kind": {
                 "const": "public_artifact_assessment"
               },
+              "local_applicability": {
+                "anyOf": [
+                  {
+                    "const": "not_evaluated"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "not_applicable_incident_count": {
                 "description": "Matching-package incidents left out because their affected versions exclude the requested version.",
                 "maximum": 100000,
@@ -1857,8 +2269,45 @@
               "preliminary_warnings_truncated": {
                 "type": "boolean"
               },
+              "reason_codes": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "enum": [
+                        "no_matching_advisory",
+                        "identity_unverified",
+                        "ecosystem_not_covered",
+                        "artifact_evidence_missing",
+                        "source_stale",
+                        "source_unavailable",
+                        "version_not_evaluable",
+                        "source_conflict",
+                        "historical_metadata_incomplete",
+                        "results_incomplete"
+                      ]
+                    },
+                    "maxItems": 10,
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "recommended_action_ids": {
                 "$ref": "#/components/schemas/StableIdList"
+              },
+              "registry_project_context": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RegistryProjectContext"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Optional dated PyPI project administration context, independent of the exact-version assessment. Unknown or failed reads are not removal or safety claims. Other ecosystems return null."
               },
               "registry_state": {
                 "enum": [
@@ -1964,7 +2413,9 @@
           "schema_version": {
             "enum": [
               "2.1.0",
-              "2.2.0"
+              "2.2.0",
+              "2.3.0",
+              "2.4.0"
             ]
           },
           "updated_at": {
@@ -2127,8 +2578,19 @@
               "unknown"
             ]
           },
+          "fix_evidence_incomplete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "fixed_versions": {
-            "description": "Source-reported fix candidates across release branches and sources (explicit patched versions, fix events and legacy exclusive upper bounds), lowest first. This union is not a safe-upgrade guarantee: sources can disagree; assess the chosen exact target version and inspect each source report.",
+            "deprecated": true,
+            "description": "Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.",
             "items": {
               "maxLength": 200,
               "minLength": 1,
@@ -2143,6 +2605,16 @@
           },
           "last_changed_at": {
             "$ref": "#/components/schemas/Timestamp"
+          },
+          "local_applicability": {
+            "anyOf": [
+              {
+                "const": "not_evaluated"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "relationship_basis": {
             "enum": [
@@ -2161,6 +2633,24 @@
             "maximum": 2147483647,
             "minimum": 1,
             "type": "integer"
+          },
+          "source_fixed_versions": {
+            "anyOf": [
+              {
+                "description": "Explicit source patch versions and OSV fixed events only, across branches. Empty can mean absent historical metadata or a source null; it does not prove no fix exists. This union is not an upgrade recommendation.",
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array",
+                "uniqueItems": true
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "source_reports": {
             "items": {
@@ -2539,8 +3029,73 @@
               "null"
             ]
           },
+          "catalog_event_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StableId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "catalog_source_sha256": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StableId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "field_policy_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StableId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fix_evidence": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PublicSourceFixEvidence"
+                },
+                "maxItems": 40,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fix_evidence_incomplete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "fixed_versions": {
-            "description": "Fix candidates explicitly reported by this source for the package, across release branches. Assess the chosen exact target version; other sources may disagree.",
+            "deprecated": true,
+            "description": "Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.",
             "items": {
               "maxLength": 200,
               "minLength": 1,
@@ -2552,6 +3107,26 @@
               "null"
             ],
             "uniqueItems": true
+          },
+          "historical_metadata_incomplete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "local_applicability": {
+            "anyOf": [
+              {
+                "const": "not_evaluated"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "observed_at": {
             "$ref": "#/components/schemas/Timestamp"
@@ -2566,6 +3141,62 @@
               }
             ]
           },
+          "range_bound_evidence": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PublicSourceRangeBound"
+                },
+                "maxItems": 40,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicAdvisoryContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_context_state": {
+            "anyOf": [
+              {
+                "enum": [
+                  "available",
+                  "unavailable",
+                  "omitted_budget"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_fixed_versions": {
+            "anyOf": [
+              {
+                "description": "Explicit source patch versions and OSV fixed events only, across branches. Empty can mean absent historical metadata or a source null; it does not prove no fix exists. This union is not an upgrade recommendation.",
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array",
+                "uniqueItems": true
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "source_id": {
             "$ref": "#/components/schemas/StableId"
           },
@@ -2573,6 +3204,18 @@
             "maxLength": 200,
             "minLength": 1,
             "type": "string"
+          },
+          "source_revision": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "source_updated_at": {
             "$ref": "#/components/schemas/Timestamp"
@@ -3401,6 +4044,109 @@
         "maxItems": 1000,
         "type": "array"
       },
+      "PublicSourceFixEvidence": {
+        "additionalProperties": false,
+        "description": "Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence.",
+        "properties": {
+          "applies_to_requested_version": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "expression": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fixed_version": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "introduced_version": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_entry_id": {
+            "$ref": "#/components/schemas/StableId"
+          },
+          "patch_field_state": {
+            "enum": [
+              "absent",
+              "explicit_null",
+              "explicit_value",
+              "invalid",
+              "no_fixed_event",
+              "unsupported_range_type"
+            ]
+          },
+          "range_index": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "range_sha256": {
+            "$ref": "#/components/schemas/Sha256"
+          },
+          "range_type": {
+            "enum": [
+              "GITHUB",
+              "SEMVER",
+              "ECOSYSTEM",
+              "GIT",
+              "other"
+            ]
+          },
+          "source_field": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "package_entry_id",
+          "range_index",
+          "range_sha256",
+          "range_type",
+          "expression",
+          "introduced_version",
+          "fixed_version",
+          "source_field",
+          "applies_to_requested_version",
+          "patch_field_state"
+        ],
+        "type": "object"
+      },
       "PublicSourceFreshness": {
         "additionalProperties": false,
         "properties": {
@@ -3441,6 +4187,110 @@
           "record_type",
           "freshness_state",
           "last_success_at"
+        ],
+        "type": "object"
+      },
+      "PublicSourceRangeBound": {
+        "additionalProperties": false,
+        "description": "Source range endpoints, never evidence that a repair was published.",
+        "properties": {
+          "kind": {
+            "enum": [
+              "exclusive_upper",
+              "inclusive_upper",
+              "last_affected",
+              "limit"
+            ]
+          },
+          "package_entry_id": {
+            "$ref": "#/components/schemas/StableId"
+          },
+          "range_index": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "version": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "package_entry_id",
+          "range_index",
+          "kind",
+          "version"
+        ],
+        "type": "object"
+      },
+      "RegistryProjectContext": {
+        "additionalProperties": false,
+        "properties": {
+          "attribution": {
+            "const": "Python Package Index",
+            "type": "string"
+          },
+          "limitation": {
+            "const": "Project administration status does not establish version availability, malware, vulnerability, or safety.",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "project_name": {
+            "maxLength": 200,
+            "pattern": "^[a-z0-9](?:[a-z0-9-]{0,198}[a-z0-9])?$",
+            "type": "string"
+          },
+          "project_status": {
+            "enum": [
+              "active",
+              "archived",
+              "deprecated",
+              "quarantined",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "retrieval": {
+            "enum": [
+              "observed",
+              "unavailable",
+              "not_found",
+              "capacity",
+              "disabled"
+            ],
+            "type": "string"
+          },
+          "source_id": {
+            "const": "gbsec:source:pypi-apis",
+            "type": "string"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 240,
+            "type": "string"
+          },
+          "valid_until": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "project_name",
+          "source_url",
+          "project_status",
+          "retrieval",
+          "observed_at",
+          "valid_until",
+          "limitation",
+          "attribution"
         ],
         "type": "object"
       },

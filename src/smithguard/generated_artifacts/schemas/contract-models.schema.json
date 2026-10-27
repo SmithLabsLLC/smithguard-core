@@ -213,11 +213,57 @@
       "title": "Alias",
       "type": "string"
     },
+    "AllOfItem": {
+      "additionalProperties": false,
+      "properties": {
+        "fact": {
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Fact",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/Value"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "fact",
+        "values"
+      ],
+      "title": "AllOfItem",
+      "type": "object"
+    },
     "AllowedHost": {
       "maxLength": 253,
       "pattern": "^[a-z0-9.-]+$",
       "title": "AllowedHost",
       "type": "string"
+    },
+    "AnyOfItem": {
+      "additionalProperties": false,
+      "properties": {
+        "all_of": {
+          "items": {
+            "$ref": "#/$defs/AllOfItem"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "All Of",
+          "type": "array"
+        }
+      },
+      "required": [
+        "all_of"
+      ],
+      "title": "AnyOfItem",
+      "type": "object"
     },
     "ApprovalRecord": {
       "additionalProperties": false,
@@ -1345,6 +1391,14 @@
       "title": "CorrectionState",
       "type": "string"
     },
+    "Coverage": {
+      "enum": [
+        "partial",
+        "unknown"
+      ],
+      "title": "Coverage",
+      "type": "string"
+    },
     "CoverageState": {
       "additionalProperties": false,
       "properties": {
@@ -1739,6 +1793,12 @@
       ],
       "title": "DependencyDelta",
       "type": "object"
+    },
+    "Description": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
     },
     "Directness": {
       "enum": [
@@ -2283,11 +2343,33 @@
       "title": "ExposurePathStep",
       "type": "object"
     },
+    "Expression": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Expression",
+      "type": "string"
+    },
+    "ExtractionMethod": {
+      "enum": [
+        "reviewed_source_text",
+        "structured_source_fields"
+      ],
+      "title": "ExtractionMethod",
+      "type": "string"
+    },
     "FieldPath": {
       "maxLength": 300,
       "pattern": "^/",
       "title": "FieldPath",
       "type": "string"
+    },
+    "FixEvidence": {
+      "items": {
+        "$ref": "#/$defs/PublicSourceFixEvidence"
+      },
+      "maxItems": 40,
+      "title": "FixEvidence",
+      "type": "array"
     },
     "FixedVersion": {
       "maxLength": 200,
@@ -2329,6 +2411,25 @@
         "unresolved"
       ],
       "title": "FreshnessState1",
+      "type": "string"
+    },
+    "IdentityAssurance": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IdentityAssuranceEnum"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "IdentityAssurance"
+    },
+    "IdentityAssuranceEnum": {
+      "enum": [
+        "caller_asserted"
+      ],
+      "title": "IdentityAssuranceEnum",
       "type": "string"
     },
     "IdentityState": {
@@ -2777,6 +2878,12 @@
       ],
       "title": "Informational"
     },
+    "IntroducedVersion": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "IntroducedVersion",
+      "type": "string"
+    },
     "InventoryEntry": {
       "additionalProperties": false,
       "properties": {
@@ -2937,6 +3044,16 @@
       "title": "InventoryStage",
       "type": "string"
     },
+    "Kind": {
+      "enum": [
+        "exclusive_upper",
+        "inclusive_upper",
+        "last_affected",
+        "limit"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
     "LatestRecheckOutcome": {
       "enum": [
         "not_checked",
@@ -2957,6 +3074,63 @@
         "CC-BY-4.0"
       ],
       "title": "LicenseExpression",
+      "type": "string"
+    },
+    "LocalApplicability": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LocalApplicabilityEnum"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "LocalApplicability"
+    },
+    "LocalApplicability1": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LocalApplicability1Enum"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "LocalApplicability1"
+    },
+    "LocalApplicability1Enum": {
+      "enum": [
+        "not_evaluated"
+      ],
+      "title": "LocalApplicability1Enum",
+      "type": "string"
+    },
+    "LocalApplicability2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LocalApplicability2Enum"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "LocalApplicability2"
+    },
+    "LocalApplicability2Enum": {
+      "enum": [
+        "not_evaluated"
+      ],
+      "title": "LocalApplicability2Enum",
+      "type": "string"
+    },
+    "LocalApplicabilityEnum": {
+      "enum": [
+        "not_evaluated"
+      ],
+      "title": "LocalApplicabilityEnum",
       "type": "string"
     },
     "LocalArtifactInput": {
@@ -3310,6 +3484,18 @@
       "title": "Packages1",
       "type": "object"
     },
+    "PatchFieldState": {
+      "enum": [
+        "absent",
+        "explicit_null",
+        "explicit_value",
+        "invalid",
+        "no_fixed_event",
+        "unsupported_range_type"
+      ],
+      "title": "PatchFieldState",
+      "type": "string"
+    },
     "PolicyDecision": {
       "additionalProperties": false,
       "properties": {
@@ -3383,7 +3569,7 @@
         },
         "reason_codes": {
           "items": {
-            "$ref": "#/$defs/ReasonCode"
+            "$ref": "#/$defs/ReasonCode1"
           },
           "maxItems": 20,
           "minItems": 1,
@@ -4092,7 +4278,7 @@
         },
         "reason_codes": {
           "items": {
-            "$ref": "#/$defs/ReasonCode1"
+            "$ref": "#/$defs/ReasonCode2"
           },
           "maxItems": 30,
           "minItems": 1,
@@ -4243,6 +4429,17 @@
       "title": "PrivateWatchlistSet",
       "type": "object"
     },
+    "ProjectStatus": {
+      "enum": [
+        "active",
+        "archived",
+        "deprecated",
+        "quarantined",
+        "unknown"
+      ],
+      "title": "ProjectStatus",
+      "type": "string"
+    },
     "Provenance": {
       "additionalProperties": false,
       "properties": {
@@ -4340,6 +4537,185 @@
       "title": "Provenance",
       "type": "object"
     },
+    "PublicAdvisoryContext": {
+      "additionalProperties": false,
+      "description": "Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit.",
+      "properties": {
+        "attribution": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Attribution",
+          "type": "string"
+        },
+        "conditions": {
+          "$ref": "#/$defs/PublicApplicabilityConditions"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Description"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description_truncated": {
+          "title": "Description Truncated",
+          "type": "boolean"
+        },
+        "license_expression": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "License Expression",
+          "type": "string"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Severity1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Title"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title_truncated": {
+          "title": "Title Truncated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "severity",
+        "attribution",
+        "license_expression",
+        "source_url",
+        "title_sha256",
+        "description_sha256",
+        "title_truncated",
+        "description_truncated",
+        "conditions"
+      ],
+      "title": "PublicAdvisoryContext",
+      "type": "object"
+    },
+    "PublicApplicabilityConditions": {
+      "additionalProperties": false,
+      "description": "OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation.",
+      "properties": {
+        "any_of": {
+          "items": {
+            "$ref": "#/$defs/AnyOfItem"
+          },
+          "maxItems": 16,
+          "title": "Any Of",
+          "type": "array"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "extraction_method": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExtractionMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "local_applicability": {
+          "const": "not_evaluated",
+          "title": "Local Applicability",
+          "type": "string"
+        },
+        "reviewed_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed On"
+        },
+        "source_field": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceField"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_text_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/State12"
+        }
+      },
+      "required": [
+        "state",
+        "coverage",
+        "extraction_method",
+        "source_field",
+        "source_text_sha256",
+        "reviewed_on",
+        "any_of",
+        "local_applicability"
+      ],
+      "title": "PublicApplicabilityConditions",
+      "type": "object"
+    },
     "PublicArtifactAssessment": {
       "additionalProperties": false,
       "properties": {
@@ -4399,6 +4775,17 @@
           "title": "Id",
           "type": "string"
         },
+        "identity_assurance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdentityAssurance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "incident_ids": {
           "items": {
             "$ref": "#/$defs/StableId"
@@ -4426,6 +4813,17 @@
           "title": "Kind",
           "type": "string"
         },
+        "local_applicability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalApplicability2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "not_applicable_incident_count": {
           "maximum": 100000,
           "minimum": 0,
@@ -4444,6 +4842,17 @@
           "title": "Preliminary Warnings Truncated",
           "type": "boolean"
         },
+        "reason_codes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReasonCodes"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "recommended_action_ids": {
           "items": {
             "$ref": "#/$defs/StableId"
@@ -4451,6 +4860,17 @@
           "maxItems": 10000,
           "title": "Recommended Action Ids",
           "type": "array"
+        },
+        "registry_project_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RegistryProjectContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "registry_state": {
           "$ref": "#/$defs/RegistryState"
@@ -4636,7 +5056,20 @@
         "confidence": {
           "$ref": "#/$defs/Confidence"
         },
+        "fix_evidence_incomplete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fix Evidence Incomplete"
+        },
         "fixed_versions": {
+          "deprecated": true,
           "items": {
             "$ref": "#/$defs/FixedVersion"
           },
@@ -4656,6 +5089,17 @@
           "title": "Last Changed At",
           "type": "string"
         },
+        "local_applicability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalApplicability1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "relationship_basis": {
           "$ref": "#/$defs/RelationshipBasis"
         },
@@ -4667,6 +5111,17 @@
           "minimum": 1,
           "title": "Revision",
           "type": "integer"
+        },
+        "source_fixed_versions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceFixedVersions1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "source_reports": {
           "items": {
@@ -4891,6 +5346,73 @@
           "default": null,
           "title": "Applies To Version"
         },
+        "catalog_event_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "catalog_source_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "field_policy_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fix_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FixEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fix_evidence_incomplete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fix Evidence Incomplete"
+        },
         "fixed_versions": {
           "anyOf": [
             {
@@ -4905,7 +5427,31 @@
             }
           ],
           "default": null,
+          "deprecated": true,
           "title": "Fixed Versions"
+        },
+        "historical_metadata_incomplete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Historical Metadata Incomplete"
+        },
+        "local_applicability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalApplicability"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "observed_at": {
           "format": "date-time",
@@ -4916,6 +5462,50 @@
           "anyOf": [
             {
               "$ref": "#/$defs/PublicOriginContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "range_bound_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RangeBoundEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicAdvisoryContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_context_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceContextState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_fixed_versions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceFixedVersions"
             },
             {
               "type": "null"
@@ -4935,6 +5525,17 @@
           "minLength": 1,
           "title": "Source Name",
           "type": "string"
+        },
+        "source_revision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRevision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "source_updated_at": {
           "format": "date-time",
@@ -5305,6 +5906,101 @@
       "title": "PublicOriginTextList",
       "type": "array"
     },
+    "PublicSourceFixEvidence": {
+      "additionalProperties": false,
+      "description": "Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence.",
+      "properties": {
+        "applies_to_requested_version": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applies To Requested Version"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expression"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fixed_version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FixedVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "introduced_version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntroducedVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "package_entry_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Package Entry Id",
+          "type": "string"
+        },
+        "patch_field_state": {
+          "$ref": "#/$defs/PatchFieldState"
+        },
+        "range_index": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Range Index",
+          "type": "integer"
+        },
+        "range_sha256": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "title": "Range Sha256",
+          "type": "string"
+        },
+        "range_type": {
+          "$ref": "#/$defs/RangeType1"
+        },
+        "source_field": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceField1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "package_entry_id",
+        "range_index",
+        "range_sha256",
+        "range_type",
+        "expression",
+        "introduced_version",
+        "fixed_version",
+        "source_field",
+        "applies_to_requested_version",
+        "patch_field_state"
+      ],
+      "title": "PublicSourceFixEvidence",
+      "type": "object"
+    },
     "PublicSourceFreshness": {
       "additionalProperties": false,
       "properties": {
@@ -5342,6 +6038,42 @@
         "last_success_at"
       ],
       "title": "PublicSourceFreshness",
+      "type": "object"
+    },
+    "PublicSourceRangeBound": {
+      "additionalProperties": false,
+      "description": "Source range endpoints, never evidence that a repair was published.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/Kind"
+        },
+        "package_entry_id": {
+          "maxLength": 160,
+          "minLength": 8,
+          "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
+          "title": "Package Entry Id",
+          "type": "string"
+        },
+        "range_index": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Range Index",
+          "type": "integer"
+        },
+        "version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "package_entry_id",
+        "range_index",
+        "kind",
+        "version"
+      ],
+      "title": "PublicSourceRangeBound",
       "type": "object"
     },
     "PublicStatus": {
@@ -5382,6 +6114,14 @@
       "title": "QuarantineReason",
       "type": "string"
     },
+    "RangeBoundEvidence": {
+      "items": {
+        "$ref": "#/$defs/PublicSourceRangeBound"
+      },
+      "maxItems": 40,
+      "title": "RangeBoundEvidence",
+      "type": "array"
+    },
     "RangeComparability": {
       "enum": [
         "comparable",
@@ -5400,6 +6140,17 @@
         "UNKNOWN"
       ],
       "title": "RangeType",
+      "type": "string"
+    },
+    "RangeType1": {
+      "enum": [
+        "GITHUB",
+        "SEMVER",
+        "ECOSYSTEM",
+        "GIT",
+        "other"
+      ],
+      "title": "RangeType1",
       "type": "string"
     },
     "RawEvidence": {
@@ -5577,12 +6328,28 @@
       "type": "string"
     },
     "ReasonCode": {
-      "maxLength": 120,
-      "pattern": "^[a-z0-9_]+$",
+      "enum": [
+        "no_matching_advisory",
+        "identity_unverified",
+        "ecosystem_not_covered",
+        "artifact_evidence_missing",
+        "source_stale",
+        "source_unavailable",
+        "version_not_evaluable",
+        "source_conflict",
+        "historical_metadata_incomplete",
+        "results_incomplete"
+      ],
       "title": "ReasonCode",
       "type": "string"
     },
     "ReasonCode1": {
+      "maxLength": 120,
+      "pattern": "^[a-z0-9_]+$",
+      "title": "ReasonCode1",
+      "type": "string"
+    },
+    "ReasonCode2": {
       "enum": [
         "feature_disabled",
         "not_synthetic",
@@ -5611,8 +6378,16 @@
         "unknown_field",
         "limit_exceeded"
       ],
-      "title": "ReasonCode1",
+      "title": "ReasonCode2",
       "type": "string"
+    },
+    "ReasonCodes": {
+      "items": {
+        "$ref": "#/$defs/ReasonCode"
+      },
+      "maxItems": 10,
+      "title": "ReasonCodes",
+      "type": "array"
     },
     "RecheckTrigger": {
       "enum": [
@@ -5786,6 +6561,74 @@
       ],
       "title": "RegistryHost1",
       "type": "string"
+    },
+    "RegistryProjectContext": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution": {
+          "const": "Python Package Index",
+          "title": "Attribution",
+          "type": "string"
+        },
+        "limitation": {
+          "const": "Project administration status does not establish version availability, malware, vulnerability, or safety.",
+          "title": "Limitation",
+          "type": "string"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        },
+        "project_name": {
+          "maxLength": 200,
+          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,198}[a-z0-9])?$",
+          "title": "Project Name",
+          "type": "string"
+        },
+        "project_status": {
+          "$ref": "#/$defs/ProjectStatus"
+        },
+        "retrieval": {
+          "$ref": "#/$defs/Retrieval1"
+        },
+        "source_id": {
+          "const": "gbsec:source:pypi-apis",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "valid_until": {
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "project_name",
+        "source_url",
+        "project_status",
+        "retrieval",
+        "observed_at",
+        "valid_until",
+        "limitation",
+        "attribution"
+      ],
+      "title": "RegistryProjectContext",
+      "type": "object"
     },
     "RegistryState": {
       "enum": [
@@ -6493,6 +7336,17 @@
       "title": "Retrieval",
       "type": "string"
     },
+    "Retrieval1": {
+      "enum": [
+        "observed",
+        "unavailable",
+        "not_found",
+        "capacity",
+        "disabled"
+      ],
+      "title": "Retrieval1",
+      "type": "string"
+    },
     "ReviewStatus": {
       "enum": [
         "REVIEWED",
@@ -6675,7 +7529,9 @@
     "SchemaVersion1": {
       "enum": [
         "2.1.0",
-        "2.2.0"
+        "2.2.0",
+        "2.3.0",
+        "2.4.0"
       ],
       "title": "SchemaVersion1",
       "type": "string"
@@ -6723,6 +7579,17 @@
         "critical"
       ],
       "title": "Severity",
+      "type": "string"
+    },
+    "Severity1": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical",
+        "unknown"
+      ],
+      "title": "Severity1",
       "type": "string"
     },
     "Sha256": {
@@ -6891,6 +7758,55 @@
       "title": "SourceClass",
       "type": "string"
     },
+    "SourceContextState": {
+      "enum": [
+        "available",
+        "unavailable",
+        "omitted_budget"
+      ],
+      "title": "SourceContextState",
+      "type": "string"
+    },
+    "SourceField": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "SourceField",
+      "type": "string"
+    },
+    "SourceField1": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "SourceField1",
+      "type": "string"
+    },
+    "SourceFixedVersion": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "SourceFixedVersion",
+      "type": "string"
+    },
+    "SourceFixedVersions": {
+      "items": {
+        "$ref": "#/$defs/SourceFixedVersion"
+      },
+      "maxItems": 20,
+      "title": "SourceFixedVersions",
+      "type": "array"
+    },
+    "SourceFixedVersions1": {
+      "items": {
+        "$ref": "#/$defs/SourceFixedVersions1Item"
+      },
+      "maxItems": 20,
+      "title": "SourceFixedVersions1",
+      "type": "array"
+    },
+    "SourceFixedVersions1Item": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "SourceFixedVersions1Item",
+      "type": "string"
+    },
     "SourceOrigin": {
       "maxLength": 253,
       "minLength": 1,
@@ -6903,6 +7819,12 @@
       "minLength": 3,
       "title": "SourceRecordId",
       "type": "string"
+    },
+    "SourceRevision": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "SourceRevision",
+      "type": "integer"
     },
     "SourceUrl": {
       "format": "uri",
@@ -6967,6 +7889,14 @@
         "recheck_required"
       ],
       "title": "State11",
+      "type": "string"
+    },
+    "State12": {
+      "enum": [
+        "recorded",
+        "unknown"
+      ],
+      "title": "State12",
       "type": "string"
     },
     "State3": {
@@ -7063,6 +7993,12 @@
       "title": "TimestampPrecision",
       "type": "string"
     },
+    "Title": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
     "ToolName": {
       "enum": [
         "list_incidents",
@@ -7106,6 +8042,12 @@
         "unknown"
       ],
       "title": "Usage",
+      "type": "string"
+    },
+    "Value": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Value",
       "type": "string"
     },
     "Visibility": {

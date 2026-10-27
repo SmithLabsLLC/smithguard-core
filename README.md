@@ -18,7 +18,7 @@ and [coverage document](https://api.smithguard.io/v1/coverage.json).
 
 The [assess-public-artifact skill](skills/assess-public-artifact/SKILL.md) teaches an
 agent to check one explicitly selected public package or image through the hosted
-SmithGuard service. Version 0.2.0 includes installation, result interpretation,
+SmithGuard service. Version 0.3.0 includes installation, result interpretation,
 before-addition and before-deployment workflows, and opt-in project policy templates.
 Read the [installation guide](skills/assess-public-artifact/references/install.md)
 and [release notes](docs/agent-skill.md). Keep all six files together.
@@ -26,6 +26,15 @@ and [release notes](docs/agent-skill.md). Keep all six files together.
 These are instructions, not a local scanner, server, automatic deployment gate or
 permission to inspect private inventories. The service runs remotely. Installing
 a skill and connecting its hosted tools are separate setup steps.
+
+## Optional local Python client
+
+The [client](clients/python/README.md) reads metadata from Linux directories you
+explicitly select, shows a local public-coordinate preview, and requires approval
+before hosted requests. Reports and local relationships stay on your computer.
+It does not install fixes, upload files, provide a local assessment database or
+scan every environment. Read the [operating guide](docs/operating-guide.md) and
+[coverage limits](docs/complementary-checks.md) before use.
 
 ## Work on the code
 
