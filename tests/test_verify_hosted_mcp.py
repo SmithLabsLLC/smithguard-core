@@ -8,9 +8,12 @@ from types import SimpleNamespace
 import httpx2
 import pytest
 from cryptography.exceptions import InvalidSignature
+from sqlalchemy.orm import Session
 
+from smithguard import bulletin_store
 from smithguard.feeds import SnapshotSigner
 from tests import test_hosted_mcp
+from tests.test_bulletins import GRANT, REGISTRY, content
 from tests.test_service_api import NOW
 from tools import verify_hosted_mcp as verifier
 
@@ -105,21 +108,40 @@ def test_unknown_assessment_version_or_missing_v22_context_is_refused(contract_e
 
 
 def test_official_client_completes_initialize_list_and_fixed_suite_offline(
-    mcp_client, tmp_path, monkeypatch
+    mcp_client, database, tmp_path, monkeypatch
 ):
     monkeypatch.setattr(verifier, "utc_now", lambda: NOW)
+    with Session(database.engine) as session, session.begin():
+        document = content()
+        document["source_published_at"] = "2026-08-05T10:00:00Z"
+        bulletin_store.publish(
+            session,
+            document,
+            registry=REGISTRY,
+            grant={
+                **GRANT,
+                "effective_at": "2026-08-01T00:00:00Z",
+                "review_due_at": "2026-08-10T00:00:00Z",
+            },
+            now=NOW,
+            manual_approval="1" * 64,
+        )
+        bulletin_store.status_tick(session, now=NOW)
     report = {"checks": [], "status": "incomplete"}
 
     async def run():
         transport = httpx2.ASGITransport(app=mcp_client.app, client=("8.8.8.8", 50000))
         async with verifier.BoundedClient(tmp_path, transport=transport) as client:
             await verifier.run_suite(client, report)
-            assert len(client.requests) == 18
+            assert len(client.requests) == 28
             assert all(row["status"] == "received" for row in client.requests)
 
     asyncio.run(run())
     assert report["status"] == "pass"
-    assert len(report["checks"]) == 12
+    assert len(report["checks"]) == 19
+    assert {row["tool"] for row in report["checks"] if "tool" in row} == verifier.EXPECTED_TOOLS
+    assert not list(tmp_path.glob("*.response.json"))
+    assert "Synthetic notice" not in "".join(path.read_text() for path in tmp_path.iterdir())
     signed_checks = [row for row in report["checks"] if row.get("signature_verified")]
     assert len(signed_checks) == 2
     assert {row["name"] for row in signed_checks} == {"django", "is-number"}
@@ -241,10 +263,12 @@ def test_matching_tampered_signatures_cannot_pass_even_when_rest_parity_holds(
                     data["signature"]["value"] = "A" * 86 + "=="
                     result["content"][0]["text"] = json.dumps(result["structuredContent"])
             headers = {"Content-Type": "application/json"} if raw else {}
+            if "cache-control" in response.headers:
+                headers["cache-control"] = response.headers["cache-control"]
             return (
                 httpx2.Response(response.status_code, json=document, headers=headers)
                 if raw
-                else httpx2.Response(response.status_code)
+                else httpx2.Response(response.status_code, headers=headers)
             )
 
         async with verifier.BoundedClient(
@@ -283,3 +307,40 @@ def test_failed_smoke_is_recorded_without_exception_content(tmp_path, monkeypatc
     assert report["status"] == "unavailable" and report["error_type"] == "RuntimeError"
     assert report["started_at"] and report["completed_at"] and report["target"] == verifier.TARGET
     assert "synthetic-untrusted-diagnostic" not in json.dumps(report) + capsys.readouterr().out
+
+
+def test_task_group_keeps_only_safe_failure_metadata():
+    error = ExceptionGroup(
+        "untrusted-outer", [RuntimeError("untrusted-body"), verifier.Refusal("rest_parity_failed")]
+    )
+    assert verifier.failure_metadata(error) == {
+        "failure_types": ["ExceptionGroup", "Refusal", "RuntimeError"],
+        "failure_reasons": ["rest_parity_failed"],
+    }
+
+
+def test_bulletin_parity_checks_decoded_cursor_and_all_other_fields(monkeypatch):
+    monkeypatch.setattr(verifier, "utc_now", lambda: NOW)
+    cursor = {
+        "v": 1,
+        "kind": "events",
+        "filters": {},
+        "after": 1,
+        "upper": 1,
+        "issued": "2026-08-05T12:00:00Z",
+    }
+    first = {"items": [], "next_cursor": bulletin_store.encode_cursor(cursor), "watermark": 1}
+    second = {
+        **first,
+        "next_cursor": bulletin_store.encode_cursor({**cursor, "issued": "2026-08-05T11:59:59Z"}),
+    }
+    assert (
+        verifier.compare_documents("get_bulletin_changes", first, second)
+        == "request_timestamp_only"
+    )
+    for change in ({"upper": 2}, {"after": 0}, {"filters": {"identity": "a" * 64}}):
+        altered = {**first, "next_cursor": bulletin_store.encode_cursor({**cursor, **change})}
+        with pytest.raises(verifier.Refusal, match="rest_parity_failed"):
+            verifier.compare_documents("get_bulletin_changes", first, altered)
+    with pytest.raises(verifier.Refusal, match="rest_parity_failed"):
+        verifier.compare_documents("get_bulletin_changes", first, {**first, "watermark": 2})

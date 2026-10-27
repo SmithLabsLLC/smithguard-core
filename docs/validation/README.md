@@ -64,3 +64,27 @@ request pacing, fixed budgets and sanitized timeout reasons.
 No second external review was run after these fixes because the selected mode was
 one completed review per reviewer. Do not describe the corrected tree as externally
 approved. No GitHub settings or hosted CI result have been tested before publication.
+
+## October 27 integration-contract follow-up
+
+This later package documents the existing canonical/signature and verification
+outcome rules, adds portable synthetic conformance vectors, and updates the public
+MCP smoke checker to exercise all eight tools while retaining metadata only.
+The October 23 source baseline and tested-file hashes above remain unchanged
+historical evidence; they are not a manifest of today's working tree.
+
+The full contributor gate passed **2,899 service tests, zero skips**, and **198
+installed-client tests**, including reproducible builds, schema/dependency checks,
+formatting and public-tree privacy checks. Focused verification passed 81 cases;
+the smoke checker passed 22 offline tests. Canonical encodings and historical
+signatures were not changed. Test responses are synthetic.
+
+The updated smoke checker's SHA256 is
+`89f57317b98fa5aae3003bb62a2fbe5a9e88a906be169927d00b65b9c86c09b0`.
+The maintained service copy passed a bounded live run of all eight tools on
+October 27 (19 checks, 28 requests); the public copy differs only in the helper
+import path, and the four imported helper functions have identical syntax trees.
+That live result is a dated observation, not an ongoing availability or latency
+promise. The public copy's own validation here was offline; no raw live answer
+is redistributed. This package does not qualify a native Guard hook, Rust verifier
+or production deployment.

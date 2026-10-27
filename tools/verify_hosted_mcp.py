@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import base64
 import hashlib
 import json
+import re
 import sys
 import time
 from copy import deepcopy
@@ -30,13 +32,12 @@ PATHS = {
     "get_coverage": "/v1/coverage.json",
     "get_emerging_leads": "/v1/emerging-leads.json",
     "get_verification_key": "/v1/public-key.json",
+    "list_bulletins": "/v1/bulletins.json",
+    "get_bulletin": "/v1/bulletins/{identity}.json",
+    "get_bulletin_changes": "/v1/bulletin-events.json",
+    "get_bulletin_status": "/v1/bulletin-status.json",
 }
-EXPECTED_TOOLS = set(PATHS) | {
-    "list_bulletins",
-    "get_bulletin",
-    "get_bulletin_changes",
-    "get_bulletin_status",
-}
+EXPECTED_TOOLS = set(PATHS)
 CASES = (
     ("key", "get_verification_key", {}),
     (
@@ -54,7 +55,7 @@ CASES = (
 )
 MAX_RESPONSE = 2_200_000
 MAX_DOCUMENT = 1_048_576
-MAX_REQUESTS = 20
+MAX_REQUESTS = 30
 REQUEST_SECONDS = 20
 TOTAL_SECONDS = 180
 
@@ -81,13 +82,18 @@ class BoundedClient(httpx2.AsyncClient):
         self.started = time.monotonic()
         self.requests = []
         self.seen = set()
+        self.bulletin_identity = None
 
     async def send(self, request, **kwargs):
         allowed = {
             TARGET,
             *(API + path for path in PATHS.values()),
             API + PATHS["get_emerging_leads"] + "?limit=5",
+            API + PATHS["list_bulletins"] + "?limit=1",
+            API + PATHS["get_bulletin_changes"] + "?limit=1",
         }
+        if self.bulletin_identity is not None:
+            allowed.add(API + PATHS["get_bulletin"].format(identity=self.bulletin_identity))
         require(str(request.url) in allowed, "target_refused")
         require(request.method in {"GET", "POST"}, "method_refused")
         require(
@@ -120,6 +126,12 @@ class BoundedClient(httpx2.AsyncClient):
                 require(not 300 <= response.status_code < 400, "redirect_refused")
                 require("mcp-session-id" not in response.headers, "stateful_session_refused")
                 require("set-cookie" not in response.headers, "cookie_response_refused")
+                if str(request.url).split("?", 1)[0] == TARGET or request.url.path.startswith(
+                    ("/v1/artifacts/assess", "/v1/bulletin")
+                ):
+                    require(
+                        response.headers.get("cache-control") == "no-store", "response_cache_policy"
+                    )
                 async for chunk in response.aiter_bytes():
                     require(len(raw) + len(chunk) <= MAX_RESPONSE, "response_size_exceeded")
                     raw.extend(chunk)
@@ -130,10 +142,10 @@ class BoundedClient(httpx2.AsyncClient):
             )
             row["response_bytes"] = len(raw)
             row["response_sha256"] = hashlib.sha256(raw).hexdigest()
+            row["cache_control"] = response.headers.get("cache-control")
             if raw:
                 document = json.loads(raw)
                 require(isinstance(document, dict), "response_shape_invalid")
-                exclusive_json(self.output / f"request-{row['number']:02d}.response.json", document)
             row["status"] = "received"
             # aiter_bytes decoded content already; prevent a second gzip decoding by the SDK.
             headers = {
@@ -195,6 +207,25 @@ def compare_documents(name, rest, mcp):
     """Compare full signed answers; only unsigned request-time fields may vary."""
     fields = {"get_coverage": ("measured_at",), "get_emerging_leads": ("as_of",)}.get(name, ())
     first, second = deepcopy(rest), deepcopy(mcp)
+    if name in {"list_bulletins", "get_bulletin_changes"}:
+        for field in ("next_cursor", "changes_cursor"):
+            if first.get(field) is None and second.get(field) is None:
+                continue
+            decoded = []
+            for value in (first.get(field), second.get(field)):
+                require(isinstance(value, str) and len(value) <= 2048, "cursor_shape_invalid")
+                decoded.append(
+                    json.loads(
+                        base64.b64decode(
+                            value + "=" * (-len(value) % 4), altchars=b"-_", validate=True
+                        )
+                    )
+                )
+            compare_documents(
+                "get_emerging_leads",
+                *[{"as_of": item.pop("issued"), "cursor": item} for item in decoded],
+            )
+            first[field] = second[field] = "validated_request_time_cursor"
     for field in fields:
         a, b = timestamp(first[field]), timestamp(second[field])
         require(abs((a - b).total_seconds()) <= 30, "request_timestamp_difference_exceeded")
@@ -215,7 +246,8 @@ def validate_result(name, result, args):
         isinstance(structured, dict) and set(structured) == {"data", "source_url"},
         "tool_result_shape_invalid",
     )
-    require(structured["source_url"] == API + PATHS[name], "source_attribution_changed")
+    expected_path = PATHS[name].format(**args) if name == "get_bulletin" else PATHS[name]
+    require(structured["source_url"] == API + expected_path, "source_attribution_changed")
     require(
         len(result.content) == 1 and result.content[0].type == "text", "tool_content_shape_invalid"
     )
@@ -282,7 +314,9 @@ async def run_suite(client, report):
             tools = [tool.model_dump(by_alias=True, exclude_none=True) for tool in listed.tools]
             validate_tools(tools)
             require(listed.next_cursor is None, "tool_pagination_changed")
-            checks.append({"name": "official_sdk_four_tools", "status": "pass"})
+            checks.append(
+                {"name": "official_sdk_tool_inventory", "status": "pass", "count": len(tools)}
+            )
             key = None
             for case, name, args in CASES:
                 path = API + PATHS[name]
@@ -312,6 +346,57 @@ async def run_suite(client, report):
                     row.update(signature_verified=True, result=data["result"])
                 checks.append(row)
 
+            for name, args in (
+                ("get_bulletin_status", {}),
+                ("list_bulletins", {"limit": 1}),
+                ("get_bulletin_changes", {"limit": 1}),
+                ("get_bulletin", {}),
+            ):
+                if name == "get_bulletin":
+                    require(client.bulletin_identity is not None, "bulletin_sample_unavailable")
+                    args = {"identity": client.bulletin_identity}
+                path = PATHS[name].format(**args) if name == "get_bulletin" else PATHS[name]
+                query = {} if name == "get_bulletin" else args
+                response = await client.get(API + path, params=query)
+                require(response.status_code == 200, "bulletin_rest_unavailable")
+                require(
+                    response.headers.get("cache-control") == "no-store", "bulletin_cache_policy"
+                )
+                rest = response.json()
+                result = await session.call_tool(name, args)
+                data = validate_result(name, result, args)
+                parity = compare_documents(name, rest, data)
+                if name == "list_bulletins":
+                    items = data.get("items")
+                    require(
+                        isinstance(items, list) and len(items) == 1, "bulletin_sample_unavailable"
+                    )
+                    identity = items[0].get("bulletin_id")
+                    require(
+                        isinstance(identity, str) and re.fullmatch(r"[a-f0-9]{64}", identity),
+                        "bulletin_identity_invalid",
+                    )
+                    client.bulletin_identity = identity
+                checks.append(
+                    {
+                        "name": name,
+                        "tool": name,
+                        "status": "pass",
+                        "parity": parity,
+                        "rest_sha256": hashlib.sha256(canonical(rest)).hexdigest(),
+                        "mcp_sha256": hashlib.sha256(canonical(data)).hexdigest(),
+                    }
+                )
+            executed = {row["tool"] for row in checks if "tool" in row}
+            require(executed == EXPECTED_TOOLS, "executed_tool_set_incomplete")
+            checks.append(
+                {
+                    "name": "executed_tool_coverage",
+                    "status": "pass",
+                    "count": len(executed),
+                }
+            )
+
         headers = {
             "Accept": "application/json, text/event-stream",
             "MCP-Protocol-Version": "2025-11-25",
@@ -338,6 +423,8 @@ async def run_suite(client, report):
             ),
             ("unknown_tool", "unsupported_synthetic_tool", {}),
             ("lead_limit_exceeded", "get_emerging_leads", {"limit": 101}),
+            ("bulletin_limit_exceeded", "list_bulletins", {"limit": 101}),
+            ("bulletin_identity_missing", "get_bulletin", {}),
         )
         for index, (case, name, args) in enumerate(negatives, 201):
             response = await client.post(
@@ -373,6 +460,19 @@ async def run_suite(client, report):
                 )
             checks.append({"name": case, "status": "pass", "http_status": response.status_code})
     report["status"] = "pass"
+
+
+def failure_metadata(error):
+    """Keep fixed refusal reasons through SDK task groups, never response text."""
+    pending, types, reasons = [error], set(), set()
+    while pending:
+        item = pending.pop()
+        types.add(type(item).__name__)
+        if isinstance(item, BaseExceptionGroup):
+            pending.extend(item.exceptions)
+        elif isinstance(item, Refusal):
+            reasons.add(str(item))
+    return {"failure_types": sorted(types), "failure_reasons": sorted(reasons)}
 
 
 def main():
@@ -427,7 +527,9 @@ def main():
     try:
         asyncio.run(run())
     except BaseException as error:
-        report.update(status="unavailable", error_type=type(error).__name__)
+        report.update(
+            status="unavailable", error_type=type(error).__name__, **failure_metadata(error)
+        )
         if isinstance(error, Refusal):
             report["reason"] = str(error)
     report["completed_at"] = utc_now().isoformat()

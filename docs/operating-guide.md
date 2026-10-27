@@ -127,3 +127,10 @@ The initial adapter is Linux only and requires Python 3.14 for its own runtime;
 it does not provide an OS, container, generic Git or private-registry scanner.
 See [complementary checks](complementary-checks.md) for supplier package versions,
 backports and the qualified limits of container and Git evidence.
+
+## Integration contracts
+
+The [versioned verification contract](verification-v1.md) specifies canonical bytes,
+key lifecycle, freshness and portable synthetic vectors. [Integration limits](integration-limits.md)
+distinguish route throttles, bounded deadlines and response retention. These
+contracts do not establish Rust conformance or a native Guard integration.

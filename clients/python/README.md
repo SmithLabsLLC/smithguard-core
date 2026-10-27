@@ -138,6 +138,10 @@ power loss before the latest state write completes.
 
 ## Verification and local facts
 
+The [versioned verification contract](https://github.com/SmithLabsLLC/smithguard-core/blob/main/docs/verification-v1.md)
+defines the canonical bytes, key lifecycle and freshness rules. Portable synthetic
+vectors live in `tests/conformance/`; Python tests do not establish Rust agreement.
+
 The reusable `verify_assessment` function verifies original bytes with strict JSON,
 source JSON Schema, expected coordinate, Ed25519, canonicalization and key identity.
 It reports verified, invalid or unchecked. Offline keys may establish signature
