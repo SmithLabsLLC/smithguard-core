@@ -347,6 +347,8 @@ def error_document(code, *, retryable=False, retry_after=None):
 
 
 def openapi_path():
+    summary_error_ref = {"$ref": "#/components/schemas/PublicArtifactSummaryError"}
+    generic_error_ref = {"$ref": "#/components/schemas/ErrorResponse"}
     return {
         "post": {
             "operationId": TOOL_NAME,
@@ -378,16 +380,32 @@ def openapi_path():
                 },
                 **{
                     str(code): {
-                        "description": "Incomplete summary request; never a raw-response fallback.",
+                        "description": (
+                            "Incomplete summary request; never a raw-response fallback. "
+                            "Origin proxy errors may use ErrorResponse."
+                            if code in {413, 429, 503}
+                            else "Incomplete summary request; never a raw-response fallback."
+                        ),
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PublicArtifactSummaryError"
-                                }
+                                "schema": (
+                                    {
+                                        "oneOf": [
+                                            deepcopy(summary_error_ref),
+                                            deepcopy(generic_error_ref),
+                                        ]
+                                    }
+                                    if code in {413, 429, 503}
+                                    else deepcopy(summary_error_ref)
+                                )
                             }
                         },
                     }
                     for code in [400, 409, 413, 415, 429, 500, 503]
+                },
+                "405": {
+                    "description": "Unsupported HTTP method; origin or transport error only.",
+                    "content": {"application/json": {"schema": deepcopy(generic_error_ref)}},
                 },
             },
         }

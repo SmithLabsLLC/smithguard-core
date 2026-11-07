@@ -6086,6 +6086,16 @@
             },
             "description": "Incomplete summary request; never a raw-response fallback."
           },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unsupported HTTP method; origin or transport error only."
+          },
           "409": {
             "content": {
               "application/json": {
@@ -6100,11 +6110,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Incomplete summary request; never a raw-response fallback."
+            "description": "Incomplete summary request; never a raw-response fallback. Origin proxy errors may use ErrorResponse."
           },
           "415": {
             "content": {
@@ -6120,11 +6137,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Incomplete summary request; never a raw-response fallback."
+            "description": "Incomplete summary request; never a raw-response fallback. Origin proxy errors may use ErrorResponse."
           },
           "500": {
             "content": {
@@ -6140,11 +6164,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ]
                 }
               }
             },
-            "description": "Incomplete summary request; never a raw-response fallback."
+            "description": "Incomplete summary request; never a raw-response fallback. Origin proxy errors may use ErrorResponse."
           }
         },
         "summary": "Read a compact, unsigned report for one exact public npm/PyPI version",

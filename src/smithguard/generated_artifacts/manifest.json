@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "src/smithguard/generated_artifacts/deploy-approval.schema.json": "sha256:3b6ea0336520aa381ac854818e2ec48cd6e4a74c043e52ee3ae534eec084cbf6",
-    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:12c40c628e80d3e03ee2382d6eb38c1d06c4109ee94acc07d4e9d4b081858202",
+    "src/smithguard/generated_artifacts/openapi-public-beta.json": "sha256:ccfa441c103f199e67572589c2d4e7a881e6699d5827e6cbcffcb50202405397",
     "src/smithguard/generated_artifacts/schemas/AffectedRange.schema.json": "sha256:a3103867ef21ce006f1bc8d893bbfe5df5b17a0b9016eb80632d26d673a4e8fa",
     "src/smithguard/generated_artifacts/schemas/ApprovalRecord.schema.json": "sha256:018adda1fba9146c37640e616f3317d1199d10d7b9fef0855fcd2db77ccf8faa",
     "src/smithguard/generated_artifacts/schemas/Artifact.schema.json": "sha256:78e0663210c1a6cb8a2e1488cd98632a6c8be981ae347655b623a3c10caabd31",
@@ -37,7 +37,7 @@
     "contracts/v1/contract-bundle.schema.json": "sha256:3d0910393fc56bc70b262ad196723e6dd81f7068c26941777b7c73923ea91876",
     "contracts/v1/deploy-approval.schema.json": "sha256:3b6ea0336520aa381ac854818e2ec48cd6e4a74c043e52ee3ae534eec084cbf6",
     "contracts/v1/operation-catalog.json": "sha256:340e9e6ff80060b95014c356b00bbcb4fbefeef84ad55a906fdb772d7d23ce77",
-    "src/smithguard/summary_contract.py": "sha256:24e70557d644d10f95995c49e90931900e411e3f4bbdb810f9fd46fbfeaed3d3"
+    "src/smithguard/summary_contract.py": "sha256:d57d7793c80fd89ce387ae45bfc4eedbfeadd3f9037670dd9c0c336532794e13"
   },
   "schema_version": "1.0.0"
 }

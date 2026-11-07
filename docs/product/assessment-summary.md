@@ -32,8 +32,11 @@ The generated OpenAPI contains closed `PublicArtifactSummaryRequest`,
 projection versions are `1.0.0`, consuming assessment `2.4.0` or `2.5.0`. Unknown
 underlying schemas and mismatched artifact identities fail closed. Both MCP representations
 contain exactly the same derived document, without the full-tool `data/source_url`
-wrapper. Returned errors are content-free; transport/proxy errors still need to be
-treated as incomplete, even when they are not tool results.
+wrapper. Returned errors are content-free. REST statuses 413, 429 and 503 accept
+either the closed summary error or the generic `ErrorResponse` used by the origin
+proxy; unsupported methods return a generic 405 error. These schemas are distinct.
+Transport/proxy errors remain incomplete, even when they are not tool results.
+The summary-only MCP tool still accepts only its closed summary error envelope.
 
 Reports preserve the assessment result, original revision/times, exact caller
 coordinate, coverage, registry state, reason codes and source freshness. Incident

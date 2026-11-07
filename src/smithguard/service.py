@@ -876,7 +876,9 @@ class SmithGuardService:
             cached_openssf.freshness_state == "unresolved"
             or (cached_openssf.unresolved_record_count or 0) > 0
         )
-        if catalog_evidence.openssf_unresolved_count or cached_gap:
+        if any(item.source_id == OPENSSF_SOURCE_ID for item in freshness) and (
+            catalog_evidence.openssf_unresolved_count or cached_gap
+        ):
             if result == "not_affected":
                 result = "unknown"
             # Keep the larger live/cached barrier until cached coverage refreshes.
