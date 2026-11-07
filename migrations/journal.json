@@ -295,6 +295,14 @@
       "revision": "0037_bulletin_intake_health",
       "rollback_mode": "forward_only",
       "source_sha256": "sha256:619ac5932939809aa08c1d3ffd75a16b595aff009931a27f8d85062d70ac8902"
+    },
+    {
+      "description": "Add immutable OpenSSF partial attempt proofs and exact repair semantics",
+      "down_revision": "0037_bulletin_intake_health",
+      "file": "versions/0038_openssf_resilience.py",
+      "revision": "0038_openssf_resilience",
+      "rollback_mode": "forward_only",
+      "source_sha256": "sha256:18a3e8ca1dd4639fdea738177ae0ff092b60e92d2d982e92d439250f917bdf1f"
     }
   ],
   "schema_version": "1.0.0"

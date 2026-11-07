@@ -294,7 +294,7 @@ def test_public_artifact_assessment_uses_the_same_canonical_incident(
         assert result["incident_ids"] == [incident["id"]]
         assert affected_range["id"] in result["affected_range_ids"]
         assert len(result["affected_range_ids"]) == 2
-        assert result["schema_version"] == "2.4.0"
+        assert result["schema_version"] == "2.5.0"
         assert result["relationship_state"] == "single_incident_record"
         assert len(result["incidents"]) == 1
         projected = result["incidents"][0]
@@ -1307,12 +1307,15 @@ def test_public_beta_has_no_customer_inventory_upload_surface(database) -> None:
             if "requestBody" in operation
         }
         assert request_operations == {
+            "assess_public_artifact_summary": {
+                "$ref": "#/components/schemas/PublicArtifactSummaryRequest"
+            },
             "assess_public_artifact": {
                 "oneOf": [
                     {"$ref": "#/components/schemas/PublicArtifactAssessmentShortRequest"},
                     {"$ref": "#/components/schemas/PublicArtifactAssessmentRequest"},
                 ]
-            }
+            },
         }
         assert {
             (method, route.path)
@@ -1374,7 +1377,7 @@ def test_public_beta_returns_only_matching_warning_and_retires_warning_catalog(
     with Session(database.engine) as session, session.begin():
         assert (
             session.scalar(text("SELECT version_num FROM public.alembic_version"))
-            == "0037_bulletin_intake_health"
+            == "0038_openssf_resilience"
         )
         append_contract(
             session,

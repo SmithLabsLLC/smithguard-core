@@ -1,7 +1,7 @@
 # Development
 
 Use a normal, unprivileged Linux user. Python 3.14.7 and uv 0.13.4 are pinned;
-PostgreSQL `initdb` and `pg_ctl` must be available. The test helper searches PATH,
+PostgreSQL `initdb` and `pg_ctl`, and `nginx`, must be available. The test helper searches PATH,
 `pg_config --bindir`, then the usual Linux PostgreSQL package directories. Windows
 native execution is not supported; use WSL. macOS is not yet a verified full-suite
 platform because some tests exercise Linux process and filesystem behavior.
@@ -10,6 +10,12 @@ All paths resolve from the checkout or an explicit argument. Temporary databases
 are created under the platform's local temporary storage and removed at the end of
 their test session. The suite checks that service installation directories remain
 unchanged. Never point tests at an existing database or run the suite as root.
+
+The full suite creates many disposable databases. If the default temporary
+filesystem is a small RAM disk, select a short, user-owned directory on a disk
+with enough free space, for example `TMPDIR=/var/tmp/sg-tests python3 tools/check.py`
+after creating that directory. PostgreSQL socket paths must stay short. The
+helper honors `TMPDIR`; temporary clusters are removed after the test session.
 
 ```sh
 uv sync --locked

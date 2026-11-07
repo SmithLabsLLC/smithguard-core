@@ -74,7 +74,7 @@
       "title": "RelationshipType1",
       "type": "string"
     },
-    "State10": {
+    "State12": {
       "enum": [
         "proven",
         "probable",
@@ -82,7 +82,7 @@
         "conflicting",
         "unknown"
       ],
-      "title": "State10",
+      "title": "State12",
       "type": "string"
     }
   },
@@ -145,7 +145,7 @@
       "type": "string"
     },
     "state": {
-      "$ref": "#/$defs/State10"
+      "$ref": "#/$defs/State12"
     },
     "steps": {
       "items": {

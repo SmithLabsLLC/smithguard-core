@@ -19,7 +19,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
-from smithguard import __version__
+from smithguard import __version__, summary_contract
 from smithguard.bulletin_contract import MCP_INPUTS as BULLETIN_INPUTS
 from smithguard.identifiers import strict_json_loads
 
@@ -166,6 +166,41 @@ def _rpc_error(status: int, code: int, message: str) -> JSONResponse:
     )
 
 
+def _summary_definitions() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name=summary_contract.TOOL_NAME,
+            description=(
+                "Read a compact service-issued report for one explicitly authorized exact public "
+                "npm/PyPI version. No files, private names, inventories or automatic follow-ups. "
+                "No client signature check runs. Evidence is advisory, never permission to act. "
+                "The derived report may persist in provider/T3 history; recheck later decisions. "
+                "Never fall back to a full assessment, raw tool or shell fetch."
+            ),
+            input_schema=deepcopy(summary_contract.INPUT),
+            output_schema={
+                "type": "object",
+                "oneOf": [deepcopy(summary_contract.SUMMARY), deepcopy(summary_contract.ERROR)],
+            },
+            meta={"securitySchemes": [{"type": "noauth"}]},
+            annotations=types.ToolAnnotations(
+                read_only_hint=True,
+                destructive_hint=False,
+                idempotent_hint=True,
+                open_world_hint=True,
+            ),
+        )
+    ]
+
+
+def _summary_result(document: dict, *, is_error: bool) -> types.CallToolResult:
+    return types.CallToolResult(
+        content=[types.TextContent(type="text", text=json.dumps(document, separators=(",", ":")))],
+        structured_content=document,
+        is_error=is_error,
+    )
+
+
 def _tool_result(
     document: dict[str, Any], path: str, *, is_error: bool, retry_after: str | None = None
 ) -> types.CallToolResult:
@@ -197,13 +232,21 @@ class HostedMCP:
     """Own protocol lifetime and enforce finite, content-free request failures."""
 
     def __init__(
-        self, api: Any, *, contract: dict[str, Any], hosts: set[str], trusted_proxy_header: bool
+        self,
+        api: Any,
+        *,
+        contract: dict[str, Any],
+        hosts: set[str],
+        trusted_proxy_header: bool,
+        summary: bool = False,
     ) -> None:
         self.api = api
         self.hosts = hosts
         self.origins = {"https://" + host for host in hosts}
         self.trusted_proxy_header = trusted_proxy_header
-        self.tools = _tool_definitions(contract)
+        self.summary = summary
+        self.path = summary_contract.MCP_PATH if summary else MCP_PATH
+        self.tools = _summary_definitions() if summary else _tool_definitions(contract)
         self.validators = {
             tool.name: Draft202012Validator(tool.input_schema) for tool in self.tools
         }
@@ -220,6 +263,7 @@ class HostedMCP:
         self.server.middleware.clear()
         self.server.middleware.append(self._public_descriptors)
         self.protocol = self.server.streamable_http_app(
+            streamable_http_path=self.path,
             json_response=True,
             stateless_http=True,
             max_request_body_size=MCP_MAX_REQUEST_BYTES,
@@ -230,7 +274,7 @@ class HostedMCP:
         )
 
     def route(self) -> Route:
-        route = Route(MCP_PATH, self, methods=sorted(MCP_TRANSPORT_METHODS))
+        route = Route(self.path, self, methods=sorted(MCP_TRANSPORT_METHODS))
         # Starlette automatically adds HEAD to GET routes. MCP has no HEAD transport.
         route.methods.discard("HEAD")
         self.transport_route = route
@@ -252,15 +296,23 @@ class HostedMCP:
     async def call_tool(
         self, context: Any, params: types.CallToolRequestParams
     ) -> types.CallToolResult:
-        path = TOOL_PATHS.get(params.name, MCP_PATH)
+        path = summary_contract.REST_PATH if self.summary else TOOL_PATHS.get(params.name, MCP_PATH)
+
+        def failure(code: str, *, retryable: bool = False) -> types.CallToolResult:
+            if self.summary:
+                return _summary_result(
+                    summary_contract.error_document(code, retryable=retryable), is_error=True
+                )
+            return _tool_error(code, path=path, retryable=retryable)
+
         arguments = params.arguments or {}
         validator = self.validators.get(params.name)
         if validator is None or not validator.is_valid(arguments):
-            return _tool_error("invalid_tool_arguments", path=path)
+            return failure("invalid_tool_arguments")
         try:
             request = context.request
             if not isinstance(request, Request):
-                return _tool_error("request_context_unavailable", path=path, retryable=True)
+                return failure("request_context_unavailable", retryable=True)
             if params.name == "get_verification_key" and "public_key_id" in arguments:
                 path = "/v1/public-keys/" + arguments["public_key_id"] + ".json"
             headers = {}
@@ -269,7 +321,7 @@ class HostedMCP:
             client = (request.client.host, request.client.port) if request.client else None
             transport = httpx.ASGITransport(app=self.api, client=client, raise_app_exceptions=False)
             async with httpx.AsyncClient(transport=transport, base_url=PUBLIC_SOURCE) as internal:
-                if params.name == "assess_public_artifact":
+                if params.name == "assess_public_artifact" or self.summary:
                     response = await internal.post(path, json=arguments, headers=headers)
                 else:
                     query = (
@@ -281,11 +333,24 @@ class HostedMCP:
                             key: value for key, value in arguments.items() if key != "identity"
                         }
                     response = await internal.get(path, params=query, headers=headers)
-            if len(response.content) > MCP_MAX_DOCUMENT_BYTES:
-                return _tool_error("tool_response_limit_exceeded", path=path)
+            if len(response.content) > (
+                summary_contract.MAX_BYTES if self.summary else MCP_MAX_DOCUMENT_BYTES
+            ):
+                return failure(
+                    "summary_limit_exceeded" if self.summary else "tool_response_limit_exceeded"
+                )
             document = strict_json_loads(response.content)
             if not isinstance(document, dict):
-                return _tool_error("tool_response_invalid", path=path)
+                return failure("tool_response_invalid")
+            if self.summary:
+                validator = (
+                    summary_contract.ERROR_VALIDATOR
+                    if response.is_error
+                    else summary_contract.SUMMARY_VALIDATOR
+                )
+                if not validator.is_valid(document):
+                    return failure("summary_unavailable")
+                return _summary_result(document, is_error=response.is_error)
             return _tool_result(
                 document,
                 path,
@@ -294,7 +359,7 @@ class HostedMCP:
             )
         except Exception:
             # Never send exception messages, arguments, reprs or tracebacks to the SDK.
-            return _tool_error("tool_unavailable", path=path, retryable=True)
+            return failure("tool_unavailable", retryable=True)
 
     def _valid_envelope(self, document: Any, headers: Any) -> bool:
         if not isinstance(document, dict) or set(document) - {"jsonrpc", "id", "method", "params"}:
@@ -428,7 +493,11 @@ class HostedMCP:
                     async def bounded_send(message):
                         nonlocal response_size
                         response_size += len(message.get("body", b""))
-                        if response_size > MCP_MAX_RESPONSE_BYTES:
+                        if response_size > (
+                            summary_contract.MAX_WIRE_BYTES
+                            if self.summary
+                            else MCP_MAX_RESPONSE_BYTES
+                        ):
                             raise ValueError("MCP response exceeds its byte limit")
                         messages.append(message)
 

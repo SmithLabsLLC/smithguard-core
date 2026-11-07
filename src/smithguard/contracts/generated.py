@@ -177,6 +177,7 @@ class SchemaVersion1(Enum):
     field_2_2_0 = "2.2.0"
     field_2_3_0 = "2.3.0"
     field_2_4_0 = "2.4.0"
+    field_2_5_0 = "2.5.0"
 
 
 class PublicArtifactAssessmentHeader(BaseModel):
@@ -798,33 +799,31 @@ class FreshnessState(Enum):
     stale = "stale"
     fresh = "fresh"
     complete = "complete"
+    unresolved = "unresolved"
 
 
 class Unknown(RootModel[str]):
     root: Annotated[str, Field(max_length=300, min_length=1)]
 
 
-class SourceCoverageLane(BaseModel):
+class State5(Enum):
+    partial = "partial"
+    complete = "complete"
+    failed = "failed"
+
+
+class OpenSSFRecordProgress(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    source_id: Annotated[
+    schema_version: Literal["1.0.0"]
+    attempt_id: Annotated[
         str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
     ]
-    lane: Lane
-    record_type: Annotated[str, Field(pattern="^[a-z][a-z0-9_]{2,79}$")]
-    state: State4
-    page_count: Annotated[int, Field(ge=0)]
-    source_record_count: Annotated[int, Field(ge=0)]
-    normalized_record_count: Annotated[int, Field(ge=0)]
-    oldest_published_at: Timestamp | None
-    newest_published_at: Timestamp | None
-    last_attempt_at: Timestamp | None
-    last_success_at: Timestamp | None
-    stale_after: Timestamp | None
-    freshness_state: FreshnessState
-    ecosystems: Annotated[list[Ecosystem], Field(max_length=20)]
-    unknowns: Annotated[list[Unknown], Field(max_length=20)]
+    state: State5
+    accepted_record_count: Annotated[int | None, Field(ge=0, le=500000)]
+    rejected_record_count: Annotated[int | None, Field(ge=0, le=10)]
+    validated_at: Timestamp | None
 
 
 class LiveCollectorUptime(Enum):
@@ -856,17 +855,6 @@ class Lane1(BaseModel):
     as_of: UtcTimestamp
     unknowns: Annotated[list[Unknown], Field(max_length=20)]
     continuous_monitoring_claimed: Literal[False]
-
-
-class SourceCoverageReport(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    measured_at: UtcTimestamp
-    human_review_hours: Annotated[float, Field(ge=0.0, le=8784.0)]
-    live_collector_uptime: LiveCollectorUptime
-    lanes: Annotated[list[Lane1], Field(max_length=20)]
-    source_lanes: Annotated[list[SourceCoverageLane], Field(max_length=100)]
 
 
 class QualityState(Enum):
@@ -909,7 +897,7 @@ class PublicOriginTextList(RootModel[list[PublicOriginText]]):
     root: Annotated[list[PublicOriginText], Field(max_length=1000)]
 
 
-class State5(Enum):
+class State6(Enum):
     fresh = "fresh"
     stale = "stale"
     failed = "failed"
@@ -1069,7 +1057,7 @@ class PublicOriginContext(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    state: State5
+    state: State6
     snapshot_id: Annotated[
         str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
     ]
@@ -1081,11 +1069,184 @@ class PublicOriginContext(BaseModel):
     context: Context
 
 
+class RangeType1(Enum):
+    GITHUB = "GITHUB"
+    SEMVER = "SEMVER"
+    ECOSYSTEM = "ECOSYSTEM"
+    GIT = "GIT"
+    other = "other"
+
+
+class Expression(RootModel[str]):
+    root: Annotated[str, Field(max_length=1000, min_length=1)]
+
+
+class IntroducedVersion(RootModel[str]):
+    root: Annotated[str, Field(max_length=200, min_length=1)]
+
+
 class FixedVersion(RootModel[str]):
     root: Annotated[str, Field(max_length=200, min_length=1)]
 
 
-class State6(Enum):
+class SourceField(RootModel[str]):
+    root: Annotated[str, Field(max_length=80, min_length=1)]
+
+
+class PatchFieldState(Enum):
+    absent = "absent"
+    explicit_null = "explicit_null"
+    explicit_value = "explicit_value"
+    invalid = "invalid"
+    no_fixed_event = "no_fixed_event"
+    unsupported_range_type = "unsupported_range_type"
+
+
+class PublicSourceFixEvidence(BaseModel):
+    """
+    Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    package_entry_id: Annotated[
+        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
+    ]
+    range_index: Annotated[int, Field(ge=0, le=10000)]
+    range_sha256: Annotated[str, Field(pattern="^sha256:[a-f0-9]{64}$")]
+    range_type: RangeType1
+    expression: Expression | None
+    introduced_version: IntroducedVersion | None
+    fixed_version: FixedVersion | None
+    source_field: SourceField | None
+    applies_to_requested_version: bool | None
+    patch_field_state: PatchFieldState
+
+
+class Kind(Enum):
+    exclusive_upper = "exclusive_upper"
+    inclusive_upper = "inclusive_upper"
+    last_affected = "last_affected"
+    limit = "limit"
+
+
+class PublicSourceRangeBound(BaseModel):
+    """
+    Source range endpoints, never evidence that a repair was published.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    package_entry_id: Annotated[
+        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
+    ]
+    range_index: Annotated[int, Field(ge=0, le=10000)]
+    kind: Kind
+    version: Annotated[str, Field(max_length=200, min_length=1)]
+
+
+class State7(Enum):
+    recorded = "recorded"
+    unknown = "unknown"
+
+
+class Coverage(Enum):
+    partial = "partial"
+    unknown = "unknown"
+
+
+class ExtractionMethod(Enum):
+    reviewed_source_text = "reviewed_source_text"
+    structured_source_fields = "structured_source_fields"
+
+
+class SourceField1(RootModel[str]):
+    root: Annotated[str, Field(max_length=200, min_length=1)]
+
+
+class Value(RootModel[str]):
+    root: Annotated[str, Field(max_length=200, min_length=1)]
+
+
+class AllOfItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    fact: Annotated[str, Field(max_length=80, min_length=1, pattern="^[a-z][a-z0-9_]*$")]
+    values: Annotated[list[Value], Field(max_length=32, min_length=1)]
+
+
+class AnyOfItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    all_of: Annotated[list[AllOfItem], Field(max_length=16, min_length=1)]
+
+
+class PublicApplicabilityConditions(BaseModel):
+    """
+    OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State7
+    coverage: Coverage
+    extraction_method: ExtractionMethod | None
+    source_field: SourceField1 | None
+    source_text_sha256: Sha256 | None
+    reviewed_on: date | None
+    any_of: Annotated[list[AnyOfItem], Field(max_length=16)]
+    local_applicability: Literal["not_evaluated"]
+
+
+class Title(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class Description(RootModel[str]):
+    root: Annotated[str, Field(max_length=2000, min_length=1)]
+
+
+class Severity(Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+    unknown = "unknown"
+
+
+class PublicAdvisoryContext(BaseModel):
+    """
+    Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    title: Title | None
+    description: Description | None
+    severity: Severity | None
+    attribution: Annotated[str, Field(max_length=200, min_length=1)]
+    license_expression: Annotated[str, Field(max_length=80, min_length=1)]
+    source_url: AnyUrl
+    title_sha256: Sha256 | None
+    description_sha256: Sha256 | None
+    title_truncated: bool
+    description_truncated: bool
+    conditions: PublicApplicabilityConditions
+
+
+class SourceStateStatus(Enum):
+    current = "current"
+    historical_unresolved = "historical_unresolved"
+    NoneType_None = None
+
+
+class State8(Enum):
     active = "active"
     removed = "removed"
     withdrawn = "withdrawn"
@@ -1110,6 +1271,14 @@ class LocalApplicability(RootModel[LocalApplicabilityEnum | None]):
     root: LocalApplicabilityEnum | None = None
 
 
+class FixEvidence(RootModel[list[PublicSourceFixEvidence]]):
+    root: Annotated[list[PublicSourceFixEvidence], Field(max_length=40)]
+
+
+class RangeBoundEvidence(RootModel[list[PublicSourceRangeBound]]):
+    root: Annotated[list[PublicSourceRangeBound], Field(max_length=40)]
+
+
 class SourceContextState(Enum):
     available = "available"
     unavailable = "unavailable"
@@ -1120,7 +1289,48 @@ class SourceRevision(RootModel[int]):
     root: Annotated[int, Field(ge=1, le=2147483647)]
 
 
-class State7(Enum):
+class PublicArtifactSourceReport(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    source_state_status: SourceStateStatus | None = None
+    origin_context: PublicOriginContext | None = None
+    applies_to_version: bool | None = None
+    """
+    Whether this source record's own package ranges include the requested version; other reports never supply its applicability.
+    """
+    fixed_versions: Annotated[list[FixedVersion] | None, Field(deprecated=True, max_length=20)] = (
+        None
+    )
+    """
+    Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.
+    """
+    source_id: Annotated[
+        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
+    ]
+    source_name: Annotated[str, Field(max_length=200, min_length=1)]
+    upstream_record_id: Annotated[
+        str, Field(max_length=160, min_length=3, pattern="^[A-Za-z0-9][A-Za-z0-9._:-]+$")
+    ]
+    state: State8
+    source_updated_at: UtcTimestamp
+    observed_at: UtcTimestamp
+    source_fixed_versions: SourceFixedVersions | None = None
+    fix_evidence_incomplete: bool | None = None
+    local_applicability: LocalApplicability | None = None
+    fix_evidence: FixEvidence | None = None
+    range_bound_evidence: RangeBoundEvidence | None = None
+    historical_metadata_incomplete: bool | None = None
+    source_context: PublicAdvisoryContext | None = None
+    source_context_state: SourceContextState | None = None
+    catalog_source_sha256: Sha256 | None = None
+    catalog_event_id: StableId | None = None
+    source_revision: SourceRevision | None = None
+    evidence_id: StableId | None = None
+    field_policy_id: StableId | None = None
+
+
+class State9(Enum):
     active = "active"
     expired = "expired"
     withdrawn = "withdrawn"
@@ -1136,7 +1346,7 @@ class PublicArtifactPreliminaryWarning(BaseModel):
         str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
     ]
     revision: Annotated[int, Field(ge=1, le=2147483647)]
-    state: State7
+    state: State9
     title: Annotated[str, Field(max_length=300, min_length=1, pattern="^[ -~]+$")]
     claim: Annotated[str, Field(max_length=1000, min_length=1, pattern="^[ -~]+$")]
     source_urls: Annotated[list[PublicIncidentUri], Field(max_length=20, min_length=1)]
@@ -1208,6 +1418,7 @@ class PublicSourceFreshness(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    unresolved_record_count: Annotated[int | None, Field(ge=0)] = None
     source_id: Annotated[
         str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
     ]
@@ -1257,7 +1468,7 @@ class Ecosystem3(Enum):
 
 class PublicArtifactAssessmentShortRequest(BaseModel):
     """
-    The simple request form: an ecosystem, a package name and an exact version (or an immutable digest). The registry host defaults to the ecosystem's public registry and is required only for container images.
+    Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.
     """
 
     model_config = ConfigDict(
@@ -1295,7 +1506,7 @@ class PublicKevValue(BaseModel):
     date_added: date
 
 
-class State8(Enum):
+class State10(Enum):
     fresh = "fresh"
     stale = "stale"
     failed = "failed"
@@ -1312,7 +1523,7 @@ class PublicEpssContext(BaseModel):
     )
     source_id: Literal["gbsec:source:first-epss"]
     attribution: Literal["FIRST Exploit Prediction Scoring System"]
-    state: State8
+    state: State10
     observed_at: Timestamp | None
     source_as_of: Timestamp | None
     source_url: SourceUrl | None
@@ -1327,7 +1538,7 @@ class PublicKevContext(BaseModel):
     )
     source_id: Literal["gbsec:source:cisa-kev"]
     attribution: Literal["CISA Known Exploited Vulnerabilities Catalog"]
-    state: State8
+    state: State10
     observed_at: Timestamp | None
     source_as_of: Timestamp | None
     source_url: SourceUrl | None
@@ -1579,7 +1790,7 @@ class ExposurePathStep(BaseModel):
     evidence_state: EvidenceState
 
 
-class State10(Enum):
+class State12(Enum):
     proven = "proven"
     probable = "probable"
     possible = "possible"
@@ -1601,7 +1812,7 @@ class ExposurePath(ContractHeader):
         str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
     ]
     steps: Annotated[list[ExposurePathStep], Field(max_length=101, min_length=2)]
-    state: State10
+    state: State12
 
 
 class OwnerScope(Enum):
@@ -1702,7 +1913,7 @@ class ApprovalRecord(ContractHeader):
     expires_at: Timestamp | None
 
 
-class State11(Enum):
+class State13(Enum):
     active = "active"
     expired = "expired"
     revoked = "revoked"
@@ -1730,7 +1941,7 @@ class PolicyException(ContractHeader):
     evidence_revision: Annotated[int, Field(ge=1)]
     expires_at: UtcTimestamp
     recheck_triggers: Annotated[list[RecheckTrigger], Field(max_length=10, min_length=1)]
-    state: State11
+    state: State13
 
 
 class Result3(Enum):
@@ -1767,7 +1978,7 @@ class IncidentState(Enum):
     expired = "expired"
 
 
-class Severity(Enum):
+class Severity1(Enum):
     unknown = "unknown"
     low = "low"
     moderate = "moderate"
@@ -1808,7 +2019,7 @@ class DeliveryEvent(DeliveryEventHeader):
     ]
     incident_revision: Annotated[int, Field(ge=1)]
     incident_state: IncidentState
-    severity: Severity
+    severity: Severity1
     evidence_state: EvidenceState1
     correction_state: CorrectionState
     recommended_action_level: Annotated[int, Field(ge=0, le=4)]
@@ -2119,152 +2330,6 @@ class UnknownListItem(RootModel[str]):
     root: Annotated[str, Field(max_length=300, min_length=1)]
 
 
-class Title(RootModel[str]):
-    root: Annotated[str, Field(max_length=300, min_length=1)]
-
-
-class Description(RootModel[str]):
-    root: Annotated[str, Field(max_length=2000, min_length=1)]
-
-
-class Severity1(Enum):
-    low = "low"
-    medium = "medium"
-    high = "high"
-    critical = "critical"
-    unknown = "unknown"
-
-
-class State12(Enum):
-    recorded = "recorded"
-    unknown = "unknown"
-
-
-class Coverage(Enum):
-    partial = "partial"
-    unknown = "unknown"
-
-
-class ExtractionMethod(Enum):
-    reviewed_source_text = "reviewed_source_text"
-    structured_source_fields = "structured_source_fields"
-
-
-class SourceField(RootModel[str]):
-    root: Annotated[str, Field(max_length=200, min_length=1)]
-
-
-class Value(RootModel[str]):
-    root: Annotated[str, Field(max_length=200, min_length=1)]
-
-
-class AllOfItem(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    fact: Annotated[str, Field(max_length=80, min_length=1, pattern="^[a-z][a-z0-9_]*$")]
-    values: Annotated[list[Value], Field(max_length=32, min_length=1)]
-
-
-class AnyOfItem(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    all_of: Annotated[list[AllOfItem], Field(max_length=16, min_length=1)]
-
-
-class PublicApplicabilityConditions(BaseModel):
-    """
-    OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation.
-    """
-
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    state: State12
-    coverage: Coverage
-    extraction_method: ExtractionMethod | None
-    source_field: SourceField | None
-    source_text_sha256: Sha256 | None
-    reviewed_on: date | None
-    any_of: Annotated[list[AnyOfItem], Field(max_length=16)]
-    local_applicability: Literal["not_evaluated"]
-
-
-class RangeType1(Enum):
-    GITHUB = "GITHUB"
-    SEMVER = "SEMVER"
-    ECOSYSTEM = "ECOSYSTEM"
-    GIT = "GIT"
-    other = "other"
-
-
-class Expression(RootModel[str]):
-    root: Annotated[str, Field(max_length=1000, min_length=1)]
-
-
-class IntroducedVersion(RootModel[str]):
-    root: Annotated[str, Field(max_length=200, min_length=1)]
-
-
-class SourceField1(RootModel[str]):
-    root: Annotated[str, Field(max_length=80, min_length=1)]
-
-
-class PatchFieldState(Enum):
-    absent = "absent"
-    explicit_null = "explicit_null"
-    explicit_value = "explicit_value"
-    invalid = "invalid"
-    no_fixed_event = "no_fixed_event"
-    unsupported_range_type = "unsupported_range_type"
-
-
-class PublicSourceFixEvidence(BaseModel):
-    """
-    Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence.
-    """
-
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    package_entry_id: Annotated[
-        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
-    ]
-    range_index: Annotated[int, Field(ge=0, le=10000)]
-    range_sha256: Annotated[str, Field(pattern="^sha256:[a-f0-9]{64}$")]
-    range_type: RangeType1
-    expression: Expression | None
-    introduced_version: IntroducedVersion | None
-    fixed_version: FixedVersion | None
-    source_field: SourceField1 | None
-    applies_to_requested_version: bool | None
-    patch_field_state: PatchFieldState
-
-
-class Kind(Enum):
-    exclusive_upper = "exclusive_upper"
-    inclusive_upper = "inclusive_upper"
-    last_affected = "last_affected"
-    limit = "limit"
-
-
-class PublicSourceRangeBound(BaseModel):
-    """
-    Source range endpoints, never evidence that a repair was published.
-    """
-
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    package_entry_id: Annotated[
-        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
-    ]
-    range_index: Annotated[int, Field(ge=0, le=10000)]
-    kind: Kind
-    version: Annotated[str, Field(max_length=200, min_length=1)]
-
-
 class ProjectStatus(StrEnum):
     active = "active"
     archived = "archived"
@@ -2505,6 +2570,42 @@ class EvidenceMaturity(BaseModel):
     runtime: EvidenceState
 
 
+class SourceCoverageLane(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    unresolved_record_count: Annotated[int | None, Field(ge=0)] = None
+    record_progress: OpenSSFRecordProgress | None = None
+    source_id: Annotated[
+        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
+    ]
+    lane: Lane
+    record_type: Annotated[str, Field(pattern="^[a-z][a-z0-9_]{2,79}$")]
+    state: State4
+    page_count: Annotated[int, Field(ge=0)]
+    source_record_count: Annotated[int, Field(ge=0)]
+    normalized_record_count: Annotated[int, Field(ge=0)]
+    oldest_published_at: Timestamp | None
+    newest_published_at: Timestamp | None
+    last_attempt_at: Timestamp | None
+    last_success_at: Timestamp | None
+    stale_after: Timestamp | None
+    freshness_state: FreshnessState
+    ecosystems: Annotated[list[Ecosystem], Field(max_length=20)]
+    unknowns: Annotated[list[Unknown], Field(max_length=20)]
+
+
+class SourceCoverageReport(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    measured_at: UtcTimestamp
+    human_review_hours: Annotated[float, Field(ge=0.0, le=8784.0)]
+    live_collector_uptime: LiveCollectorUptime
+    lanes: Annotated[list[Lane1], Field(max_length=20)]
+    source_lanes: Annotated[list[SourceCoverageLane], Field(max_length=100)]
+
+
 class SbomQuality(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -2538,6 +2639,10 @@ class RecommendedAction(ContractHeader):
 
 
 class PublicArtifactAssessmentRequest(ContractHeader):
+    """
+    Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.
+    """
+
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -2548,12 +2653,92 @@ class PublicArtifactAssessmentRequest(ContractHeader):
     artifact: PublicArtifactInput
 
 
-class FixEvidence(RootModel[list[PublicSourceFixEvidence]]):
-    root: Annotated[list[PublicSourceFixEvidence], Field(max_length=40)]
+class PublicArtifactIncident(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    incident_id: Annotated[
+        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
+    ]
+    revision: Annotated[int, Field(ge=1, le=2147483647)]
+    status: IncidentStatus
+    confidence: Confidence
+    classification: Classification | None = None
+    title: Annotated[str, Field(max_length=300, min_length=1)]
+    last_changed_at: UtcTimestamp
+    report_relationship: ReportRelationship
+    relationship_basis: RelationshipBasis
+    source_reports: Annotated[list[PublicArtifactSourceReport], Field(max_length=100)]
+    source_reports_truncated: bool
+    applies_to_version: bool | None
+    """
+    Whether this incident's affected versions include the requested version, compared with the ecosystem's own version rules; null when the ranges cannot decide. npm ranges deliberately include prereleases that fall inside the range (node-semver would skip them), so a prerelease can read as affected.
+    """
+    affected_range_ids: Annotated[list[StableId], Field(max_length=10000)]
+    fixed_versions: Annotated[list[FixedVersion], Field(deprecated=True, max_length=20)]
+    """
+    Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.
+    """
+    aliases: Annotated[list[Alias], Field(max_length=20)]
+    """
+    Public advisory identifiers for this incident, such as GHSA, CVE and MAL IDs.
+    """
+    upstream_urls: Annotated[list[PublicIncidentUri], Field(max_length=10)]
+    """
+    The upstream advisory records behind this incident.
+    """
+    source_fixed_versions: SourceFixedVersions1 | None = None
+    fix_evidence_incomplete: bool | None = None
+    local_applicability: LocalApplicability1 | None = None
 
 
-class RangeBoundEvidence(RootModel[list[PublicSourceRangeBound]]):
-    root: Annotated[list[PublicSourceRangeBound], Field(max_length=40)]
+class PublicArtifactAssessment(PublicArtifactAssessmentHeader):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Annotated[Literal["public_artifact_assessment"], Field(max_length=80, min_length=2)]
+    data_classification: Literal["public"]
+    artifact: PublicArtifactInput
+    result: Result2
+    relationship_state: RelationshipState
+    incidents: Annotated[list[PublicArtifactIncident], Field(max_length=100)]
+    cve_context: Annotated[list[PublicCveContext] | None, Field(max_length=2000)] = None
+    """
+    Exact CVE context for listed incident aliases. Supplemental EPSS and KEV context never changes the assessment result; missing values are unknown, and failed or stale sources retain their dated values with that state.
+    """
+    preliminary_warnings: Annotated[list[PublicArtifactPreliminaryWarning], Field(max_length=100)]
+    preliminary_warnings_truncated: bool
+    incident_ids: Annotated[list[StableId], Field(max_length=10000)]
+    affected_range_ids: Annotated[list[StableId], Field(max_length=10000)]
+    recommended_action_ids: Annotated[list[StableId], Field(max_length=10000)]
+    evidence_maturity: EvidenceMaturity
+    coverage: CoverageState
+    registry_project_context: RegistryProjectContext | None = None
+    """
+    Optional dated PyPI project administration context, independent of the exact-version assessment. Unknown or failed reads are not removal or safety claims. Other ecosystems return null.
+    """
+    registry_state: RegistryState
+    unknowns: Annotated[list[UnknownListItem], Field(max_length=100)]
+    feed_revision: Annotated[str, Field(max_length=160, min_length=8)]
+    not_applicable_incident_count: Annotated[int, Field(ge=0, le=100000)]
+    """
+    Matching-package incidents left out because their affected versions exclude the requested version.
+    """
+    incidents_truncated: bool
+    """
+    True when more applicable incidents exist than the 100 listed.
+    """
+    source_freshness: Annotated[list[PublicSourceFreshness], Field(max_length=10)]
+    """
+    Freshness of each source that covers this ecosystem.
+    """
+    signature: AssessmentSignature | None = None
+    """
+    Present on every public API answer; null only in unsigned local use.
+    """
+    identity_assurance: IdentityAssurance | None = None
+    local_applicability: LocalApplicability2 | None = None
+    reason_codes: ReasonCodes | None = None
 
 
 class InventorySnapshot(ContractHeader):
@@ -2666,182 +2851,6 @@ class PrivateWatchlistSet(ContractHeader):
     expires_unconfirmed_after_days: Literal[45]
 
 
-class PublicAdvisoryContext(BaseModel):
-    """
-    Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit.
-    """
-
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    title: Title | None
-    description: Description | None
-    severity: Severity1 | None
-    attribution: Annotated[str, Field(max_length=200, min_length=1)]
-    license_expression: Annotated[str, Field(max_length=80, min_length=1)]
-    source_url: AnyUrl
-    title_sha256: Sha256 | None
-    description_sha256: Sha256 | None
-    title_truncated: bool
-    description_truncated: bool
-    conditions: PublicApplicabilityConditions
-
-
-class IncidentPage(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    items: Annotated[list[Incident], Field(max_length=100)]
-    truncated: bool
-    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]
-
-
-class IncidentEventPage(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    items: Annotated[list[IncidentEvent], Field(max_length=100)]
-    truncated: bool
-    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]
-
-
-class RecommendedActionPage(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    items: Annotated[list[RecommendedAction], Field(max_length=100)]
-    truncated: bool
-    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]
-
-
-class PublicArtifactSourceReport(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    origin_context: PublicOriginContext | None = None
-    applies_to_version: bool | None = None
-    """
-    Whether this source record's own package ranges include the requested version; other reports never supply its applicability.
-    """
-    fixed_versions: Annotated[list[FixedVersion] | None, Field(deprecated=True, max_length=20)] = (
-        None
-    )
-    """
-    Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.
-    """
-    source_id: Annotated[
-        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
-    ]
-    source_name: Annotated[str, Field(max_length=200, min_length=1)]
-    upstream_record_id: Annotated[
-        str, Field(max_length=160, min_length=3, pattern="^[A-Za-z0-9][A-Za-z0-9._:-]+$")
-    ]
-    state: State6
-    source_updated_at: UtcTimestamp
-    observed_at: UtcTimestamp
-    source_fixed_versions: SourceFixedVersions | None = None
-    fix_evidence_incomplete: bool | None = None
-    local_applicability: LocalApplicability | None = None
-    fix_evidence: FixEvidence | None = None
-    range_bound_evidence: RangeBoundEvidence | None = None
-    historical_metadata_incomplete: bool | None = None
-    source_context: PublicAdvisoryContext | None = None
-    source_context_state: SourceContextState | None = None
-    catalog_source_sha256: Sha256 | None = None
-    catalog_event_id: StableId | None = None
-    source_revision: SourceRevision | None = None
-    evidence_id: StableId | None = None
-    field_policy_id: StableId | None = None
-
-
-class PublicArtifactIncident(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    incident_id: Annotated[
-        str, Field(max_length=160, min_length=8, pattern="^gbsec:[a-z0-9][a-z0-9:._/-]+$")
-    ]
-    revision: Annotated[int, Field(ge=1, le=2147483647)]
-    status: IncidentStatus
-    confidence: Confidence
-    classification: Classification | None = None
-    title: Annotated[str, Field(max_length=300, min_length=1)]
-    last_changed_at: UtcTimestamp
-    report_relationship: ReportRelationship
-    relationship_basis: RelationshipBasis
-    source_reports: Annotated[list[PublicArtifactSourceReport], Field(max_length=100)]
-    source_reports_truncated: bool
-    applies_to_version: bool | None
-    """
-    Whether this incident's affected versions include the requested version, compared with the ecosystem's own version rules; null when the ranges cannot decide. npm ranges deliberately include prereleases that fall inside the range (node-semver would skip them), so a prerelease can read as affected.
-    """
-    affected_range_ids: Annotated[list[StableId], Field(max_length=10000)]
-    fixed_versions: Annotated[list[FixedVersion], Field(deprecated=True, max_length=20)]
-    """
-    Deprecated legacy candidate list, retaining prior behavior: explicit source versions plus inferred exclusive range ends. These are not all published fixes. Use source_fixed_versions and each source report's branch evidence, then re-assess the exact target.
-    """
-    aliases: Annotated[list[Alias], Field(max_length=20)]
-    """
-    Public advisory identifiers for this incident, such as GHSA, CVE and MAL IDs.
-    """
-    upstream_urls: Annotated[list[PublicIncidentUri], Field(max_length=10)]
-    """
-    The upstream advisory records behind this incident.
-    """
-    source_fixed_versions: SourceFixedVersions1 | None = None
-    fix_evidence_incomplete: bool | None = None
-    local_applicability: LocalApplicability1 | None = None
-
-
-class PublicArtifactAssessment(PublicArtifactAssessmentHeader):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    kind: Annotated[Literal["public_artifact_assessment"], Field(max_length=80, min_length=2)]
-    data_classification: Literal["public"]
-    artifact: PublicArtifactInput
-    result: Result2
-    relationship_state: RelationshipState
-    incidents: Annotated[list[PublicArtifactIncident], Field(max_length=100)]
-    cve_context: Annotated[list[PublicCveContext] | None, Field(max_length=2000)] = None
-    """
-    Exact CVE context for listed incident aliases. Supplemental EPSS and KEV context never changes the assessment result; missing values are unknown, and failed or stale sources retain their dated values with that state.
-    """
-    preliminary_warnings: Annotated[list[PublicArtifactPreliminaryWarning], Field(max_length=100)]
-    preliminary_warnings_truncated: bool
-    incident_ids: Annotated[list[StableId], Field(max_length=10000)]
-    affected_range_ids: Annotated[list[StableId], Field(max_length=10000)]
-    recommended_action_ids: Annotated[list[StableId], Field(max_length=10000)]
-    evidence_maturity: EvidenceMaturity
-    coverage: CoverageState
-    registry_project_context: RegistryProjectContext | None = None
-    """
-    Optional dated PyPI project administration context, independent of the exact-version assessment. Unknown or failed reads are not removal or safety claims. Other ecosystems return null.
-    """
-    registry_state: RegistryState
-    unknowns: Annotated[list[UnknownListItem], Field(max_length=100)]
-    feed_revision: Annotated[str, Field(max_length=160, min_length=8)]
-    not_applicable_incident_count: Annotated[int, Field(ge=0, le=100000)]
-    """
-    Matching-package incidents left out because their affected versions exclude the requested version.
-    """
-    incidents_truncated: bool
-    """
-    True when more applicable incidents exist than the 100 listed.
-    """
-    source_freshness: Annotated[list[PublicSourceFreshness], Field(max_length=10)]
-    """
-    Freshness of each source that covers this ecosystem.
-    """
-    signature: AssessmentSignature | None = None
-    """
-    Present on every public API answer; null only in unsigned local use.
-    """
-    identity_assurance: IdentityAssurance | None = None
-    local_applicability: LocalApplicability2 | None = None
-    reason_codes: ReasonCodes | None = None
-
-
 class SmithguardV1ContractBundle(
     RootModel[
         Source
@@ -2906,3 +2915,30 @@ class SmithguardV1ContractBundle(
     """
     Authoritative Phase 0A contracts for public evidence, local decisions, delivery, and disabled synthetic Private Watchlists.
     """
+
+
+class IncidentPage(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    items: Annotated[list[Incident], Field(max_length=100)]
+    truncated: bool
+    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]
+
+
+class IncidentEventPage(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    items: Annotated[list[IncidentEvent], Field(max_length=100)]
+    truncated: bool
+    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]
+
+
+class RecommendedActionPage(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    items: Annotated[list[RecommendedAction], Field(max_length=100)]
+    truncated: bool
+    next_cursor: Annotated[str | None, Field(max_length=512, min_length=16)]

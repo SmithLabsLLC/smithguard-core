@@ -109,9 +109,36 @@
     }
   },
   "additionalProperties": false,
+  "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
   "properties": {
     "artifact": {
-      "$ref": "#/$defs/PublicArtifactInput"
+      "allOf": [
+        {
+          "$ref": "#/$defs/PublicArtifactInput"
+        },
+        {
+          "else": {
+            "properties": {
+              "digest": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "oci",
+                  "docker"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem"
+            ]
+          }
+        }
+      ]
     },
     "created_at": {
       "format": "date-time",

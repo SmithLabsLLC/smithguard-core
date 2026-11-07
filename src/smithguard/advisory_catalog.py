@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Literal
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, literal, select, true, union_all
+from sqlalchemy.dialects.postgresql import aggregate_order_by
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session, aliased
 
@@ -153,6 +154,7 @@ class CatalogMatchFamily:
 class CatalogPackageEvidence:
     families: tuple[CatalogMatchFamily, ...]
     fingerprint: str
+    openssf_unresolved_count: int = 0
 
 
 def _aware(value: datetime, *, field: str) -> datetime:
@@ -1174,9 +1176,46 @@ def catalog_evidence_for_package(
         .correlate(relevant)
         .scalar_subquery()
     )
-    unresolved = actionable_quarantines_statement(source_id=GITHUB_SOURCE_ID).subquery(
-        "unresolved_collection_records"
+    unresolved = union_all(
+        actionable_quarantines_statement(source_id=GITHUB_SOURCE_ID),
+        actionable_quarantines_statement(source_id=OPENSSF_SOURCE_ID),
+    ).subquery("unresolved_collection_records")
+    global_cases = (
+        actionable_quarantines_statement(source_id=OPENSSF_SOURCE_ID)
+        .limit(CATALOG_QUERY_LIMIT + 1)
+        .subquery("openssf_global_gaps")
     )
+    # A bounded count and SHA256 commitment avoid copying an entire gap set into
+    # every package row. No rejected body or last-known package can narrow scope.
+    global_refs = (
+        select(
+            func.jsonb_build_array(
+                func.count(func.distinct(global_cases.c.record_key)),
+                func.count(),
+                func.encode(
+                    func.sha256(
+                        func.convert_to(
+                            func.coalesce(
+                                func.string_agg(
+                                    global_cases.c.outcome_id + global_cases.c.record_hash,
+                                    aggregate_order_by(literal(""), global_cases.c.outcome_id),
+                                ),
+                                "",
+                            ),
+                            "UTF8",
+                        )
+                    ),
+                    "hex",
+                ),
+            )
+        )
+        .select_from(global_cases)
+        .scalar_subquery()
+    )
+    # A one-row anchor preserves the authoritative source-wide read even when no
+    # package has ever been mapped. Both global gaps and latest rows use ONE SQL
+    # snapshot, independent of the asynchronous coverage cache.
+    anchor = select(literal(1).label("one")).subquery("catalog_snapshot_anchor")
     rows = tuple(
         session.execute(
             select(
@@ -1186,9 +1225,11 @@ def catalog_evidence_for_package(
                 unresolved.c.outcome_id,
                 unresolved.c.record_hash,
                 SourceGovernanceDecisionRecord.field_policy_id,
+                global_refs.label("openssf_global_refs"),
             )
-            .select_from(relevant)
-            .join(AdvisoryCatalogRecord, AdvisoryCatalogRecord.catalog_event_id == newest_id)
+            .select_from(anchor)
+            .outerjoin(relevant, true())
+            .outerjoin(AdvisoryCatalogRecord, AdvisoryCatalogRecord.catalog_event_id == newest_id)
             .outerjoin(
                 AdvisoryPackageRecord,
                 and_(
@@ -1226,25 +1267,35 @@ def catalog_evidence_for_package(
         raise AdvisoryCatalogCapacityExceeded(
             "catalog package evidence exceeds the explicit 10000-row bound"
         )
+    openssf_summary = rows[0][-1]
+    if openssf_summary[1] > CATALOG_QUERY_LIMIT:
+        raise AdvisoryCatalogCapacityExceeded(
+            "OpenSSF global unresolved accounting exceeds query bound"
+        )
+    openssf_unresolved_count = int(openssf_summary[0])
     gap_keys = {
-        record_key
-        for _catalog, _package, record_key, _outcome, _hash, _policy in rows
+        (_catalog.source_id, record_key)
+        for _catalog, _package, record_key, _outcome, _hash, _policy, _global in rows
         if record_key is not None
     }
     gap_refs = sorted(
         {
             (outcome_id, record_hash)
-            for _catalog, _package, _key, outcome_id, record_hash, _policy in rows
+            for _catalog, _package, _key, outcome_id, record_hash, _policy, _global in rows
             if outcome_id is not None
         }
     )
     active_members = []
+    if openssf_unresolved_count:
+        gap_refs.append(("openssf-source-gaps", openssf_summary[2]))
     member_refs = [
         ("unresolved_collection", outcome_id, record_hash) for outcome_id, record_hash in gap_refs
     ]
     seen_members = set()
     field_policies = {}
-    for catalog, package, _record_key, _outcome_id, _record_hash, field_policy in rows:
+    for catalog, package, _record_key, _outcome_id, _record_hash, field_policy, _global in rows:
+        if catalog is None:
+            continue
         field_policies[catalog.governance_decision_id] = field_policy
         member_key = (catalog.catalog_event_id, package.package_event_id if package else None)
         if member_key in seen_members:
@@ -1269,7 +1320,12 @@ def catalog_evidence_for_package(
                 ),
             )
         )
-        if catalog.state != "active" or package is None or package.state != "active":
+        if package is None:
+            continue
+        if (catalog.state != "active" or package.state != "active") and not (
+            catalog.source_id == OPENSSF_SOURCE_ID
+            and (catalog.source_id, catalog.upstream_record_id) in gap_keys
+        ):
             continue
         active_members.append((catalog, package))
     grouped = _alias_components(active_members)
@@ -1280,7 +1336,7 @@ def catalog_evidence_for_package(
                 catalog,
                 package,
                 None
-                if catalog.source_id == GITHUB_SOURCE_ID and catalog.upstream_record_id in gap_keys
+                if (catalog.source_id, catalog.upstream_record_id) in gap_keys
                 else _package_match(package, version=version),
             )
             for catalog, package in values
@@ -1335,6 +1391,9 @@ def catalog_evidence_for_package(
                 ),
                 "upstream_record_id": catalog.upstream_record_id,
                 "state": catalog.state,
+                "source_state_status": "historical_unresolved"
+                if (catalog.source_id, catalog.upstream_record_id) in gap_keys
+                else "current",
                 "source_updated_at": timestamp(catalog.source_updated_at),
                 "observed_at": timestamp(catalog.observed_at),
                 "catalog_source_sha256": catalog.source_sha256,
@@ -1357,9 +1416,7 @@ def catalog_evidence_for_package(
             reports[report_key]["fixed_versions"] = list(
                 _fixed_versions(
                     entries[0][0].ecosystem,
-                    []
-                    if report_key[0] == GITHUB_SOURCE_ID and report_key[1] in gap_keys
-                    else [package for package, _evaluation in entries],
+                    [] if report_key in gap_keys else [package for package, _evaluation in entries],
                 )
             )
             report = reports[report_key]
@@ -1372,7 +1429,7 @@ def catalog_evidence_for_package(
                     ),
                     osv_match=lambda affected: _openssf_range_matches(ecosystem, version, affected),
                     historical=report["field_policy_id"] in HISTORICAL_GITHUB_POLICIES,
-                    unresolved=report_key[0] == GITHUB_SOURCE_ID and report_key[1] in gap_keys,
+                    unresolved=report_key in gap_keys,
                 )
             )
         families.append(
@@ -1394,10 +1451,7 @@ def catalog_evidence_for_package(
                     [
                         package
                         for catalog, package in values
-                        if not (
-                            catalog.source_id == GITHUB_SOURCE_ID
-                            and catalog.upstream_record_id in gap_keys
-                        )
+                        if (catalog.source_id, catalog.upstream_record_id) not in gap_keys
                     ],
                 ),
                 aliases=family_aliases,
@@ -1406,6 +1460,7 @@ def catalog_evidence_for_package(
         )
     return CatalogPackageEvidence(
         families=tuple(families),
+        openssf_unresolved_count=openssf_unresolved_count,
         fingerprint=stable_id(
             "catalog-evidence-v1",
             member_refs,

@@ -106,6 +106,7 @@ EXPECTED_MAIN_TABLES: tuple[str, ...] = tuple(
     "supplemental_snapshots",
     "supplemental_facts",
     "supplemental_payloads",
+    "openssf_catalog_attempts",
     "collection_record_outcomes",
     "collection_record_memberships",
     "collection_record_resolutions",

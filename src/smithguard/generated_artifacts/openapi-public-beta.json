@@ -1764,6 +1764,59 @@
           "expired"
         ]
       },
+      "OpenSSFRecordProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_record_count": {
+            "maximum": 500000,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "attempt_id": {
+            "$ref": "#/components/schemas/StableId"
+          },
+          "rejected_record_count": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "schema_version": {
+            "const": "1.0.0"
+          },
+          "state": {
+            "enum": [
+              "partial",
+              "complete",
+              "failed"
+            ]
+          },
+          "validated_at": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "schema_version",
+          "attempt_id",
+          "state",
+          "accepted_record_count",
+          "rejected_record_count",
+          "validated_at"
+        ],
+        "type": "object"
+      },
       "PublicAdvisoryContext": {
         "additionalProperties": false,
         "description": "Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit.",
@@ -1998,10 +2051,55 @@
             "if": {
               "properties": {
                 "schema_version": {
+                  "const": "2.5.0"
+                }
+              },
+              "required": [
+                "schema_version"
+              ]
+            },
+            "then": {
+              "properties": {
+                "incidents": {
+                  "items": {
+                    "properties": {
+                      "source_reports": {
+                        "items": {
+                          "properties": {
+                            "source_state_status": {
+                              "enum": [
+                                "current",
+                                "historical_unresolved"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_state_status"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "source_freshness": {
+                  "items": {
+                    "required": [
+                      "unresolved_record_count"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "schema_version": {
                   "enum": [
                     "2.2.0",
                     "2.3.0",
-                    "2.4.0"
+                    "2.4.0",
+                    "2.5.0"
                   ]
                 }
               },
@@ -2026,7 +2124,8 @@
                 "schema_version": {
                   "enum": [
                     "2.3.0",
-                    "2.4.0"
+                    "2.4.0",
+                    "2.5.0"
                   ]
                 }
               },
@@ -2044,7 +2143,10 @@
             "if": {
               "properties": {
                 "schema_version": {
-                  "const": "2.4.0"
+                  "enum": [
+                    "2.4.0",
+                    "2.5.0"
+                  ]
                 }
               },
               "required": [
@@ -2415,7 +2517,8 @@
               "2.1.0",
               "2.2.0",
               "2.3.0",
-              "2.4.0"
+              "2.4.0",
+              "2.5.0"
             ]
           },
           "updated_at": {
@@ -2441,7 +2544,33 @@
           {
             "properties": {
               "artifact": {
-                "$ref": "#/components/schemas/PublicArtifactInput"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicArtifactInput"
+                  },
+                  {
+                    "else": {
+                      "properties": {
+                        "digest": {
+                          "type": "null"
+                        }
+                      }
+                    },
+                    "if": {
+                      "properties": {
+                        "ecosystem": {
+                          "enum": [
+                            "oci",
+                            "docker"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ecosystem"
+                      ]
+                    }
+                  }
+                ]
               },
               "data_classification": {
                 "const": "public"
@@ -2456,6 +2585,7 @@
             "type": "object"
           }
         ],
+        "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
         "title": "Public artifact assessment request",
         "unevaluatedProperties": false,
         "x-smithguard-handling": {
@@ -2466,7 +2596,7 @@
       },
       "PublicArtifactAssessmentShortRequest": {
         "additionalProperties": false,
-        "description": "The simple request form: an ecosystem, a package name and an exact version (or an immutable digest). The registry host defaults to the ecosystem's public registry and is required only for container images.",
+        "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
         "examples": [
           {
             "ecosystem": "npm",
@@ -3217,6 +3347,13 @@
               }
             ]
           },
+          "source_state_status": {
+            "enum": [
+              "current",
+              "historical_unresolved",
+              null
+            ]
+          },
           "source_updated_at": {
             "$ref": "#/components/schemas/Timestamp"
           },
@@ -3241,6 +3378,834 @@
           "state",
           "source_updated_at",
           "observed_at"
+        ],
+        "type": "object"
+      },
+      "PublicArtifactSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "action_authorized": {
+            "const": false
+          },
+          "artifact": {
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "type": "null"
+              },
+              "ecosystem": {
+                "enum": [
+                  "npm",
+                  "pypi"
+                ]
+              },
+              "name": {
+                "maxLength": 300,
+                "minLength": 1,
+                "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+                "type": "string"
+              },
+              "public_visibility": {
+                "const": "asserted_public"
+              },
+              "registry_host": {
+                "enum": [
+                  "registry.npmjs.org",
+                  "pypi.org"
+                ]
+              },
+              "version": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "ecosystem",
+              "name",
+              "version",
+              "registry_host",
+              "digest",
+              "public_visibility"
+            ],
+            "type": "object"
+          },
+          "assessment": {
+            "additionalProperties": false,
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "revision": {
+                "maximum": 2147483647,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "schema_version": {
+                "enum": [
+                  "2.4.0",
+                  "2.5.0"
+                ]
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "schema_version",
+              "revision",
+              "created_at",
+              "updated_at"
+            ],
+            "type": "object"
+          },
+          "assessment_freshness": {
+            "enum": [
+              "fresh",
+              "stale"
+            ]
+          },
+          "check_state": {
+            "enum": [
+              "completed",
+              "partial"
+            ]
+          },
+          "client_signature_verified": {
+            "const": false
+          },
+          "coverage": {
+            "additionalProperties": false,
+            "properties": {
+              "as_of": {
+                "format": "date-time",
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "ecosystem": {
+                "enum": [
+                  "npm",
+                  "pypi",
+                  "unknown"
+                ]
+              },
+              "result": {
+                "enum": [
+                  "supported",
+                  "partial",
+                  "unsupported",
+                  "stale",
+                  "unknown"
+                ]
+              },
+              "stage": {
+                "enum": [
+                  "research",
+                  "intake",
+                  "normalized",
+                  "matched",
+                  "response-tested"
+                ]
+              }
+            },
+            "required": [
+              "ecosystem",
+              "stage",
+              "result",
+              "as_of"
+            ],
+            "type": "object"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          },
+          "identity_assurance": {
+            "const": "caller_asserted"
+          },
+          "incidents": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "aliases": {
+                  "items": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+                    "type": "string"
+                  },
+                  "maxItems": 20,
+                  "type": "array"
+                },
+                "applies_to_version": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "citations": {
+                  "items": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "pattern": "^https://[A-Za-z0-9./_?=-]+$",
+                    "type": "string"
+                  },
+                  "maxItems": 4,
+                  "type": "array"
+                },
+                "confidence": {
+                  "enum": [
+                    "confirmed",
+                    "probable",
+                    "possible",
+                    "unverified",
+                    "disputed",
+                    "unknown"
+                  ]
+                },
+                "fix_evidence_incomplete": {
+                  "type": "boolean"
+                },
+                "incident_id": {
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "pattern": "^gbsec:(?:catalog-incident|incident):[a-zA-Z0-9._:-]+$",
+                  "type": "string"
+                },
+                "last_changed_at": {
+                  "format": "date-time",
+                  "maxLength": 40,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "revision": {
+                  "maximum": 2147483647,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "source_reports": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "applies_to_version": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "fix_evidence": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "applies_to_requested_version": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "fixed_version": {
+                              "maxLength": 200,
+                              "minLength": 1,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9.!+_-]*$",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "introduced_version": {
+                              "maxLength": 200,
+                              "minLength": 1,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9.!+_-]*$",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "package_entry_id": {
+                              "maxLength": 160,
+                              "minLength": 1,
+                              "pattern": "^gbsec:advisory-package:[a-f0-9]{40}$",
+                              "type": "string"
+                            },
+                            "patch_field_state": {
+                              "enum": [
+                                "absent",
+                                "explicit_null",
+                                "explicit_value",
+                                "invalid",
+                                "no_fixed_event",
+                                "unsupported_range_type"
+                              ]
+                            },
+                            "range_index": {
+                              "maximum": 10000,
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "range_sha256": {
+                              "maxLength": 71,
+                              "minLength": 1,
+                              "pattern": "^sha256:[a-f0-9]{64}$",
+                              "type": "string"
+                            },
+                            "range_type": {
+                              "enum": [
+                                "GITHUB",
+                                "SEMVER",
+                                "ECOSYSTEM",
+                                "GIT",
+                                "other"
+                              ]
+                            },
+                            "source_field": {
+                              "maxLength": 80,
+                              "minLength": 1,
+                              "pattern": "^[A-Za-z0-9_.\\[\\]-]+$",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "package_entry_id",
+                            "range_sha256",
+                            "range_index",
+                            "range_type",
+                            "introduced_version",
+                            "fixed_version",
+                            "source_field",
+                            "applies_to_requested_version",
+                            "patch_field_state"
+                          ],
+                          "type": "object"
+                        },
+                        "maxItems": 8,
+                        "type": "array"
+                      },
+                      "fix_evidence_incomplete": {
+                        "type": "boolean"
+                      },
+                      "historical_metadata_incomplete": {
+                        "type": "boolean"
+                      },
+                      "observed_at": {
+                        "format": "date-time",
+                        "maxLength": 40,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "range_bound_evidence": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "exclusive_upper",
+                                "inclusive_upper",
+                                "last_affected",
+                                "limit"
+                              ]
+                            },
+                            "package_entry_id": {
+                              "maxLength": 160,
+                              "minLength": 1,
+                              "pattern": "^gbsec:advisory-package:[a-f0-9]{40}$",
+                              "type": "string"
+                            },
+                            "range_index": {
+                              "maximum": 10000,
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "version": {
+                              "maxLength": 200,
+                              "minLength": 1,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9.!+_-]*$",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "package_entry_id",
+                            "range_index",
+                            "kind",
+                            "version"
+                          ],
+                          "type": "object"
+                        },
+                        "maxItems": 8,
+                        "type": "array"
+                      },
+                      "source_context_state": {
+                        "enum": [
+                          "available",
+                          "unavailable",
+                          "omitted_budget"
+                        ]
+                      },
+                      "source_fixed_versions": {
+                        "items": {
+                          "maxLength": 200,
+                          "minLength": 1,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9.!+_-]*$",
+                          "type": "string"
+                        },
+                        "maxItems": 20,
+                        "type": "array"
+                      },
+                      "source_id": {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "pattern": "^gbsec:source:[a-z0-9-]+$",
+                        "type": "string"
+                      },
+                      "source_state_status": {
+                        "enum": [
+                          "current",
+                          "historical_unresolved",
+                          "unknown"
+                        ]
+                      },
+                      "source_updated_at": {
+                        "format": "date-time",
+                        "maxLength": 40,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "state": {
+                        "enum": [
+                          "active",
+                          "removed",
+                          "withdrawn"
+                        ]
+                      },
+                      "upstream_record_id": {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "source_id",
+                      "upstream_record_id",
+                      "state",
+                      "source_updated_at",
+                      "observed_at",
+                      "source_state_status",
+                      "applies_to_version",
+                      "source_fixed_versions",
+                      "fix_evidence_incomplete",
+                      "historical_metadata_incomplete",
+                      "fix_evidence",
+                      "range_bound_evidence",
+                      "source_context_state"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 4,
+                  "type": "array"
+                },
+                "source_reports_truncated": {
+                  "type": "boolean"
+                },
+                "status": {
+                  "enum": [
+                    "internal_candidate",
+                    "emerging_unverified",
+                    "investigating",
+                    "reported",
+                    "corroborated",
+                    "confirmed",
+                    "contained",
+                    "resolved",
+                    "disputed",
+                    "withdrawn",
+                    "expired"
+                  ]
+                }
+              },
+              "required": [
+                "incident_id",
+                "revision",
+                "status",
+                "confidence",
+                "last_changed_at",
+                "applies_to_version",
+                "aliases",
+                "citations",
+                "source_reports",
+                "source_reports_truncated",
+                "fix_evidence_incomplete"
+              ],
+              "type": "object"
+            },
+            "maxItems": 8,
+            "type": "array"
+          },
+          "limitations": {
+            "const": [
+              "Advisory evidence only; not a safety verdict or permission to install or change software.",
+              "Service-issued derived report; no client signature verification ran.",
+              "Original source and assessment clocks remain authoritative; recheck before a later decision.",
+              "Source-listed fixes and range boundaries are different; neither is a tested application repair.",
+              "Source prose, original responses and raw lookup references are excluded; omissions are explicit."
+            ]
+          },
+          "local_applicability": {
+            "const": "not_evaluated"
+          },
+          "not_applicable_incident_count": {
+            "maximum": 1000000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "omissions": {
+            "additionalProperties": false,
+            "properties": {
+              "aliases": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "citations": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "cve_contexts": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "fix_evidence": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "incident_titles": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "incidents": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "preliminary_warnings": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "range_bound_evidence": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "registry_project_context": {
+                "type": "boolean"
+              },
+              "source_contexts": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "source_fixed_versions": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "source_reports": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "unknown_texts": {
+                "maximum": 1000000,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "upstream_incidents_truncated": {
+                "type": "boolean"
+              },
+              "upstream_source_reports_truncated": {
+                "type": "boolean"
+              },
+              "upstream_warnings_truncated": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "incidents",
+              "source_reports",
+              "fix_evidence",
+              "range_bound_evidence",
+              "source_fixed_versions",
+              "citations",
+              "aliases",
+              "source_contexts",
+              "incident_titles",
+              "unknown_texts",
+              "preliminary_warnings",
+              "cve_contexts",
+              "registry_project_context",
+              "upstream_incidents_truncated",
+              "upstream_source_reports_truncated",
+              "upstream_warnings_truncated"
+            ],
+            "type": "object"
+          },
+          "projection_version": {
+            "const": "1.0.0"
+          },
+          "reason_codes": {
+            "items": {
+              "enum": [
+                "no_matching_advisory",
+                "identity_unverified",
+                "ecosystem_not_covered",
+                "artifact_evidence_missing",
+                "source_stale",
+                "source_unavailable",
+                "version_not_evaluable",
+                "source_conflict",
+                "historical_metadata_incomplete",
+                "results_incomplete"
+              ]
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "registry_state": {
+            "enum": [
+              "available",
+              "removed",
+              "yanked",
+              "deprecated",
+              "unknown"
+            ]
+          },
+          "report_origin": {
+            "const": "hosted_projection"
+          },
+          "result": {
+            "enum": [
+              "affected",
+              "not_affected",
+              "possibly_affected",
+              "conflicting",
+              "unknown"
+            ]
+          },
+          "source_freshness": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "freshness_state": {
+                  "enum": [
+                    "fresh",
+                    "complete",
+                    "stale",
+                    "failed",
+                    "missing",
+                    "in_progress",
+                    "reconciling",
+                    "unresolved"
+                  ]
+                },
+                "last_success_at": {
+                  "format": "date-time",
+                  "maxLength": 40,
+                  "minLength": 1,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "record_type": {
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "type": "string"
+                },
+                "source_id": {
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "pattern": "^gbsec:source:[a-z0-9-]+$",
+                  "type": "string"
+                },
+                "unresolved_record_count": {
+                  "maximum": 1000000,
+                  "minimum": 0,
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "source_id",
+                "record_type",
+                "freshness_state",
+                "last_success_at",
+                "unresolved_record_count"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "summary_schema_version": {
+            "const": "1.0.0"
+          },
+          "valid_until": {
+            "format": "date-time",
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary_schema_version",
+          "projection_version",
+          "report_origin",
+          "client_signature_verified",
+          "action_authorized",
+          "check_state",
+          "artifact",
+          "assessment",
+          "generated_at",
+          "valid_until",
+          "assessment_freshness",
+          "result",
+          "reason_codes",
+          "identity_assurance",
+          "local_applicability",
+          "registry_state",
+          "coverage",
+          "source_freshness",
+          "incidents",
+          "not_applicable_incident_count",
+          "omissions",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "PublicArtifactSummaryError": {
+        "additionalProperties": false,
+        "properties": {
+          "action_authorized": {
+            "const": false
+          },
+          "check_state": {
+            "const": "incomplete"
+          },
+          "client_signature_verified": {
+            "const": false
+          },
+          "error": {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "invalid_request",
+                  "version_not_exact",
+                  "unsupported_media_type",
+                  "request_limit_exceeded",
+                  "request_deadline_exceeded",
+                  "service_capacity_exceeded",
+                  "anonymous_burst_limit_exceeded",
+                  "anonymous_daily_limit_exceeded",
+                  "assessment_in_progress",
+                  "anonymous_quota_unavailable",
+                  "proxy_network_identity_invalid",
+                  "service_unavailable",
+                  "summary_unavailable",
+                  "summary_identity_mismatch",
+                  "summary_schema_unsupported",
+                  "summary_time_invalid",
+                  "summary_limit_exceeded",
+                  "invalid_tool_arguments"
+                ]
+              },
+              "message": {
+                "const": "The summary request did not complete; no safety or action conclusion is available."
+              },
+              "retry_after_seconds": {
+                "maximum": 86400,
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "retryable": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable",
+              "retry_after_seconds"
+            ],
+            "type": "object"
+          },
+          "summary_schema_version": {
+            "const": "1.0.0"
+          }
+        },
+        "required": [
+          "summary_schema_version",
+          "check_state",
+          "client_signature_verified",
+          "action_authorized",
+          "error"
+        ],
+        "type": "object"
+      },
+      "PublicArtifactSummaryRequest": {
+        "additionalProperties": false,
+        "description": "One explicitly authorized exact public npm/PyPI version. No files, private names, inventory, ranges or moving tags. Publicness is caller-asserted.",
+        "properties": {
+          "ecosystem": {
+            "enum": [
+              "npm",
+              "pypi"
+            ]
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+            "type": "string"
+          },
+          "registry_host": {
+            "enum": [
+              "registry.npmjs.org",
+              "pypi.org"
+            ]
+          },
+          "version": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "ecosystem",
+          "name",
+          "version"
         ],
         "type": "object"
       },
@@ -4180,6 +5145,13 @@
           },
           "source_id": {
             "$ref": "#/components/schemas/StableId"
+          },
+          "unresolved_record_count": {
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
           }
         },
         "required": [
@@ -4334,7 +5306,8 @@
               "failed",
               "stale",
               "fresh",
-              "complete"
+              "complete",
+              "unresolved"
             ]
           },
           "lane": {
@@ -4391,6 +5364,16 @@
             "minimum": 0,
             "type": "integer"
           },
+          "record_progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpenSSFRecordProgress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "record_type": {
             "pattern": "^[a-z][a-z0-9_]{2,79}$",
             "type": "string"
@@ -4429,6 +5412,13 @@
             "maxItems": 20,
             "type": "array",
             "uniqueItems": true
+          },
+          "unresolved_record_count": {
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
           }
         },
         "required": [
@@ -5056,6 +6046,112 @@
         "x-smithguard-limits": {
           "max_input_bytes": 8192,
           "max_output_bytes": 1048576,
+          "timeout_seconds": 10
+        },
+        "x-smithguard-public-service-allowed": true,
+        "x-smithguard-read-only": true
+      }
+    },
+    "/v1/artifacts/assessment-summary": {
+      "post": {
+        "operationId": "assess_public_artifact_summary",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicArtifactSummaryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummary"
+                }
+              }
+            },
+            "description": "Bounded service-issued derived report; not client-verified."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicArtifactSummaryError"
+                }
+              }
+            },
+            "description": "Incomplete summary request; never a raw-response fallback."
+          }
+        },
+        "summary": "Read a compact, unsigned report for one exact public npm/PyPI version",
+        "x-smithguard-availability": "public_beta",
+        "x-smithguard-limits": {
+          "max_input_bytes": 8192,
+          "max_output_bytes": 32768,
           "timeout_seconds": 10
         },
         "x-smithguard-public-service-allowed": true,
@@ -5872,5 +6968,16 @@
     "transport": "streamable-http",
     "url": "https://api.smithguard.io/mcp"
   },
-  "x-smithguard-service-state": "public_beta"
+  "x-smithguard-service-state": "public_beta",
+  "x-smithguard-summary-mcp": {
+    "authentication": "none",
+    "client_signature_verified": false,
+    "read_only": true,
+    "retention": "Derived reports may persist in the authorized provider/client history; recheck for a later decision.",
+    "tools": [
+      "assess_public_artifact_summary"
+    ],
+    "transport": "streamable-http",
+    "url": "https://api.smithguard.io/mcp/summaries"
+  }
 }

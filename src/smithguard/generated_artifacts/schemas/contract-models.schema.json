@@ -1655,7 +1655,7 @@
           "type": "string"
         },
         "severity": {
-          "$ref": "#/$defs/Severity"
+          "$ref": "#/$defs/Severity1"
         },
         "updated_at": {
           "format": "date-time",
@@ -2273,7 +2273,7 @@
           "type": "string"
         },
         "state": {
-          "$ref": "#/$defs/State10"
+          "$ref": "#/$defs/State12"
         },
         "steps": {
           "items": {
@@ -3737,7 +3737,7 @@
           "type": "string"
         },
         "state": {
-          "$ref": "#/$defs/State11"
+          "$ref": "#/$defs/State13"
         },
         "updated_at": {
           "format": "date-time",
@@ -4583,7 +4583,7 @@
         "severity": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Severity1"
+              "$ref": "#/$defs/Severity"
             },
             {
               "type": "null"
@@ -4682,7 +4682,7 @@
         "source_field": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SourceField"
+              "$ref": "#/$defs/SourceField1"
             },
             {
               "type": "null"
@@ -4700,7 +4700,7 @@
           ]
         },
         "state": {
-          "$ref": "#/$defs/State12"
+          "$ref": "#/$defs/State7"
         }
       },
       "required": [
@@ -4954,9 +4954,36 @@
     },
     "PublicArtifactAssessmentRequest": {
       "additionalProperties": false,
+      "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
       "properties": {
         "artifact": {
-          "$ref": "#/$defs/PublicArtifactInput"
+          "allOf": [
+            {
+              "$ref": "#/$defs/PublicArtifactInput"
+            },
+            {
+              "else": {
+                "properties": {
+                  "digest": {
+                    "type": "null"
+                  }
+                }
+              },
+              "if": {
+                "properties": {
+                  "ecosystem": {
+                    "enum": [
+                      "oci",
+                      "docker"
+                    ]
+                  }
+                },
+                "required": [
+                  "ecosystem"
+                ]
+              }
+            }
+          ]
         },
         "created_at": {
           "format": "date-time",
@@ -5289,7 +5316,7 @@
           "type": "array"
         },
         "state": {
-          "$ref": "#/$defs/State7"
+          "$ref": "#/$defs/State9"
         },
         "title": {
           "maxLength": 300,
@@ -5537,13 +5564,24 @@
           ],
           "default": null
         },
+        "source_state_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceStateStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "source_updated_at": {
           "format": "date-time",
           "title": "Source Updated At",
           "type": "string"
         },
         "state": {
-          "$ref": "#/$defs/State6"
+          "$ref": "#/$defs/State8"
         },
         "upstream_record_id": {
           "maxLength": 160,
@@ -5646,7 +5684,7 @@
           ]
         },
         "state": {
-          "$ref": "#/$defs/State8"
+          "$ref": "#/$defs/State10"
         },
         "value": {
           "anyOf": [
@@ -5787,7 +5825,7 @@
           ]
         },
         "state": {
-          "$ref": "#/$defs/State8"
+          "$ref": "#/$defs/State10"
         },
         "value": {
           "anyOf": [
@@ -5875,7 +5913,7 @@
           "type": "string"
         },
         "state": {
-          "$ref": "#/$defs/State5"
+          "$ref": "#/$defs/State6"
         }
       },
       "required": [
@@ -5978,7 +6016,7 @@
         "source_field": {
           "anyOf": [
             {
-              "$ref": "#/$defs/SourceField1"
+              "$ref": "#/$defs/SourceField"
             },
             {
               "type": "null"
@@ -6029,6 +6067,19 @@
           "pattern": "^gbsec:[a-z0-9][a-z0-9:._/-]+$",
           "title": "Source Id",
           "type": "string"
+        },
+        "unresolved_record_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unresolved Record Count"
         }
       },
       "required": [
@@ -7531,7 +7582,8 @@
         "2.1.0",
         "2.2.0",
         "2.3.0",
-        "2.4.0"
+        "2.4.0",
+        "2.5.0"
       ],
       "title": "SchemaVersion1",
       "type": "string"
@@ -7572,22 +7624,22 @@
     },
     "Severity": {
       "enum": [
-        "unknown",
         "low",
-        "moderate",
+        "medium",
         "high",
-        "critical"
+        "critical",
+        "unknown"
       ],
       "title": "Severity",
       "type": "string"
     },
     "Severity1": {
       "enum": [
+        "unknown",
         "low",
-        "medium",
+        "moderate",
         "high",
-        "critical",
-        "unknown"
+        "critical"
       ],
       "title": "Severity1",
       "type": "string"
@@ -7768,13 +7820,13 @@
       "type": "string"
     },
     "SourceField": {
-      "maxLength": 200,
+      "maxLength": 80,
       "minLength": 1,
       "title": "SourceField",
       "type": "string"
     },
     "SourceField1": {
-      "maxLength": 80,
+      "maxLength": 200,
       "minLength": 1,
       "title": "SourceField1",
       "type": "string"
@@ -7826,6 +7878,14 @@
       "title": "SourceRevision",
       "type": "integer"
     },
+    "SourceStateStatus": {
+      "enum": [
+        "current",
+        "historical_unresolved",
+        null
+      ],
+      "title": "SourceStateStatus"
+    },
     "SourceUrl": {
       "format": "uri",
       "minLength": 1,
@@ -7871,16 +7931,26 @@
     },
     "State10": {
       "enum": [
+        "fresh",
+        "stale",
+        "failed",
+        "missing"
+      ],
+      "title": "State10",
+      "type": "string"
+    },
+    "State12": {
+      "enum": [
         "proven",
         "probable",
         "possible",
         "conflicting",
         "unknown"
       ],
-      "title": "State10",
+      "title": "State12",
       "type": "string"
     },
-    "State11": {
+    "State13": {
       "enum": [
         "active",
         "expired",
@@ -7888,15 +7958,7 @@
         "superseded",
         "recheck_required"
       ],
-      "title": "State11",
-      "type": "string"
-    },
-    "State12": {
-      "enum": [
-        "recorded",
-        "unknown"
-      ],
-      "title": "State12",
+      "title": "State13",
       "type": "string"
     },
     "State3": {
@@ -7910,25 +7972,33 @@
       "title": "State3",
       "type": "string"
     },
-    "State5": {
+    "State6": {
       "enum": [
         "fresh",
         "stale",
         "failed"
       ],
-      "title": "State5",
+      "title": "State6",
       "type": "string"
     },
-    "State6": {
+    "State7": {
+      "enum": [
+        "recorded",
+        "unknown"
+      ],
+      "title": "State7",
+      "type": "string"
+    },
+    "State8": {
       "enum": [
         "active",
         "removed",
         "withdrawn"
       ],
-      "title": "State6",
+      "title": "State8",
       "type": "string"
     },
-    "State7": {
+    "State9": {
       "enum": [
         "active",
         "expired",
@@ -7936,17 +8006,7 @@
         "promoted",
         "contradicted"
       ],
-      "title": "State7",
-      "type": "string"
-    },
-    "State8": {
-      "enum": [
-        "fresh",
-        "stale",
-        "failed",
-        "missing"
-      ],
-      "title": "State8",
+      "title": "State9",
       "type": "string"
     },
     "StorageState": {

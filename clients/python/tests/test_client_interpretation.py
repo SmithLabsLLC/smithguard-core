@@ -13,17 +13,20 @@ from smithguard_client.verification import verify_assessment
 def pair(signed, change=None):
     body, key, sign = signed
     body.update(
-        schema_version="2.4.0",
+        schema_version="2.5.0",
         artifact=artifact("public-demo", "1.0"),
         unknowns=[],
         registry_state="available",
         reason_codes=["identity_unverified"],
     )
     body["coverage"]["ecosystem"] = "pypi"
+    for row in body["source_freshness"]:
+        row["unresolved_record_count"] = 0
     incident = body["incidents"][0]
     incident.update(source_fixed_versions=["1.1"], fix_evidence_incomplete=False)
     source = incident["source_reports"][0]
     source.update(
+        source_state_status="current",
         applies_to_version=True,
         source_fixed_versions=["1.1"],
         fix_evidence=[
@@ -101,6 +104,10 @@ def test_exact_source_patch_can_only_earn_application_testing(signed):
         "changed_feed",
         "missing_metadata",
         "truncated",
+        "historical_source",
+        "unknown_source",
+        "unresolved_count",
+        "unknown_count",
     ],
 )
 def test_candidate_must_resolve_all_evidence(signed, case):
@@ -132,6 +139,15 @@ def test_candidate_must_resolve_all_evidence(signed, case):
             source["historical_metadata_incomplete"] = True
         elif case == "truncated":
             after["incidents_truncated"] = True
+        elif case == "historical_source":
+            source["source_state_status"] = "historical_unresolved"
+        elif case == "unknown_source":
+            before["schema_version"] = after["schema_version"] = "2.4.0"
+            source.pop("source_state_status")
+        elif case == "unresolved_count":
+            after["source_freshness"][0]["unresolved_record_count"] = 1
+        elif case == "unknown_count":
+            after["source_freshness"][0]["unresolved_record_count"] = None
 
     before, after = pair(signed, change)
     assert decide(before, after)["outcome"] == "no_verified_recommendation"

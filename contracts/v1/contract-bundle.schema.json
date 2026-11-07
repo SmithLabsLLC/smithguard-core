@@ -34,87 +34,33 @@
     "ReplayCase"
   ],
   "oneOf": [
-    {
-      "$ref": "#/$defs/Source"
-    },
-    {
-      "$ref": "#/$defs/RawEvidence"
-    },
-    {
-      "$ref": "#/$defs/AuthorityDecision"
-    },
-    {
-      "$ref": "#/$defs/Claim"
-    },
-    {
-      "$ref": "#/$defs/Artifact"
-    },
-    {
-      "$ref": "#/$defs/AffectedRange"
-    },
-    {
-      "$ref": "#/$defs/Relationship"
-    },
-    {
-      "$ref": "#/$defs/Incident"
-    },
-    {
-      "$ref": "#/$defs/IncidentEvent"
-    },
-    {
-      "$ref": "#/$defs/PreliminaryWarning"
-    },
-    {
-      "$ref": "#/$defs/RecommendedAction"
-    },
-    {
-      "$ref": "#/$defs/PublicArtifactAssessmentRequest"
-    },
-    {
-      "$ref": "#/$defs/PublicArtifactAssessment"
-    },
-    {
-      "$ref": "#/$defs/InventorySnapshot"
-    },
-    {
-      "$ref": "#/$defs/DependencyDelta"
-    },
-    {
-      "$ref": "#/$defs/ExposurePath"
-    },
-    {
-      "$ref": "#/$defs/RemediationFrontier"
-    },
-    {
-      "$ref": "#/$defs/PolicyDecision"
-    },
-    {
-      "$ref": "#/$defs/ApprovalRecord"
-    },
-    {
-      "$ref": "#/$defs/PolicyException"
-    },
-    {
-      "$ref": "#/$defs/AssessmentReceipt"
-    },
-    {
-      "$ref": "#/$defs/DeliveryEvent"
-    },
-    {
-      "$ref": "#/$defs/RestOperation"
-    },
-    {
-      "$ref": "#/$defs/McpOperation"
-    },
-    {
-      "$ref": "#/$defs/PrivateWatchlistSet"
-    },
-    {
-      "$ref": "#/$defs/PrivateWatchlistRejection"
-    },
-    {
-      "$ref": "#/$defs/ReplayCase"
-    }
+    { "$ref": "#/$defs/Source" },
+    { "$ref": "#/$defs/RawEvidence" },
+    { "$ref": "#/$defs/AuthorityDecision" },
+    { "$ref": "#/$defs/Claim" },
+    { "$ref": "#/$defs/Artifact" },
+    { "$ref": "#/$defs/AffectedRange" },
+    { "$ref": "#/$defs/Relationship" },
+    { "$ref": "#/$defs/Incident" },
+    { "$ref": "#/$defs/IncidentEvent" },
+    { "$ref": "#/$defs/PreliminaryWarning" },
+    { "$ref": "#/$defs/RecommendedAction" },
+    { "$ref": "#/$defs/PublicArtifactAssessmentRequest" },
+    { "$ref": "#/$defs/PublicArtifactAssessment" },
+    { "$ref": "#/$defs/InventorySnapshot" },
+    { "$ref": "#/$defs/DependencyDelta" },
+    { "$ref": "#/$defs/ExposurePath" },
+    { "$ref": "#/$defs/RemediationFrontier" },
+    { "$ref": "#/$defs/PolicyDecision" },
+    { "$ref": "#/$defs/ApprovalRecord" },
+    { "$ref": "#/$defs/PolicyException" },
+    { "$ref": "#/$defs/AssessmentReceipt" },
+    { "$ref": "#/$defs/DeliveryEvent" },
+    { "$ref": "#/$defs/RestOperation" },
+    { "$ref": "#/$defs/McpOperation" },
+    { "$ref": "#/$defs/PrivateWatchlistSet" },
+    { "$ref": "#/$defs/PrivateWatchlistRejection" },
+    { "$ref": "#/$defs/ReplayCase" }
   ],
   "$defs": {
     "Timestamp": {
@@ -158,10 +104,7 @@
       "additionalProperties": false,
       "properties": {
         "cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512,
           "default": null
@@ -177,30 +120,19 @@
     "IncidentIdInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "incident_id"
-      ],
+      "required": ["incident_id"],
       "properties": {
-        "incident_id": {
-          "$ref": "#/$defs/StableId"
-        }
+        "incident_id": { "$ref": "#/$defs/StableId" }
       }
     },
     "IncidentPageInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "incident_id"
-      ],
+      "required": ["incident_id"],
       "properties": {
-        "incident_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "incident_id": { "$ref": "#/$defs/StableId" },
         "cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512,
           "default": null
@@ -216,13 +148,9 @@
     "PreliminaryWarningIdInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "signal_id"
-      ],
+      "required": ["signal_id"],
       "properties": {
-        "signal_id": {
-          "$ref": "#/$defs/StableId"
-        }
+        "signal_id": { "$ref": "#/$defs/StableId" }
       }
     },
     "PreliminaryWarningPageInput": {
@@ -230,21 +158,11 @@
       "additionalProperties": false,
       "properties": {
         "state": {
-          "enum": [
-            "active",
-            "expired",
-            "withdrawn",
-            "promoted",
-            "contradicted",
-            "all"
-          ],
+          "enum": ["active", "expired", "withdrawn", "promoted", "contradicted", "all"],
           "default": "active"
         },
         "cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512,
           "default": null
@@ -260,27 +178,16 @@
     "IncidentPage": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "items",
-        "truncated",
-        "next_cursor"
-      ],
+      "required": ["items", "truncated", "next_cursor"],
       "properties": {
         "items": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/Incident"
-          }
+          "items": { "$ref": "#/$defs/Incident" }
         },
-        "truncated": {
-          "type": "boolean"
-        },
+        "truncated": { "type": "boolean" },
         "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512
         }
@@ -289,27 +196,16 @@
     "PreliminaryWarningPage": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "items",
-        "truncated",
-        "next_cursor"
-      ],
+      "required": ["items", "truncated", "next_cursor"],
       "properties": {
         "items": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/PreliminaryWarning"
-          }
+          "items": { "$ref": "#/$defs/PreliminaryWarning" }
         },
-        "truncated": {
-          "type": "boolean"
-        },
+        "truncated": { "type": "boolean" },
         "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512
         }
@@ -318,27 +214,16 @@
     "IncidentEventPage": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "items",
-        "truncated",
-        "next_cursor"
-      ],
+      "required": ["items", "truncated", "next_cursor"],
       "properties": {
         "items": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/IncidentEvent"
-          }
+          "items": { "$ref": "#/$defs/IncidentEvent" }
         },
-        "truncated": {
-          "type": "boolean"
-        },
+        "truncated": { "type": "boolean" },
         "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512
         }
@@ -347,27 +232,16 @@
     "RecommendedActionPage": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "items",
-        "truncated",
-        "next_cursor"
-      ],
+      "required": ["items", "truncated", "next_cursor"],
       "properties": {
         "items": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/RecommendedAction"
-          }
+          "items": { "$ref": "#/$defs/RecommendedAction" }
         },
-        "truncated": {
-          "type": "boolean"
-        },
+        "truncated": { "type": "boolean" },
         "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512
         }
@@ -376,34 +250,20 @@
     "DeliveryEventPage": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "items",
-        "truncated",
-        "next_cursor",
-        "as_of"
-      ],
+      "required": ["items", "truncated", "next_cursor", "as_of"],
       "properties": {
         "items": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/DeliveryEvent"
-          }
+          "items": { "$ref": "#/$defs/DeliveryEvent" }
         },
-        "truncated": {
-          "type": "boolean"
-        },
+        "truncated": { "type": "boolean" },
         "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 16,
           "maxLength": 512
         },
-        "as_of": {
-          "$ref": "#/$defs/Timestamp"
-        }
+        "as_of": { "$ref": "#/$defs/Timestamp" }
       }
     },
     "ContractHeader": {
@@ -418,9 +278,7 @@
         "data_classification"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "id": { "$ref": "#/$defs/StableId" },
         "kind": {
           "type": "string",
           "minLength": 2,
@@ -434,12 +292,8 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "created_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "updated_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "created_at": { "$ref": "#/$defs/Timestamp" },
+        "updated_at": { "$ref": "#/$defs/Timestamp" },
         "data_classification": {
           "enum": [
             "public",
@@ -463,31 +317,20 @@
         "data_classification"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "id": { "$ref": "#/$defs/StableId" },
         "kind": {
           "type": "string",
           "minLength": 2,
           "maxLength": 80
         },
-        "schema_version": {
-          "enum": [
-            "1.0.0",
-            "1.1.0"
-          ]
-        },
+        "schema_version": { "enum": ["1.0.0", "1.1.0"] },
         "revision": {
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "created_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "updated_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "created_at": { "$ref": "#/$defs/Timestamp" },
+        "updated_at": { "$ref": "#/$defs/Timestamp" },
         "data_classification": {
           "enum": [
             "public",
@@ -511,9 +354,7 @@
         "data_classification"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "id": { "$ref": "#/$defs/StableId" },
         "kind": {
           "type": "string",
           "minLength": 2,
@@ -527,12 +368,8 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "created_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "updated_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "created_at": { "$ref": "#/$defs/Timestamp" },
+        "updated_at": { "$ref": "#/$defs/Timestamp" },
         "data_classification": {
           "enum": [
             "public",
@@ -567,7 +404,8 @@
             "2.1.0",
             "2.2.0",
             "2.3.0",
-            "2.4.0"
+            "2.4.0",
+            "2.5.0"
           ]
         },
         "revision": {
@@ -601,48 +439,30 @@
         "signature_state"
       ],
       "properties": {
-        "source_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "source_id": { "$ref": "#/$defs/StableId" },
         "source_record_id": {
           "type": "string",
           "minLength": 1,
           "maxLength": 512
         },
-        "source_url": {
-          "$ref": "#/$defs/Uri"
-        },
+        "source_url": { "$ref": "#/$defs/Uri" },
         "evidence_id": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/StableId"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/StableId" },
+            { "type": "null" }
           ]
         },
-        "retrieved_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "retrieved_at": { "$ref": "#/$defs/Timestamp" },
         "source_published_at": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "source_modified_at": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "collection_method": {
@@ -684,12 +504,8 @@
         },
         "claim_lineage": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/ClaimLineage"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/ClaimLineage" },
+            { "type": "null" }
           ]
         }
       }
@@ -715,33 +531,20 @@
         "exception_reason_code"
       ],
       "properties": {
-        "transport_source_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "transport_source_id": { "$ref": "#/$defs/StableId" },
         "assertion_source_state": {
-          "enum": [
-            "identified",
-            "unknown"
-          ]
+          "enum": ["identified", "unknown"]
         },
         "assertion_source_id": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/StableId"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/StableId" },
+            { "type": "null" }
           ]
         },
         "confirming_authority_id": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/StableId"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/StableId" },
+            { "type": "null" }
           ]
         },
         "confirmation_method": {
@@ -760,21 +563,15 @@
           "maxLength": 120,
           "pattern": "^[a-z0-9_]+$"
         },
-        "authority_policy_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "authority_policy_id": { "$ref": "#/$defs/StableId" },
         "authority_policy_version": {
           "type": "string",
           "minLength": 1,
           "maxLength": 100,
           "pattern": "^[A-Za-z0-9._-]+$"
         },
-        "authority_rule_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "source_rights_register_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "authority_rule_id": { "$ref": "#/$defs/StableId" },
+        "source_rights_register_id": { "$ref": "#/$defs/StableId" },
         "attribution_policy_version": {
           "type": "string",
           "minLength": 1,
@@ -798,24 +595,13 @@
           "minItems": 1,
           "maxItems": 20,
           "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/Uri"
-          }
+          "items": { "$ref": "#/$defs/Uri" }
         },
         "public_status": {
-          "enum": [
-            "reported",
-            "corroborated",
-            "confirmed",
-            "disputed",
-            "withdrawn"
-          ]
+          "enum": ["reported", "corroborated", "confirmed", "disputed", "withdrawn"]
         },
         "exception_reason_code": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 2,
           "maxLength": 120,
           "pattern": "^[a-z0-9_]+$"
@@ -825,32 +611,20 @@
         {
           "if": {
             "properties": {
-              "assertion_source_state": {
-                "const": "identified"
-              }
+              "assertion_source_state": { "const": "identified" }
             },
-            "required": [
-              "assertion_source_state"
-            ]
+            "required": ["assertion_source_state"]
           },
           "then": {
-            "required": [
-              "assertion_source_id"
-            ],
+            "required": ["assertion_source_id"],
             "properties": {
-              "assertion_source_id": {
-                "$ref": "#/$defs/StableId"
-              }
+              "assertion_source_id": { "$ref": "#/$defs/StableId" }
             }
           },
           "else": {
             "properties": {
-              "assertion_source_id": {
-                "type": "null"
-              },
-              "confirming_authority_id": {
-                "type": "null"
-              }
+              "assertion_source_id": { "type": "null" },
+              "confirming_authority_id": { "type": "null" }
             }
           }
         }
@@ -875,51 +649,20 @@
       ],
       "properties": {
         "retrieval": {
-          "enum": [
-            "allowed",
-            "conditional",
-            "prohibited",
-            "unknown"
-          ]
+          "enum": ["allowed", "conditional", "prohibited", "unknown"]
         },
         "raw_storage": {
-          "enum": [
-            "allowed",
-            "conditional",
-            "link_only",
-            "prohibited",
-            "unknown"
-          ]
+          "enum": ["allowed", "conditional", "link_only", "prohibited", "unknown"]
         },
         "raw_redistribution": {
-          "enum": [
-            "allowed",
-            "attribution",
-            "share_alike",
-            "conditional",
-            "link_only",
-            "prohibited",
-            "unknown"
-          ]
+          "enum": ["allowed", "attribution", "share_alike", "conditional", "link_only", "prohibited", "unknown"]
         },
         "normalized_fact_redistribution": {
-          "enum": [
-            "allowed",
-            "attribution",
-            "conditional",
-            "link_only",
-            "prohibited",
-            "unknown"
-          ]
+          "enum": ["allowed", "attribution", "conditional", "link_only", "prohibited", "unknown"]
         },
-        "attribution_required": {
-          "type": "boolean"
-        },
+        "attribution_required": { "type": "boolean" },
         "attribution_text": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 500
         },
         "retention": {
@@ -932,12 +675,8 @@
             "unknown"
           ]
         },
-        "correction_required": {
-          "type": "boolean"
-        },
-        "withdrawal_required": {
-          "type": "boolean"
-        },
+        "correction_required": { "type": "boolean" },
+        "withdrawal_required": { "type": "boolean" },
         "decision": {
           "enum": [
             "approved_public",
@@ -948,15 +687,10 @@
           ]
         },
         "license_expression": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 120
         },
-        "terms_url": {
-          "$ref": "#/$defs/Uri"
-        },
+        "terms_url": { "$ref": "#/$defs/Uri" },
         "reviewed_on": {
           "type": "string",
           "format": "date"
@@ -979,9 +713,7 @@
         "export": "only rights-approved fields with attribution"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -996,14 +728,9 @@
             "kill_switch"
           ],
           "properties": {
-            "kind": {
-              "const": "source"
-            },
+            "kind": { "const": "source" },
             "data_classification": {
-              "enum": [
-                "public",
-                "restricted_source"
-              ]
+              "enum": ["public", "restricted_source"]
             },
             "name": {
               "type": "string",
@@ -1011,16 +738,9 @@
               "maxLength": 200
             },
             "source_class": {
-              "enum": [
-                "primary",
-                "curated",
-                "discovery",
-                "raw_signal"
-              ]
+              "enum": ["primary", "curated", "discovery", "raw_signal"]
             },
-            "canonical_url": {
-              "$ref": "#/$defs/Uri"
-            },
+            "canonical_url": { "$ref": "#/$defs/Uri" },
             "operator": {
               "type": "string",
               "minLength": 1,
@@ -1053,23 +773,12 @@
                 "maxLength": 253
               }
             },
-            "rights": {
-              "$ref": "#/$defs/RightsDecision"
-            },
-            "correction_url": {
-              "$ref": "#/$defs/Uri"
-            },
+            "rights": { "$ref": "#/$defs/RightsDecision" },
+            "correction_url": { "$ref": "#/$defs/Uri" },
             "withdrawal_behavior": {
-              "enum": [
-                "retain_mark_withdrawn",
-                "remove_raw_keep_minimal_tombstone",
-                "link_only",
-                "unknown"
-              ]
+              "enum": ["retain_mark_withdrawn", "remove_raw_keep_minimal_tombstone", "link_only", "unknown"]
             },
-            "kill_switch": {
-              "type": "boolean"
-            },
+            "kill_switch": { "type": "boolean" },
             "cadence": {
               "type": "string",
               "maxLength": 100
@@ -1087,9 +796,7 @@
         "export": "raw bytes only when the source rights explicitly allow it"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1104,49 +811,29 @@
             "rights_decision"
           ],
           "properties": {
-            "kind": {
-              "const": "raw_evidence"
-            },
-            "data_classification": {
-              "const": "restricted_source"
-            },
-            "source_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "kind": { "const": "raw_evidence" },
+            "data_classification": { "const": "restricted_source" },
+            "source_id": { "$ref": "#/$defs/StableId" },
             "source_record_id": {
               "type": "string",
               "minLength": 1,
               "maxLength": 512
             },
-            "canonical_url": {
-              "$ref": "#/$defs/Uri"
-            },
-            "retrieved_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "canonical_url": { "$ref": "#/$defs/Uri" },
+            "retrieved_at": { "$ref": "#/$defs/Timestamp" },
             "source_published_at": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
             "source_modified_at": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
-            "sha256": {
-              "$ref": "#/$defs/Sha256"
-            },
+            "sha256": { "$ref": "#/$defs/Sha256" },
             "byte_count": {
               "type": "integer",
               "minimum": 0,
@@ -1158,12 +845,7 @@
               "maxLength": 200
             },
             "storage_state": {
-              "enum": [
-                "stored_immutable",
-                "quarantined",
-                "link_only",
-                "not_retained"
-              ]
+              "enum": ["stored_immutable", "quarantined", "link_only", "not_retained"]
             },
             "rights_decision": {
               "enum": [
@@ -1197,9 +879,7 @@
         "export": "public decision, bounded source references, and policy versions"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1227,32 +907,14 @@
             "decided_at"
           ],
           "properties": {
-            "kind": {
-              "const": "authority_decision"
-            },
-            "data_classification": {
-              "const": "public"
-            },
-            "incident_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "claim_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "artifact_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "evidence_ids": {
-              "$ref": "#/$defs/AuthorityEvidenceIdList"
-            },
+            "kind": { "const": "authority_decision" },
+            "data_classification": { "const": "public" },
+            "incident_id": { "$ref": "#/$defs/StableId" },
+            "claim_id": { "$ref": "#/$defs/StableId" },
+            "artifact_id": { "$ref": "#/$defs/StableId" },
+            "evidence_ids": { "$ref": "#/$defs/AuthorityEvidenceIdList" },
             "public_status": {
-              "enum": [
-                "reported",
-                "corroborated",
-                "confirmed",
-                "disputed",
-                "withdrawn"
-              ]
+              "enum": ["reported", "corroborated", "confirmed", "disputed", "withdrawn"]
             },
             "confirmation_method": {
               "enum": [
@@ -1264,44 +926,28 @@
                 "dispute"
               ]
             },
-            "transport_source_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "transport_source_id": { "$ref": "#/$defs/StableId" },
             "assertion_source_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
             "confirming_authority_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
-            "authority_policy_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "authority_policy_id": { "$ref": "#/$defs/StableId" },
             "authority_policy_version": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
               "pattern": "^[A-Za-z0-9._-]+$"
             },
-            "authority_rule_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "source_rights_register_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "authority_rule_id": { "$ref": "#/$defs/StableId" },
+            "source_rights_register_id": { "$ref": "#/$defs/StableId" },
             "attribution_policy_version": {
               "type": "string",
               "minLength": 1,
@@ -1314,12 +960,8 @@
               "maxLength": 120,
               "pattern": "^[a-z0-9_]+$"
             },
-            "automated": {
-              "type": "boolean"
-            },
-            "independent_goodboy_analysis": {
-              "type": "boolean"
-            },
+            "automated": { "type": "boolean" },
+            "independent_goodboy_analysis": { "type": "boolean" },
             "upstream_ids": {
               "type": "array",
               "minItems": 1,
@@ -1337,37 +979,24 @@
               "minItems": 1,
               "maxItems": 20,
               "uniqueItems": true,
-              "items": {
-                "$ref": "#/$defs/Uri"
-              }
+              "items": { "$ref": "#/$defs/Uri" }
             },
-            "exception_required": {
-              "type": "boolean"
-            },
+            "exception_required": { "type": "boolean" },
             "exception_reason_code": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "minLength": 2,
               "maxLength": 120,
               "pattern": "^[a-z0-9_]+$"
             },
-            "decided_at": {
-              "$ref": "#/$defs/Timestamp"
-            }
+            "decided_at": { "$ref": "#/$defs/Timestamp" }
           },
           "allOf": [
             {
               "if": {
                 "properties": {
-                  "exception_required": {
-                    "const": true
-                  }
+                  "exception_required": { "const": true }
                 },
-                "required": [
-                  "exception_required"
-                ]
+                "required": ["exception_required"]
               },
               "then": {
                 "properties": {
@@ -1381,9 +1010,7 @@
               },
               "else": {
                 "properties": {
-                  "exception_reason_code": {
-                    "type": "null"
-                  }
+                  "exception_reason_code": { "type": "null" }
                 }
               }
             }
@@ -1400,9 +1027,7 @@
         "export": "derived claim and permitted references; never restricted source body"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1417,14 +1042,9 @@
             "provenance"
           ],
           "properties": {
-            "kind": {
-              "const": "claim"
-            },
+            "kind": { "const": "claim" },
             "data_classification": {
-              "enum": [
-                "public",
-                "restricted_source"
-              ]
+              "enum": ["public", "restricted_source"]
             },
             "claim_type": {
               "enum": [
@@ -1440,76 +1060,41 @@
                 "unknown"
               ]
             },
-            "subject_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "subject_id": { "$ref": "#/$defs/StableId" },
             "predicate": {
               "type": "string",
               "minLength": 1,
               "maxLength": 120
             },
             "object_value": {
-              "type": [
-                "string",
-                "number",
-                "integer",
-                "boolean",
-                "null"
-              ],
+              "type": ["string", "number", "integer", "boolean", "null"],
               "maxLength": 1000
             },
             "confidence": {
-              "enum": [
-                "confirmed",
-                "probable",
-                "possible",
-                "unverified",
-                "disputed",
-                "unknown"
-              ]
+              "enum": ["confirmed", "probable", "possible", "unverified", "disputed", "unknown"]
             },
             "state": {
-              "enum": [
-                "active",
-                "superseded",
-                "disputed",
-                "withdrawn",
-                "expired"
-              ]
+              "enum": ["active", "superseded", "disputed", "withdrawn", "expired"]
             },
             "valid_from": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
             "valid_until": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
             "supersedes_claim_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
-            "provenance": {
-              "$ref": "#/$defs/Provenance"
-            }
+            "provenance": { "$ref": "#/$defs/Provenance" }
           }
         }
       ],
@@ -1523,9 +1108,7 @@
         "export": "public coordinates only; private names are rejected"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1537,32 +1120,13 @@
             "identity_state"
           ],
           "properties": {
-            "kind": {
-              "const": "artifact"
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "artifact" },
+            "data_classification": { "const": "public" },
             "ecosystem": {
               "enum": [
-                "npm",
-                "pypi",
-                "github-actions",
-                "oci",
-                "docker",
-                "go",
-                "rust",
-                "composer",
-                "erlang",
-                "git",
-                "maven",
-                "nuget",
-                "open-vsx",
-                "pub",
-                "rubygems",
-                "swift",
-                "vscode",
-                "unknown"
+                "npm", "pypi", "github-actions", "oci", "docker", "go", "rust",
+                "composer", "erlang", "git", "maven", "nuget", "open-vsx", "pub",
+                "rubygems", "swift", "vscode", "unknown"
               ]
             },
             "name": {
@@ -1578,30 +1142,17 @@
               "pattern": "^pkg:"
             },
             "version": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 200
             },
             "digest": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Sha256"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Sha256" },
+                { "type": "null" }
               ]
             },
             "identity_state": {
-              "enum": [
-                "exact",
-                "range_only",
-                "tag_only",
-                "unresolved",
-                "unknown"
-              ]
+              "enum": ["exact", "range_only", "tag_only", "unresolved", "unknown"]
             }
           }
         }
@@ -1616,9 +1167,7 @@
         "export": "permitted normalized facts with provenance"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1632,24 +1181,11 @@
             "provenance"
           ],
           "properties": {
-            "kind": {
-              "const": "affected_range"
-            },
-            "data_classification": {
-              "const": "public"
-            },
-            "artifact_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "kind": { "const": "affected_range" },
+            "data_classification": { "const": "public" },
+            "artifact_id": { "$ref": "#/$defs/StableId" },
             "range_type": {
-              "enum": [
-                "ECOSYSTEM",
-                "SEMVER",
-                "GIT",
-                "EXACT",
-                "DIGEST",
-                "UNKNOWN"
-              ]
+              "enum": ["ECOSYSTEM", "SEMVER", "GIT", "EXACT", "DIGEST", "UNKNOWN"]
             },
             "expression": {
               "type": "string",
@@ -1657,38 +1193,21 @@
               "maxLength": 1000
             },
             "introduced": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 200
             },
             "fixed": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 200
             },
             "last_affected": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 200
             },
             "evaluation_state": {
-              "enum": [
-                "supported",
-                "partial",
-                "conflicting",
-                "unsupported",
-                "unknown"
-              ]
+              "enum": ["supported", "partial", "conflicting", "unsupported", "unknown"]
             },
-            "provenance": {
-              "$ref": "#/$defs/Provenance"
-            }
+            "provenance": { "$ref": "#/$defs/Provenance" }
           }
         }
       ],
@@ -1702,9 +1221,7 @@
         "export": "public relationships only; customer-local paths stay local"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1719,21 +1236,12 @@
             "provenance"
           ],
           "properties": {
-            "kind": {
-              "const": "relationship"
-            },
+            "kind": { "const": "relationship" },
             "data_classification": {
-              "enum": [
-                "public",
-                "customer_local"
-              ]
+              "enum": ["public", "customer_local"]
             },
-            "subject_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "object_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "subject_id": { "$ref": "#/$defs/StableId" },
+            "object_id": { "$ref": "#/$defs/StableId" },
             "relationship_type": {
               "enum": [
                 "affects",
@@ -1761,47 +1269,24 @@
               ]
             },
             "confidence": {
-              "enum": [
-                "confirmed",
-                "probable",
-                "possible",
-                "unverified",
-                "disputed",
-                "unknown"
-              ]
+              "enum": ["confirmed", "probable", "possible", "unverified", "disputed", "unknown"]
             },
             "valid_from": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
             "valid_until": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
             "state": {
-              "enum": [
-                "active",
-                "superseded",
-                "disputed",
-                "withdrawn",
-                "expired"
-              ]
+              "enum": ["active", "superseded", "disputed", "withdrawn", "expired"]
             },
-            "provenance": {
-              "$ref": "#/$defs/Provenance"
-            }
+            "provenance": { "$ref": "#/$defs/Provenance" }
           }
         }
       ],
@@ -1815,9 +1300,7 @@
         "export": "public classification only; rights-filtered claims, public artifacts, events, and references"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -1835,32 +1318,18 @@
             "coverage"
           ],
           "properties": {
-            "kind": {
-              "const": "incident"
-            },
+            "kind": { "const": "incident" },
             "data_classification": {
-              "enum": [
-                "public",
-                "internal_control"
-              ]
+              "enum": ["public", "internal_control"]
             },
             "title": {
               "type": "string",
               "minLength": 1,
               "maxLength": 300
             },
-            "status": {
-              "$ref": "#/$defs/IncidentStatus"
-            },
+            "status": { "$ref": "#/$defs/IncidentStatus" },
             "confidence": {
-              "enum": [
-                "confirmed",
-                "probable",
-                "possible",
-                "unverified",
-                "disputed",
-                "unknown"
-              ]
+              "enum": ["confirmed", "probable", "possible", "unverified", "disputed", "unknown"]
             },
             "claim_ids": {
               "$ref": "#/$defs/StableIdList"
@@ -1879,22 +1348,14 @@
             },
             "authority_decision_ids": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableIdList"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableIdList" },
+                { "type": "null" }
               ]
             },
             "authority": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/AuthorityDecision"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/AuthorityDecision" },
+                { "type": "null" }
               ]
             },
             "alias_ids": {
@@ -1902,27 +1363,17 @@
             },
             "redirect_to": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
-            "first_observed_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
-            "last_changed_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "first_observed_at": { "$ref": "#/$defs/Timestamp" },
+            "last_changed_at": { "$ref": "#/$defs/Timestamp" },
             "coverage": {
               "type": "array",
               "minItems": 1,
               "maxItems": 20,
-              "items": {
-                "$ref": "#/$defs/CoverageState"
-              }
+              "items": { "$ref": "#/$defs/CoverageState" }
             },
             "unknowns": {
               "$ref": "#/$defs/UnknownList"
@@ -1933,28 +1384,19 @@
               "if": {
                 "properties": {
                   "status": {
-                    "enum": [
-                      "internal_candidate",
-                      "emerging_unverified"
-                    ]
+                    "enum": ["internal_candidate", "emerging_unverified"]
                   }
                 },
-                "required": [
-                  "status"
-                ]
+                "required": ["status"]
               },
               "then": {
                 "properties": {
-                  "data_classification": {
-                    "const": "internal_control"
-                  }
+                  "data_classification": { "const": "internal_control" }
                 }
               },
               "else": {
                 "properties": {
-                  "data_classification": {
-                    "const": "public"
-                  }
+                  "data_classification": { "const": "public" }
                 }
               }
             }
@@ -1971,9 +1413,7 @@
         "export": "public warning, public URLs, bounded outcomes, and expiry history"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/PreliminaryWarningHeader"
-        },
+        { "$ref": "#/$defs/PreliminaryWarningHeader" },
         {
           "type": "object",
           "required": [
@@ -1999,18 +1439,9 @@
             "final_reason"
           ],
           "properties": {
-            "kind": {
-              "const": "preliminary_warning"
-            },
-            "schema_version": {
-              "enum": [
-                "1.0.0",
-                "1.1.0"
-              ]
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "preliminary_warning" },
+            "schema_version": { "enum": ["1.0.0", "1.1.0"] },
+            "data_classification": { "const": "public" },
             "title": {
               "type": "string",
               "minLength": 1,
@@ -2018,13 +1449,7 @@
               "pattern": "^[ -~]+$"
             },
             "state": {
-              "enum": [
-                "active",
-                "expired",
-                "withdrawn",
-                "promoted",
-                "contradicted"
-              ]
+              "enum": ["active", "expired", "withdrawn", "promoted", "contradicted"]
             },
             "claim": {
               "type": "string",
@@ -2049,16 +1474,10 @@
               "minItems": 1,
               "maxItems": 20,
               "uniqueItems": true,
-              "items": {
-                "$ref": "#/$defs/PublicIncidentUri"
-              }
+              "items": { "$ref": "#/$defs/PublicIncidentUri" }
             },
             "evidence_class": {
-              "enum": [
-                "social_only",
-                "web_only",
-                "web_and_social"
-              ]
+              "enum": ["social_only", "web_only", "web_and_social"]
             },
             "independent_source_clusters": {
               "type": "integer",
@@ -2073,23 +1492,12 @@
                 "confirmed_elsewhere"
               ]
             },
-            "awaiting_authoritative_confirmation": {
-              "type": "boolean"
-            },
-            "automation_allowed": {
-              "const": false
-            },
-            "max_action_level": {
-              "const": 0
-            },
-            "human_reviewed": {
-              "type": "boolean"
-            },
+            "awaiting_authoritative_confirmation": { "type": "boolean" },
+            "automation_allowed": { "const": false },
+            "max_action_level": { "const": 0 },
+            "human_reviewed": { "type": "boolean" },
             "qualification_basis": {
-              "enum": [
-                "human_review",
-                "owner_authorized_early_lead_policy"
-              ]
+              "enum": ["human_review", "owner_authorized_early_lead_policy"]
             },
             "qualification_actor_id": {
               "type": "string",
@@ -2103,9 +1511,7 @@
               "maxLength": 300,
               "pattern": "^[ -~]+$"
             },
-            "qualification_sha256": {
-              "$ref": "#/$defs/Sha256"
-            },
+            "qualification_sha256": { "$ref": "#/$defs/Sha256" },
             "source_origins": {
               "type": "array",
               "minItems": 1,
@@ -2121,25 +1527,15 @@
             "warning_text": {
               "const": "Emerging and unverified. SmithGuard has not independently confirmed this warning and is awaiting authoritative or non-social confirmation. Use it to investigate, not as proof or authorization for a disruptive action."
             },
-            "observed_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
-            "last_checked_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "observed_at": { "$ref": "#/$defs/Timestamp" },
+            "last_checked_at": { "$ref": "#/$defs/Timestamp" },
             "next_check_at": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             },
-            "expires_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "expires_at": { "$ref": "#/$defs/Timestamp" },
             "recheck_count": {
               "type": "integer",
               "minimum": 0,
@@ -2158,10 +1554,7 @@
               ]
             },
             "latest_recheck_reason": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "minLength": 1,
               "maxLength": 300,
               "pattern": "^[ -~]+$"
@@ -2170,24 +1563,16 @@
               "type": "array",
               "maxItems": 8,
               "uniqueItems": true,
-              "items": {
-                "$ref": "#/$defs/PublicIncidentUri"
-              }
+              "items": { "$ref": "#/$defs/PublicIncidentUri" }
             },
             "final_reason": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "minLength": 1,
               "maxLength": 300,
               "pattern": "^[ -~]+$"
             },
             "terminal_actor_id": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "minLength": 3,
               "maxLength": 160,
               "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]+$"
@@ -2196,54 +1581,31 @@
               "type": "array",
               "maxItems": 20,
               "uniqueItems": true,
-              "items": {
-                "$ref": "#/$defs/PublicIncidentUri"
-              }
+              "items": { "$ref": "#/$defs/PublicIncidentUri" }
             },
             "terminal_expected_revision": {
-              "type": [
-                "integer",
-                "null"
-              ],
+              "type": ["integer", "null"],
               "minimum": 1
             }
           }
         },
         {
           "if": {
-            "properties": {
-              "schema_version": {
-                "const": "1.0.0"
-              }
-            },
-            "required": [
-              "schema_version"
-            ]
+            "properties": { "schema_version": { "const": "1.0.0" } },
+            "required": ["schema_version"]
           },
           "then": {
             "properties": {
-              "source_urls": {
-                "minItems": 2
-              },
-              "independent_source_clusters": {
-                "minimum": 2
-              },
-              "human_reviewed": {
-                "const": true
-              }
+              "source_urls": { "minItems": 2 },
+              "independent_source_clusters": { "minimum": 2 },
+              "human_reviewed": { "const": true }
             }
           }
         },
         {
           "if": {
-            "properties": {
-              "schema_version": {
-                "const": "1.1.0"
-              }
-            },
-            "required": [
-              "schema_version"
-            ]
+            "properties": { "schema_version": { "const": "1.1.0" } },
+            "required": ["schema_version"]
           },
           "then": {
             "required": [
@@ -2262,41 +1624,19 @@
         },
         {
           "if": {
-            "properties": {
-              "qualification_basis": {
-                "const": "human_review"
-              }
-            },
-            "required": [
-              "qualification_basis"
-            ]
+            "properties": { "qualification_basis": { "const": "human_review" } },
+            "required": ["qualification_basis"]
           },
-          "then": {
-            "properties": {
-              "human_reviewed": {
-                "const": true
-              }
-            }
-          }
+          "then": { "properties": { "human_reviewed": { "const": true } } }
         },
         {
           "if": {
             "properties": {
-              "qualification_basis": {
-                "const": "owner_authorized_early_lead_policy"
-              }
+              "qualification_basis": { "const": "owner_authorized_early_lead_policy" }
             },
-            "required": [
-              "qualification_basis"
-            ]
+            "required": ["qualification_basis"]
           },
-          "then": {
-            "properties": {
-              "human_reviewed": {
-                "const": false
-              }
-            }
-          }
+          "then": { "properties": { "human_reviewed": { "const": false } } }
         }
       ],
       "unevaluatedProperties": false
@@ -2309,9 +1649,7 @@
         "export": "public events omit private actor identity and restricted evidence"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -2327,18 +1665,11 @@
             "confidence"
           ],
           "properties": {
-            "kind": {
-              "const": "incident_event"
-            },
+            "kind": { "const": "incident_event" },
             "data_classification": {
-              "enum": [
-                "public",
-                "internal_control"
-              ]
+              "enum": ["public", "internal_control"]
             },
-            "incident_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "incident_id": { "$ref": "#/$defs/StableId" },
             "event_type": {
               "enum": [
                 "created",
@@ -2357,32 +1688,18 @@
             },
             "old_status": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/IncidentStatus"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/IncidentStatus" },
+                { "type": "null" }
               ]
             },
             "new_status": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/IncidentStatus"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/IncidentStatus" },
+                { "type": "null" }
               ]
             },
             "actor_type": {
-              "enum": [
-                "rule",
-                "reviewer",
-                "maintainer",
-                "affected_party",
-                "system"
-              ]
+              "enum": ["rule", "reviewer", "maintainer", "affected_party", "system"]
             },
             "actor_id": {
               "type": "string",
@@ -2395,27 +1712,13 @@
               "maxLength": 120,
               "pattern": "^[a-z0-9_]+$"
             },
-            "evidence_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "occurred_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "evidence_ids": { "$ref": "#/$defs/StableIdList" },
+            "occurred_at": { "$ref": "#/$defs/Timestamp" },
             "confidence": {
-              "enum": [
-                "confirmed",
-                "probable",
-                "possible",
-                "unverified",
-                "disputed",
-                "unknown"
-              ]
+              "enum": ["confirmed", "probable", "possible", "unverified", "disputed", "unknown"]
             },
             "superseded_revision": {
-              "type": [
-                "integer",
-                "null"
-              ],
+              "type": ["integer", "null"],
               "minimum": 1
             }
           },
@@ -2426,43 +1729,29 @@
                   {
                     "properties": {
                       "old_status": {
-                        "enum": [
-                          "internal_candidate",
-                          "emerging_unverified"
-                        ]
+                        "enum": ["internal_candidate", "emerging_unverified"]
                       }
                     },
-                    "required": [
-                      "old_status"
-                    ]
+                    "required": ["old_status"]
                   },
                   {
                     "properties": {
                       "new_status": {
-                        "enum": [
-                          "internal_candidate",
-                          "emerging_unverified"
-                        ]
+                        "enum": ["internal_candidate", "emerging_unverified"]
                       }
                     },
-                    "required": [
-                      "new_status"
-                    ]
+                    "required": ["new_status"]
                   }
                 ]
               },
               "then": {
                 "properties": {
-                  "data_classification": {
-                    "const": "internal_control"
-                  }
+                  "data_classification": { "const": "internal_control" }
                 }
               },
               "else": {
                 "properties": {
-                  "data_classification": {
-                    "const": "public"
-                  }
+                  "data_classification": { "const": "public" }
                 }
               }
             }
@@ -2474,45 +1763,18 @@
     "EvidenceMaturity": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "composition",
-        "provenance",
-        "signature",
-        "vex",
-        "deployment",
-        "runtime"
-      ],
+      "required": ["composition", "provenance", "signature", "vex", "deployment", "runtime"],
       "properties": {
-        "composition": {
-          "$ref": "#/$defs/EvidenceState"
-        },
-        "provenance": {
-          "$ref": "#/$defs/EvidenceState"
-        },
-        "signature": {
-          "$ref": "#/$defs/EvidenceState"
-        },
-        "vex": {
-          "$ref": "#/$defs/EvidenceState"
-        },
-        "deployment": {
-          "$ref": "#/$defs/EvidenceState"
-        },
-        "runtime": {
-          "$ref": "#/$defs/EvidenceState"
-        }
+        "composition": { "$ref": "#/$defs/EvidenceState" },
+        "provenance": { "$ref": "#/$defs/EvidenceState" },
+        "signature": { "$ref": "#/$defs/EvidenceState" },
+        "vex": { "$ref": "#/$defs/EvidenceState" },
+        "deployment": { "$ref": "#/$defs/EvidenceState" },
+        "runtime": { "$ref": "#/$defs/EvidenceState" }
       }
     },
     "EvidenceState": {
-      "enum": [
-        "present",
-        "missing",
-        "invalid",
-        "stale",
-        "conflicting",
-        "unsupported",
-        "unknown"
-      ]
+      "enum": ["present", "missing", "invalid", "stale", "conflicting", "unsupported", "unknown"]
     },
     "IncidentStatus": {
       "enum": [
@@ -2532,56 +1794,22 @@
     "CoverageState": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "ecosystem",
-        "stage",
-        "result",
-        "as_of"
-      ],
+      "required": ["ecosystem", "stage", "result", "as_of"],
       "properties": {
         "ecosystem": {
           "enum": [
-            "npm",
-            "pypi",
-            "github-actions",
-            "oci",
-            "docker",
-            "go",
-            "rust",
-            "composer",
-            "erlang",
-            "git",
-            "maven",
-            "nuget",
-            "open-vsx",
-            "pub",
-            "rubygems",
-            "swift",
-            "vscode",
-            "unknown"
+            "npm", "pypi", "github-actions", "oci", "docker", "go", "rust",
+            "composer", "erlang", "git", "maven", "nuget", "open-vsx", "pub",
+            "rubygems", "swift", "vscode", "unknown"
           ]
         },
         "stage": {
-          "enum": [
-            "research",
-            "intake",
-            "normalized",
-            "matched",
-            "response-tested"
-          ]
+          "enum": ["research", "intake", "normalized", "matched", "response-tested"]
         },
         "result": {
-          "enum": [
-            "supported",
-            "partial",
-            "unsupported",
-            "stale",
-            "unknown"
-          ]
+          "enum": ["supported", "partial", "unsupported", "stale", "unknown"]
         },
-        "as_of": {
-          "$ref": "#/$defs/Timestamp"
-        }
+        "as_of": { "$ref": "#/$defs/Timestamp" }
       }
     },
     "SourceCoverageLane": {
@@ -2605,26 +1833,16 @@
         "unknowns"
       ],
       "properties": {
-        "source_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "lane": {
-          "enum": [
-            "historical",
-            "updates"
-          ]
-        },
+        "unresolved_record_count": {"type": ["integer", "null"], "minimum": 0},
+        "record_progress": {"anyOf": [{"$ref": "#/$defs/OpenSSFRecordProgress"}, {"type": "null"}]},
+        "source_id": { "$ref": "#/$defs/StableId" },
+        "lane": { "enum": ["historical", "updates"] },
         "record_type": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]{2,79}$"
         },
         "state": {
-          "enum": [
-            "not_started",
-            "in_progress",
-            "complete",
-            "failed"
-          ]
+          "enum": ["not_started", "in_progress", "complete", "failed"]
         },
         "page_count": {
           "type": "integer",
@@ -2640,62 +1858,36 @@
         },
         "oldest_published_at": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "newest_published_at": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "last_attempt_at": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "last_success_at": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "stale_after": {
           "oneOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Timestamp" },
+            { "type": "null" }
           ]
         },
         "freshness_state": {
-          "enum": [
-            "missing",
-            "failed",
-            "stale",
-            "fresh",
-            "complete"
-          ]
+          "enum": ["missing", "failed", "stale", "fresh", "complete", "unresolved"]
         },
         "ecosystems": {
           "type": "array",
@@ -2736,6 +1928,18 @@
         }
       }
     },
+    "OpenSSFRecordProgress": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "attempt_id", "state", "accepted_record_count", "rejected_record_count", "validated_at"],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "attempt_id": {"$ref": "#/$defs/StableId"},
+        "state": {"enum": ["partial", "complete", "failed"]},
+        "accepted_record_count": {"type": ["integer", "null"], "minimum": 0, "maximum": 500000},
+        "rejected_record_count": {"type": ["integer", "null"], "minimum": 0, "maximum": 10},
+        "validated_at": {"anyOf": [{"$ref": "#/$defs/Timestamp"}, {"type": "null"}]}
+      }
+    },
     "SourceCoverageReport": {
       "type": "object",
       "additionalProperties": false,
@@ -2747,9 +1951,7 @@
         "source_lanes"
       ],
       "properties": {
-        "measured_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "measured_at": { "$ref": "#/$defs/Timestamp" },
         "human_review_hours": {
           "type": "number",
           "minimum": 0,
@@ -2784,11 +1986,7 @@
               },
               "version_range_evaluation": {
                 "description": "How version ranges are decided: ecosystem_rules orders versions with the registry's own rules; digest_only matches immutable digests; not_supported leaves ranges undecided.",
-                "enum": [
-                  "ecosystem_rules",
-                  "digest_only",
-                  "not_supported"
-                ]
+                "enum": ["ecosystem_rules", "digest_only", "not_supported"]
               },
               "stage": {
                 "enum": [
@@ -2800,17 +1998,9 @@
                 ]
               },
               "result": {
-                "enum": [
-                  "supported",
-                  "partial",
-                  "unsupported",
-                  "stale",
-                  "unknown"
-                ]
+                "enum": ["supported", "partial", "unsupported", "stale", "unknown"]
               },
-              "as_of": {
-                "$ref": "#/$defs/Timestamp"
-              },
+              "as_of": { "$ref": "#/$defs/Timestamp" },
               "unknowns": {
                 "type": "array",
                 "maxItems": 20,
@@ -2821,18 +2011,14 @@
                   "maxLength": 300
                 }
               },
-              "continuous_monitoring_claimed": {
-                "const": false
-              }
+              "continuous_monitoring_claimed": { "const": false }
             }
           }
         },
         "source_lanes": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/SourceCoverageLane"
-          }
+          "items": { "$ref": "#/$defs/SourceCoverageLane" }
         }
       }
     },
@@ -2851,45 +2037,19 @@
         "overall"
       ],
       "properties": {
-        "format": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "root_component": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "identifiers": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "versions": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "relationships": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "hashes": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "provenance": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "conflicts": {
-          "$ref": "#/$defs/QualityState"
-        },
-        "overall": {
-          "$ref": "#/$defs/QualityState"
-        }
+        "format": { "$ref": "#/$defs/QualityState" },
+        "root_component": { "$ref": "#/$defs/QualityState" },
+        "identifiers": { "$ref": "#/$defs/QualityState" },
+        "versions": { "$ref": "#/$defs/QualityState" },
+        "relationships": { "$ref": "#/$defs/QualityState" },
+        "hashes": { "$ref": "#/$defs/QualityState" },
+        "provenance": { "$ref": "#/$defs/QualityState" },
+        "conflicts": { "$ref": "#/$defs/QualityState" },
+        "overall": { "$ref": "#/$defs/QualityState" }
       }
     },
     "QualityState": {
-      "enum": [
-        "complete",
-        "partial",
-        "missing",
-        "invalid",
-        "conflicting",
-        "unsupported",
-        "unknown"
-      ]
+      "enum": ["complete", "partial", "missing", "invalid", "conflicting", "unsupported", "unknown"]
     },
     "RecommendedAction": {
       "title": "Evidence-linked recommended action",
@@ -2899,9 +2059,7 @@
         "export": "typed plan without credentials, commands, or private paths"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -2916,90 +2074,54 @@
             "automation_allowed"
           ],
           "properties": {
-            "kind": {
-              "const": "recommended_action"
-            },
+            "kind": { "const": "recommended_action" },
             "data_classification": {
-              "enum": [
-                "public",
-                "customer_local"
-              ]
+              "enum": ["public", "customer_local"]
             },
             "action_type": {
-              "enum": [
-                "observe",
-                "check",
-                "contain",
-                "remediate",
-                "validate",
-                "recover"
-              ]
+              "enum": ["observe", "check", "contain", "remediate", "validate", "recover"]
             },
             "risk_level": {
               "type": "integer",
               "minimum": 0,
               "maximum": 4
             },
-            "approval_required": {
-              "type": "boolean"
-            },
-            "preconditions": {
-              "$ref": "#/$defs/BoundedTextList"
-            },
+            "approval_required": { "type": "boolean" },
+            "preconditions": { "$ref": "#/$defs/BoundedTextList" },
             "expected_result": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000
             },
-            "validation": {
-              "$ref": "#/$defs/BoundedTextList"
-            },
-            "rollback": {
-              "$ref": "#/$defs/BoundedTextList"
-            },
-            "evidence_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "automation_allowed": {
-              "type": "boolean"
-            }
+            "validation": { "$ref": "#/$defs/BoundedTextList" },
+            "rollback": { "$ref": "#/$defs/BoundedTextList" },
+            "evidence_ids": { "$ref": "#/$defs/StableIdList" },
+            "automation_allowed": { "type": "boolean" }
           },
           "allOf": [
             {
               "if": {
                 "properties": {
-                  "risk_level": {
-                    "minimum": 2
-                  }
+                  "risk_level": { "minimum": 2 }
                 },
-                "required": [
-                  "risk_level"
-                ]
+                "required": ["risk_level"]
               },
               "then": {
                 "properties": {
-                  "approval_required": {
-                    "const": true
-                  }
+                  "approval_required": { "const": true }
                 }
               }
             },
             {
               "if": {
                 "properties": {
-                  "risk_level": {
-                    "const": 4
-                  }
+                  "risk_level": { "const": 4 }
                 },
-                "required": [
-                  "risk_level"
-                ]
+                "required": ["risk_level"]
               },
               "then": {
                 "properties": {
-                  "automation_allowed": {
-                    "const": false
-                  }
+                  "automation_allowed": { "const": false }
                 }
               }
             }
@@ -3010,29 +2132,28 @@
     },
     "PublicArtifactAssessmentRequest": {
       "title": "Public artifact assessment request",
+      "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
       "x-smithguard-handling": {
         "privacy": "public",
         "logging": "request ID and exact public coordinate only",
         "export": "request may contain only a public artifact coordinate"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
-          "required": [
-            "artifact"
-          ],
+          "required": ["artifact"],
           "properties": {
-            "kind": {
-              "const": "public_artifact_assessment_request"
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "public_artifact_assessment_request" },
+            "data_classification": { "const": "public" },
             "artifact": {
-              "$ref": "#/$defs/PublicArtifactInput"
+              "allOf": [
+                { "$ref": "#/$defs/PublicArtifactInput" },
+                {
+                  "if": { "properties": { "ecosystem": { "enum": ["oci", "docker"] } }, "required": ["ecosystem"] },
+                  "else": { "properties": { "digest": { "type": "null" } } }
+                }
+              ]
             }
           }
         }
@@ -3443,6 +2564,368 @@
       },
       "description": "Upstream symbol and platform assertions with dated source provenance; application reachability is not assessed and this context never changes package-version applicability."
     },
+    "PublicSourceFixEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_entry_id",
+        "range_index",
+        "range_sha256",
+        "range_type",
+        "expression",
+        "introduced_version",
+        "fixed_version",
+        "source_field",
+        "applies_to_requested_version",
+        "patch_field_state"
+      ],
+      "properties": {
+        "package_entry_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "range_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "range_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "range_type": {
+          "enum": [
+            "GITHUB",
+            "SEMVER",
+            "ECOSYSTEM",
+            "GIT",
+            "other"
+          ]
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "introduced_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fixed_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_field": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applies_to_requested_version": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "patch_field_state": {
+          "enum": [
+            "absent",
+            "explicit_null",
+            "explicit_value",
+            "invalid",
+            "no_fixed_event",
+            "unsupported_range_type"
+          ]
+        }
+      },
+      "description": "Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence."
+    },
+    "PublicSourceRangeBound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_entry_id",
+        "range_index",
+        "kind",
+        "version"
+      ],
+      "properties": {
+        "package_entry_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "range_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "kind": {
+          "enum": [
+            "exclusive_upper",
+            "inclusive_upper",
+            "last_affected",
+            "limit"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "description": "Source range endpoints, never evidence that a repair was published."
+    },
+    "PublicApplicabilityConditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "coverage",
+        "extraction_method",
+        "source_field",
+        "source_text_sha256",
+        "reviewed_on",
+        "any_of",
+        "local_applicability"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "recorded",
+            "unknown"
+          ]
+        },
+        "coverage": {
+          "enum": [
+            "partial",
+            "unknown"
+          ]
+        },
+        "extraction_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "reviewed_source_text",
+                "structured_source_fields"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_field": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_text_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewed_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "any_of": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "all_of"
+            ],
+            "properties": {
+              "all_of": {
+                "type": "array",
+                "maxItems": 16,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "fact",
+                    "values"
+                  ],
+                  "properties": {
+                    "fact": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80,
+                      "pattern": "^[a-z][a-z0-9_]*$"
+                    },
+                    "values": {
+                      "type": "array",
+                      "maxItems": 32,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    }
+                  }
+                },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "local_applicability": {
+          "const": "not_evaluated"
+        }
+      },
+      "description": "OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation."
+    },
+    "PublicAdvisoryContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "description",
+        "severity",
+        "attribution",
+        "license_expression",
+        "source_url",
+        "title_sha256",
+        "description_sha256",
+        "title_truncated",
+        "description_truncated",
+        "conditions"
+      ],
+      "properties": {
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attribution": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "license_expression": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "source_url": {
+          "$ref": "#/$defs/PublicIncidentUri"
+        },
+        "title_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description_sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title_truncated": {
+          "type": "boolean"
+        },
+        "description_truncated": {
+          "type": "boolean"
+        },
+        "conditions": {
+          "$ref": "#/$defs/PublicApplicabilityConditions"
+        }
+      },
+      "description": "Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit."
+    },
     "PublicArtifactSourceReport": {
       "type": "object",
       "additionalProperties": false,
@@ -3455,6 +2938,7 @@
         "observed_at"
       ],
       "properties": {
+        "source_state_status": {"enum": ["current", "historical_unresolved", null]},
         "origin_context": {
           "anyOf": [
             {
@@ -3687,22 +3171,14 @@
         "final_reason"
       ],
       "properties": {
-        "warning_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "warning_id": { "$ref": "#/$defs/StableId" },
         "revision": {
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
         "state": {
-          "enum": [
-            "active",
-            "expired",
-            "withdrawn",
-            "promoted",
-            "contradicted"
-          ]
+          "enum": ["active", "expired", "withdrawn", "promoted", "contradicted"]
         },
         "title": {
           "type": "string",
@@ -3716,22 +3192,16 @@
           "maxLength": 1000,
           "pattern": "^[ -~]+$"
         },
-        "source_urls": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 20,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/PublicIncidentUri"
-          }
-        },
-        "evidence_class": {
-          "enum": [
-            "social_only",
-            "web_only",
-            "web_and_social"
-          ]
-        },
+            "source_urls": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/PublicIncidentUri" }
+            },
+            "evidence_class": {
+              "enum": ["social_only", "web_only", "web_and_social"]
+            },
         "confirmation_status": {
           "enum": [
             "unverified",
@@ -3746,20 +3216,11 @@
           "maxLength": 1000,
           "pattern": "^[ -~]+$"
         },
-        "observed_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "last_checked_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "expires_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "observed_at": { "$ref": "#/$defs/Timestamp" },
+        "last_checked_at": { "$ref": "#/$defs/Timestamp" },
+        "expires_at": { "$ref": "#/$defs/Timestamp" },
         "final_reason": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 1,
           "maxLength": 1000,
           "pattern": "^[ -~]+$"
@@ -3940,21 +3401,11 @@
     "PublicSourceFreshness": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "source_id",
-        "record_type",
-        "freshness_state",
-        "last_success_at"
-      ],
+      "required": ["source_id", "record_type", "freshness_state", "last_success_at"],
       "properties": {
-        "source_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "record_type": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 80
-        },
+        "unresolved_record_count": {"type": ["integer", "null"], "minimum": 0},
+        "source_id": { "$ref": "#/$defs/StableId" },
+        "record_type": { "type": "string", "minLength": 1, "maxLength": 80 },
         "freshness_state": {
           "description": "fresh or complete means current; anything else means recent reports may be missing.",
           "enum": [
@@ -3969,14 +3420,7 @@
           ]
         },
         "last_success_at": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Timestamp"
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "anyOf": [{ "$ref": "#/$defs/Timestamp" }, { "type": "null" }]
         }
       }
     },
@@ -3984,59 +3428,26 @@
       "description": "Ed25519 signature over the canonical JSON of the whole response without this field: keys sorted, no whitespace, non-ASCII escaped as \\uXXXX. Verify with the key at /v1/public-keys/{public_key_id}.json.",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "algorithm",
-        "public_key_id",
-        "canonicalization",
-        "value"
-      ],
+      "required": ["algorithm", "public_key_id", "canonicalization", "value"],
       "properties": {
-        "algorithm": {
-          "const": "Ed25519"
-        },
-        "public_key_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "canonicalization": {
-          "const": "smithguard-canonical-json-v1"
-        },
-        "value": {
-          "type": "string",
-          "minLength": 88,
-          "maxLength": 88,
-          "pattern": "^[A-Za-z0-9+/]{86}==$"
-        }
+        "algorithm": { "const": "Ed25519" },
+        "public_key_id": { "$ref": "#/$defs/StableId" },
+        "canonicalization": { "const": "smithguard-canonical-json-v1" },
+        "value": { "type": "string", "minLength": 88, "maxLength": 88, "pattern": "^[A-Za-z0-9+/]{86}==$" }
       }
     },
     "PublicArtifactAssessmentShortRequest": {
       "title": "Short public artifact assessment request",
-      "description": "The simple request form: an ecosystem, a package name and an exact version (or an immutable digest). The registry host defaults to the ecosystem's public registry and is required only for container images.",
+      "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "ecosystem",
-        "name"
-      ],
+      "required": ["ecosystem", "name"],
       "properties": {
         "ecosystem": {
           "enum": [
-            "npm",
-            "pypi",
-            "github-actions",
-            "oci",
-            "docker",
-            "go",
-            "rust",
-            "composer",
-            "erlang",
-            "git",
-            "maven",
-            "nuget",
-            "open-vsx",
-            "pub",
-            "rubygems",
-            "swift",
-            "vscode"
+            "npm", "pypi", "github-actions", "oci", "docker", "go", "rust",
+            "composer", "erlang", "git", "maven", "nuget", "open-vsx", "pub",
+            "rubygems", "swift", "vscode"
           ]
         },
         "name": {
@@ -4045,31 +3456,13 @@
           "maxLength": 300,
           "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
         },
-        "version": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 200
-        },
-        "digest": {
-          "$ref": "#/$defs/Sha256"
-        },
-        "registry_host": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 80
-        }
+        "version": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "digest": { "$ref": "#/$defs/Sha256" },
+        "registry_host": { "type": "string", "minLength": 1, "maxLength": 80 }
       },
       "examples": [
-        {
-          "ecosystem": "npm",
-          "name": "event-stream",
-          "version": "3.3.6"
-        },
-        {
-          "ecosystem": "maven",
-          "name": "org.apache.logging.log4j:log4j-core",
-          "version": "2.14.1"
-        }
+        { "ecosystem": "npm", "name": "event-stream", "version": "3.3.6" },
+        { "ecosystem": "maven", "name": "org.apache.logging.log4j:log4j-core", "version": "2.14.1" }
       ]
     },
     "PublicEpssValue": {
@@ -4437,13 +3830,24 @@
           "$ref": "#/$defs/PublicArtifactAssessmentHeader"
         },
         {
+          "if": {"properties": {"schema_version": {"const": "2.5.0"}}, "required": ["schema_version"]},
+          "then": {"properties": {
+            "source_freshness": {"items": {"required": ["unresolved_record_count"]}},
+            "incidents": {"items": {"properties": {"source_reports": {"items": {
+              "required": ["source_state_status"],
+              "properties": {"source_state_status": {"enum": ["current", "historical_unresolved"]}}
+            }}}}}
+          }}
+        },
+        {
           "if": {
             "properties": {
               "schema_version": {
                 "enum": [
                   "2.2.0",
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -4468,7 +3872,8 @@
               "schema_version": {
                 "enum": [
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -4486,7 +3891,7 @@
           "if": {
             "properties": {
               "schema_version": {
-                "const": "2.4.0"
+                "enum": ["2.4.0", "2.5.0"]
               }
             },
             "required": [
@@ -4839,23 +4244,9 @@
       "properties": {
         "ecosystem": {
           "enum": [
-            "npm",
-            "pypi",
-            "github-actions",
-            "oci",
-            "docker",
-            "go",
-            "rust",
-            "composer",
-            "erlang",
-            "git",
-            "maven",
-            "nuget",
-            "open-vsx",
-            "pub",
-            "rubygems",
-            "swift",
-            "vscode"
+            "npm", "pypi", "github-actions", "oci", "docker", "go", "rust",
+            "composer", "erlang", "git", "maven", "nuget", "open-vsx", "pub",
+            "rubygems", "swift", "vscode"
           ]
         },
         "registry_host": {
@@ -4887,57 +4278,32 @@
           "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
         },
         "version": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 200
         },
         "digest": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Sha256" },
+            { "type": "null" }
           ]
         },
-        "public_visibility": {
-          "const": "asserted_public"
-        }
+        "public_visibility": { "const": "asserted_public" }
       },
       "allOf": [
         {
           "if": {
             "properties": {
-              "ecosystem": {
-                "enum": [
-                  "oci",
-                  "docker"
-                ]
-              }
+              "ecosystem": { "enum": ["oci", "docker"] }
             },
-            "required": [
-              "ecosystem"
-            ]
+            "required": ["ecosystem"]
           },
           "then": {
-            "required": [
-              "digest"
-            ],
+            "required": ["digest"],
             "properties": {
               "registry_host": {
-                "enum": [
-                  "docker.io",
-                  "ghcr.io",
-                  "public.ecr.aws",
-                  "quay.io"
-                ]
+                "enum": ["docker.io", "ghcr.io", "public.ecr.aws", "quay.io"]
               },
-              "digest": {
-                "$ref": "#/$defs/Sha256"
-              }
+              "digest": { "$ref": "#/$defs/Sha256" }
             }
           },
           "else": {
@@ -4952,97 +4318,49 @@
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "npm"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "npm" } },
+            "required": ["ecosystem"]
           },
           "then": {
             "properties": {
-              "registry_host": {
-                "const": "registry.npmjs.org"
-              }
+              "registry_host": { "const": "registry.npmjs.org" }
             }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "pypi"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "pypi" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "pypi.org"
-              }
-            }
+            "properties": { "registry_host": { "const": "pypi.org" } }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "github-actions"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "github-actions" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "github.com"
-              }
-            }
+            "properties": { "registry_host": { "const": "github.com" } }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "go"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "go" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "proxy.golang.org"
-              }
-            }
+            "properties": { "registry_host": { "const": "proxy.golang.org" } }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "rust"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "rust" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "crates.io"
-              }
-            }
+            "properties": { "registry_host": { "const": "crates.io" } }
           }
         }
       ]
@@ -5072,10 +4390,7 @@
           ]
         },
         "registry_host": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 259,
           "pattern": "^[A-Za-z0-9.-]+(?::(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$"
         },
@@ -5085,50 +4400,30 @@
           "maxLength": 300
         },
         "version": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 200
         },
         "digest": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Sha256" },
+            { "type": "null" }
           ]
         },
         "visibility": {
-          "enum": [
-            "verified_public",
-            "private",
-            "unknown"
-          ]
+          "enum": ["verified_public", "private", "unknown"]
         }
       },
       "allOf": [
         {
           "if": {
             "properties": {
-              "ecosystem": {
-                "enum": [
-                  "oci",
-                  "docker"
-                ]
-              }
+              "ecosystem": { "enum": ["oci", "docker"] }
             },
-            "required": [
-              "ecosystem"
-            ]
+            "required": ["ecosystem"]
           },
           "then": {
             "properties": {
-              "digest": {
-                "$ref": "#/$defs/Sha256"
-              }
+              "digest": { "$ref": "#/$defs/Sha256" }
             }
           },
           "else": {
@@ -5146,32 +4441,13 @@
     "ReplayArtifactInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "ecosystem",
-        "name",
-        "version",
-        "digest"
-      ],
+      "required": ["ecosystem", "name", "version", "digest"],
       "properties": {
         "ecosystem": {
           "enum": [
-            "npm",
-            "pypi",
-            "github-actions",
-            "oci",
-            "docker",
-            "go",
-            "rust",
-            "composer",
-            "erlang",
-            "git",
-            "maven",
-            "nuget",
-            "open-vsx",
-            "pub",
-            "rubygems",
-            "swift",
-            "vscode"
+            "npm", "pypi", "github-actions", "oci", "docker", "go", "rust",
+            "composer", "erlang", "git", "maven", "nuget", "open-vsx", "pub",
+            "rubygems", "swift", "vscode"
           ]
         },
         "name": {
@@ -5181,20 +4457,13 @@
           "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
         },
         "version": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 200
         },
         "digest": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Sha256" },
+            { "type": "null" }
           ]
         }
       },
@@ -5202,22 +4471,13 @@
         {
           "if": {
             "properties": {
-              "ecosystem": {
-                "enum": [
-                  "oci",
-                  "docker"
-                ]
-              }
+              "ecosystem": { "enum": ["oci", "docker"] }
             },
-            "required": [
-              "ecosystem"
-            ]
+            "required": ["ecosystem"]
           },
           "then": {
             "properties": {
-              "digest": {
-                "$ref": "#/$defs/Sha256"
-              }
+              "digest": { "$ref": "#/$defs/Sha256" }
             }
           }
         }
@@ -5234,37 +4494,16 @@
         "dependency_path_ids"
       ],
       "properties": {
-        "local_entry_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "artifact": {
-          "$ref": "#/$defs/LocalArtifactInput"
-        },
-        "directness": {
-          "enum": [
-            "direct",
-            "transitive",
-            "root",
-            "unknown"
-          ]
-        },
+        "local_entry_id": { "$ref": "#/$defs/StableId" },
+        "artifact": { "$ref": "#/$defs/LocalArtifactInput" },
+        "directness": { "enum": ["direct", "transitive", "root", "unknown"] },
         "inventory_stage": {
-          "enum": [
-            "source",
-            "analyzed_source",
-            "build_input",
-            "built_artifact",
-            "deployment",
-            "runtime",
-            "unknown"
-          ]
+          "enum": ["source", "analyzed_source", "build_input", "built_artifact", "deployment", "runtime", "unknown"]
         },
         "dependency_path_ids": {
           "type": "array",
           "maxItems": 100,
-          "items": {
-            "$ref": "#/$defs/StableId"
-          }
+          "items": { "$ref": "#/$defs/StableId" }
         }
       }
     },
@@ -5276,9 +4515,7 @@
         "export": "never exported by default; reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5291,41 +4528,23 @@
             "sbom_quality"
           ],
           "properties": {
-            "kind": {
-              "const": "inventory_snapshot"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
+            "kind": { "const": "inventory_snapshot" },
+            "data_classification": { "const": "customer_local" },
             "project_alias": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
               "pattern": "^[A-Za-z0-9._-]+$"
             },
-            "inventory_fingerprint": {
-              "$ref": "#/$defs/Sha256"
-            },
-            "captured_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "inventory_fingerprint": { "$ref": "#/$defs/Sha256" },
+            "captured_at": { "$ref": "#/$defs/Timestamp" },
             "format": {
-              "enum": [
-                "package_list",
-                "npm_lock",
-                "python_lock",
-                "github_actions",
-                "oci",
-                "cyclonedx",
-                "spdx"
-              ]
+              "enum": ["package_list", "npm_lock", "python_lock", "github_actions", "oci", "cyclonedx", "spdx"]
             },
             "entries": {
               "type": "array",
               "maxItems": 100000,
-              "items": {
-                "$ref": "#/$defs/InventoryEntry"
-              }
+              "items": { "$ref": "#/$defs/InventoryEntry" }
             },
             "parser_unknowns": {
               "$ref": "#/$defs/UnknownList",
@@ -5333,12 +4552,8 @@
             },
             "sbom_quality": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/SbomQuality"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/SbomQuality" },
+                { "type": "null" }
               ]
             }
           }
@@ -5354,9 +4569,7 @@
         "export": "reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5368,27 +4581,13 @@
             "material_transitive_expansion"
           ],
           "properties": {
-            "kind": {
-              "const": "dependency_delta"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
-            "before_snapshot_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "after_snapshot_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "added_entry_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "removed_entry_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "changed_entry_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
+            "kind": { "const": "dependency_delta" },
+            "data_classification": { "const": "customer_local" },
+            "before_snapshot_id": { "$ref": "#/$defs/StableId" },
+            "after_snapshot_id": { "$ref": "#/$defs/StableId" },
+            "added_entry_ids": { "$ref": "#/$defs/StableIdList" },
+            "removed_entry_ids": { "$ref": "#/$defs/StableIdList" },
+            "changed_entry_ids": { "$ref": "#/$defs/StableIdList" },
             "material_transitive_expansion": {
               "type": "boolean"
             }
@@ -5400,46 +4599,21 @@
     "ExposurePathStep": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "sequence",
-        "node_id",
-        "node_type",
-        "relationship_type",
-        "evidence_state"
-      ],
+      "required": ["sequence", "node_id", "node_type", "relationship_type", "evidence_state"],
       "properties": {
         "sequence": {
           "type": "integer",
           "minimum": 0,
           "maximum": 100
         },
-        "node_id": {
-          "$ref": "#/$defs/StableId"
-        },
+        "node_id": { "$ref": "#/$defs/StableId" },
         "node_type": {
-          "enum": [
-            "project",
-            "workflow",
-            "image",
-            "artifact",
-            "incident",
-            "claim",
-            "evidence"
-          ]
+          "enum": ["project", "workflow", "image", "artifact", "incident", "claim", "evidence"]
         },
         "relationship_type": {
-          "enum": [
-            "root",
-            "depends_on",
-            "contains",
-            "uses",
-            "affects",
-            "supports"
-          ]
+          "enum": ["root", "depends_on", "contains", "uses", "affects", "supports"]
         },
-        "evidence_state": {
-          "$ref": "#/$defs/EvidenceState"
-        }
+        "evidence_state": { "$ref": "#/$defs/EvidenceState" }
       }
     },
     "ExposurePath": {
@@ -5450,53 +4624,29 @@
         "export": "reviewed customer-controlled report only; never Private Watchlists"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
-          "required": [
-            "project_alias",
-            "incident_id",
-            "affected_artifact_id",
-            "steps",
-            "state"
-          ],
+          "required": ["project_alias", "incident_id", "affected_artifact_id", "steps", "state"],
           "properties": {
-            "kind": {
-              "const": "exposure_path"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
+            "kind": { "const": "exposure_path" },
+            "data_classification": { "const": "customer_local" },
             "project_alias": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
               "pattern": "^[A-Za-z0-9._-]+$"
             },
-            "incident_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "affected_artifact_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "incident_id": { "$ref": "#/$defs/StableId" },
+            "affected_artifact_id": { "$ref": "#/$defs/StableId" },
             "steps": {
               "type": "array",
               "minItems": 2,
               "maxItems": 101,
-              "items": {
-                "$ref": "#/$defs/ExposurePathStep"
-              }
+              "items": { "$ref": "#/$defs/ExposurePathStep" }
             },
             "state": {
-              "enum": [
-                "proven",
-                "probable",
-                "possible",
-                "conflicting",
-                "unknown"
-              ]
+              "enum": ["proven", "probable", "possible", "conflicting", "unknown"]
             }
           }
         }
@@ -5511,9 +4661,7 @@
         "export": "reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5528,62 +4676,26 @@
             "support_state"
           ],
           "properties": {
-            "kind": {
-              "const": "remediation_frontier"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
-            "exposure_path_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "kind": { "const": "remediation_frontier" },
+            "data_classification": { "const": "customer_local" },
+            "exposure_path_id": { "$ref": "#/$defs/StableId" },
             "owner_scope": {
-              "enum": [
-                "project",
-                "platform",
-                "base_image",
-                "dependency",
-                "workflow",
-                "vendor",
-                "unknown"
-              ]
+              "enum": ["project", "platform", "base_image", "dependency", "workflow", "vendor", "unknown"]
             },
             "change_type": {
-              "enum": [
-                "upgrade",
-                "remove",
-                "pin_digest",
-                "replace",
-                "contain",
-                "monitor",
-                "unknown"
-              ]
+              "enum": ["upgrade", "remove", "pin_digest", "replace", "contain", "monitor", "unknown"]
             },
-            "target_artifact": {
-              "$ref": "#/$defs/LocalArtifactInput"
-            },
+            "target_artifact": { "$ref": "#/$defs/LocalArtifactInput" },
             "expected_effect": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000
             },
-            "compatibility_unknowns": {
-              "$ref": "#/$defs/UnknownList"
-            },
-            "validation": {
-              "$ref": "#/$defs/BoundedTextList"
-            },
-            "rollback": {
-              "$ref": "#/$defs/BoundedTextList"
-            },
+            "compatibility_unknowns": { "$ref": "#/$defs/UnknownList" },
+            "validation": { "$ref": "#/$defs/BoundedTextList" },
+            "rollback": { "$ref": "#/$defs/BoundedTextList" },
             "support_state": {
-              "enum": [
-                "supported",
-                "plausible",
-                "unverified",
-                "conflicting",
-                "unknown"
-              ]
+              "enum": ["supported", "plausible", "unverified", "conflicting", "unknown"]
             }
           }
         }
@@ -5598,9 +4710,7 @@
         "export": "reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5616,23 +4726,15 @@
             "recheck_triggers"
           ],
           "properties": {
-            "kind": {
-              "const": "policy_decision"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
+            "kind": { "const": "policy_decision" },
+            "data_classification": { "const": "customer_local" },
             "policy_version": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100
             },
-            "rule_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "artifact": {
-              "$ref": "#/$defs/LocalArtifactInput"
-            },
+            "rule_id": { "$ref": "#/$defs/StableId" },
+            "artifact": { "$ref": "#/$defs/LocalArtifactInput" },
             "project_alias": {
               "type": "string",
               "minLength": 1,
@@ -5640,13 +4742,7 @@
               "pattern": "^[A-Za-z0-9._-]+$"
             },
             "disposition": {
-              "enum": [
-                "record_only",
-                "notify",
-                "require_acknowledgement",
-                "require_approval",
-                "deny"
-              ]
+              "enum": ["record_only", "notify", "require_acknowledgement", "require_approval", "deny"]
             },
             "reason_codes": {
               "type": "array",
@@ -5661,27 +4757,17 @@
             },
             "exception_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
             "approval_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
-            "decision_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "decision_at": { "$ref": "#/$defs/Timestamp" },
             "recheck_triggers": {
               "type": "array",
               "minItems": 1,
@@ -5711,9 +4797,7 @@
         "export": "reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5726,50 +4810,28 @@
             "expires_at"
           ],
           "properties": {
-            "kind": {
-              "const": "approval_record"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
-            "policy_decision_id": {
-              "$ref": "#/$defs/StableId"
-            },
-            "decision": {
-              "enum": [
-                "approved",
-                "denied"
-              ]
-            },
+            "kind": { "const": "approval_record" },
+            "data_classification": { "const": "customer_local" },
+            "policy_decision_id": { "$ref": "#/$defs/StableId" },
+            "decision": { "enum": ["approved", "denied"] },
             "actor_id": {
               "type": "string",
               "minLength": 3,
               "maxLength": 160
             },
-            "decided_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "decided_at": { "$ref": "#/$defs/Timestamp" },
             "reason": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000
             },
             "scope": {
-              "enum": [
-                "one_assessment",
-                "artifact_version",
-                "project",
-                "time_bounded"
-              ]
+              "enum": ["one_assessment", "artifact_version", "project", "time_bounded"]
             },
             "expires_at": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/Timestamp"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/Timestamp" },
+                { "type": "null" }
               ]
             }
           }
@@ -5785,9 +4847,7 @@
         "export": "reviewed customer-controlled report only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5804,51 +4864,36 @@
             "state"
           ],
           "properties": {
-            "kind": {
-              "const": "policy_exception"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
+            "kind": { "const": "policy_exception" },
+            "data_classification": { "const": "customer_local" },
             "actor_id": {
               "type": "string",
               "minLength": 3,
               "maxLength": 160
             },
-            "created_for_rule_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "created_for_rule_id": { "$ref": "#/$defs/StableId" },
             "project_alias": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
               "pattern": "^[A-Za-z0-9._-]+$"
             },
-            "artifact": {
-              "$ref": "#/$defs/LocalArtifactInput"
-            },
+            "artifact": { "$ref": "#/$defs/LocalArtifactInput" },
             "reason": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000
             },
             "customer_ticket": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 160
             },
-            "incident_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "incident_id": { "$ref": "#/$defs/StableId" },
             "evidence_revision": {
               "type": "integer",
               "minimum": 1
             },
-            "expires_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "expires_at": { "$ref": "#/$defs/Timestamp" },
             "recheck_triggers": {
               "type": "array",
               "minItems": 1,
@@ -5866,13 +4911,7 @@
               }
             },
             "state": {
-              "enum": [
-                "active",
-                "expired",
-                "revoked",
-                "superseded",
-                "recheck_required"
-              ]
+              "enum": ["active", "expired", "revoked", "superseded", "recheck_required"]
             }
           }
         }
@@ -5887,9 +4926,7 @@
         "export": "deliberate reviewed customer export only; never public or Private Watchlists"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -5909,23 +4946,15 @@
             "unknowns"
           ],
           "properties": {
-            "kind": {
-              "const": "assessment_receipt"
-            },
-            "data_classification": {
-              "const": "customer_local"
-            },
-            "assessed_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
+            "kind": { "const": "assessment_receipt" },
+            "data_classification": { "const": "customer_local" },
+            "assessed_at": { "$ref": "#/$defs/Timestamp" },
             "feed_revision": {
               "type": "string",
               "minLength": 8,
               "maxLength": 160
             },
-            "feed_snapshot_hash": {
-              "$ref": "#/$defs/Sha256"
-            },
+            "feed_snapshot_hash": { "$ref": "#/$defs/Sha256" },
             "matcher_version": {
               "type": "string",
               "minLength": 1,
@@ -5936,17 +4965,11 @@
               "minLength": 1,
               "maxLength": 100
             },
-            "inventory_fingerprint": {
-              "$ref": "#/$defs/Sha256"
-            },
+            "inventory_fingerprint": { "$ref": "#/$defs/Sha256" },
             "dependency_delta_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ],
               "default": null
             },
@@ -5954,45 +4977,22 @@
               "type": "array",
               "minItems": 1,
               "maxItems": 20,
-              "items": {
-                "$ref": "#/$defs/CoverageState"
-              }
+              "items": { "$ref": "#/$defs/CoverageState" }
             },
-            "evidence_maturity": {
-              "$ref": "#/$defs/EvidenceMaturity"
-            },
-            "exposure_path_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "remediation_frontier_ids": {
-              "$ref": "#/$defs/StableIdList"
-            },
-            "policy_decision_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "evidence_maturity": { "$ref": "#/$defs/EvidenceMaturity" },
+            "exposure_path_ids": { "$ref": "#/$defs/StableIdList" },
+            "remediation_frontier_ids": { "$ref": "#/$defs/StableIdList" },
+            "policy_decision_id": { "$ref": "#/$defs/StableId" },
             "exception_id": {
               "anyOf": [
-                {
-                  "$ref": "#/$defs/StableId"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/$defs/StableId" },
+                { "type": "null" }
               ]
             },
             "result": {
-              "enum": [
-                "allow",
-                "allow_with_notice",
-                "acknowledgement_required",
-                "approval_required",
-                "deny",
-                "unknown"
-              ]
+              "enum": ["allow", "allow_with_notice", "acknowledgement_required", "approval_required", "deny", "unknown"]
             },
-            "unknowns": {
-              "$ref": "#/$defs/UnknownList"
-            }
+            "unknowns": { "$ref": "#/$defs/UnknownList" }
           }
         }
       ],
@@ -6006,9 +5006,7 @@
         "export": "minimal event; no source code, inventory, paths, policy, or full receipt"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/DeliveryEventHeader"
-        },
+        { "$ref": "#/$defs/DeliveryEventHeader" },
         {
           "type": "object",
           "required": [
@@ -6029,35 +5027,16 @@
             "deduplication_key"
           ],
           "properties": {
-            "kind": {
-              "const": "delivery_event"
-            },
+            "kind": { "const": "delivery_event" },
             "data_classification": {
-              "enum": [
-                "public",
-                "customer_local",
-                "private_watchlists_minimized"
-              ]
+              "enum": ["public", "customer_local", "private_watchlists_minimized"]
             },
-            "event_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "event_id": { "$ref": "#/$defs/StableId" },
             "event_type": {
-              "enum": [
-                "incident_created",
-                "incident_updated",
-                "corrected",
-                "disputed",
-                "expired",
-                "withdrawn"
-              ]
+              "enum": ["incident_created", "incident_updated", "corrected", "disputed", "expired", "withdrawn"]
             },
-            "occurred_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
-            "incident_id": {
-              "$ref": "#/$defs/StableId"
-            },
+            "occurred_at": { "$ref": "#/$defs/Timestamp" },
+            "incident_id": { "$ref": "#/$defs/StableId" },
             "incident_revision": {
               "type": "integer",
               "minimum": 1
@@ -6074,52 +5053,24 @@
               ]
             },
             "severity": {
-              "enum": [
-                "unknown",
-                "low",
-                "moderate",
-                "high",
-                "critical"
-              ]
+              "enum": ["unknown", "low", "moderate", "high", "critical"]
             },
             "evidence_state": {
-              "enum": [
-                "confirmed",
-                "probable",
-                "possible",
-                "unverified",
-                "disputed",
-                "unknown"
-              ]
+              "enum": ["confirmed", "probable", "possible", "unverified", "disputed", "unknown"]
             },
             "correction_state": {
-              "enum": [
-                "current",
-                "corrected",
-                "disputed",
-                "expired",
-                "withdrawn"
-              ]
+              "enum": ["current", "corrected", "disputed", "expired", "withdrawn"]
             },
             "recommended_action_level": {
               "type": "integer",
               "minimum": 0,
               "maximum": 4
             },
-            "published_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
-            "incident_updated_at": {
-              "$ref": "#/$defs/Timestamp"
-            },
-            "public_incident_url": {
-              "$ref": "#/$defs/PublicIncidentUri"
-            },
+            "published_at": { "$ref": "#/$defs/Timestamp" },
+            "incident_updated_at": { "$ref": "#/$defs/Timestamp" },
+            "public_incident_url": { "$ref": "#/$defs/PublicIncidentUri" },
             "project_alias": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 100,
               "pattern": "^[A-Za-z0-9._-]+$"
             },
@@ -6134,19 +5085,13 @@
             {
               "if": {
                 "properties": {
-                  "data_classification": {
-                    "const": "public"
-                  }
+                  "data_classification": { "const": "public" }
                 },
-                "required": [
-                  "data_classification"
-                ]
+                "required": ["data_classification"]
               },
               "then": {
                 "properties": {
-                  "project_alias": {
-                    "const": null
-                  }
+                  "project_alias": { "const": null }
                 }
               }
             }
@@ -6163,9 +5108,7 @@
         "export": "bounded schema-defined response only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -6181,12 +5124,8 @@
             "response_definition"
           ],
           "properties": {
-            "kind": {
-              "const": "rest_operation"
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "rest_operation" },
+            "data_classification": { "const": "public" },
             "operation": {
               "enum": [
                 "list_incidents",
@@ -6202,23 +5141,14 @@
                 "get_source_coverage"
               ]
             },
-            "method": {
-              "enum": [
-                "GET",
-                "POST"
-              ]
-            },
+            "method": { "enum": ["GET", "POST"] },
             "path": {
               "type": "string",
               "pattern": "^/v1/",
               "maxLength": 200
             },
-            "read_only": {
-              "const": true
-            },
-            "public_service_allowed": {
-              "type": "boolean"
-            },
+            "read_only": { "const": true },
+            "public_service_allowed": { "type": "boolean" },
             "max_input_bytes": {
               "type": "integer",
               "minimum": 0,
@@ -6235,10 +5165,7 @@
               "maximum": 120
             },
             "request_definition": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 120
             },
             "response_definition": {
@@ -6258,15 +5185,11 @@
                     ]
                   }
                 },
-                "required": [
-                  "operation"
-                ]
+                "required": ["operation"]
               },
               "then": {
                 "properties": {
-                  "public_service_allowed": {
-                    "const": false
-                  }
+                  "public_service_allowed": { "const": false }
                 }
               }
             }
@@ -6283,9 +5206,7 @@
         "export": "bounded schema-defined result only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -6301,12 +5222,8 @@
             "timeout_seconds"
           ],
           "properties": {
-            "kind": {
-              "const": "mcp_operation"
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "mcp_operation" },
+            "data_classification": { "const": "public" },
             "tool_name": {
               "enum": [
                 "list_incidents",
@@ -6335,20 +5252,11 @@
                 "get_source_coverage"
               ]
             },
-            "read_only": {
-              "const": true
-            },
-            "destructive": {
-              "const": false
-            },
-            "public_service_allowed": {
-              "type": "boolean"
-            },
+            "read_only": { "const": true },
+            "destructive": { "const": false },
+            "public_service_allowed": { "type": "boolean" },
             "input_definition": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "maxLength": 120
             },
             "output_definition": {
@@ -6383,15 +5291,11 @@
                     ]
                   }
                 },
-                "required": [
-                  "tool_name"
-                ]
+                "required": ["tool_name"]
               },
               "then": {
                 "properties": {
-                  "public_service_allowed": {
-                    "const": false
-                  }
+                  "public_service_allowed": { "const": false }
                 }
               }
             }
@@ -6431,78 +5335,41 @@
             "container_image"
           ]
         },
-        "artifact": {
-          "$ref": "#/$defs/PrivateWatchlistArtifact"
-        },
-        "public_visibility": {
-          "const": "verified_public"
-        },
-        "visibility_verified_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "visibility_source_url": {
-          "$ref": "#/$defs/PrivateWatchlistVisibilityUri"
-        },
-        "directness": {
-          "enum": [
-            "direct",
-            "transitive"
-          ]
-        },
+        "artifact": { "$ref": "#/$defs/PrivateWatchlistArtifact" },
+        "public_visibility": { "const": "verified_public" },
+        "visibility_verified_at": { "$ref": "#/$defs/Timestamp" },
+        "visibility_source_url": { "$ref": "#/$defs/PrivateWatchlistVisibilityUri" },
+        "directness": { "enum": ["direct", "transitive"] },
         "usage": {
-          "enum": [
-            "production",
-            "development",
-            "build",
-            "unknown"
-          ]
+          "enum": ["production", "development", "build", "unknown"]
         },
         "importance": {
-          "enum": [
-            "standard",
-            "important",
-            "critical"
-          ]
+          "enum": ["standard", "important", "critical"]
         },
         "inventory_revision": {
           "type": "string",
           "minLength": 8,
           "maxLength": 160
         },
-        "first_seen_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
-        "last_confirmed_at": {
-          "$ref": "#/$defs/Timestamp"
-        }
+        "first_seen_at": { "$ref": "#/$defs/Timestamp" },
+        "last_confirmed_at": { "$ref": "#/$defs/Timestamp" }
       },
       "allOf": [
         {
           "if": {
             "properties": {
-              "target_type": {
-                "const": "software_dependency"
-              }
+              "target_type": { "const": "software_dependency" }
             },
-            "required": [
-              "target_type"
-            ]
+            "required": ["target_type"]
           },
           "then": {
             "properties": {
               "artifact": {
                 "allOf": [
-                  {
-                    "$ref": "#/$defs/PrivateWatchlistArtifact"
-                  },
+                  { "$ref": "#/$defs/PrivateWatchlistArtifact" },
                   {
                     "properties": {
-                      "ecosystem": {
-                        "enum": [
-                          "npm",
-                          "pypi"
-                        ]
-                      }
+                      "ecosystem": { "enum": ["npm", "pypi"] }
                     }
                   }
                 ]
@@ -6513,26 +5380,18 @@
         {
           "if": {
             "properties": {
-              "target_type": {
-                "const": "github_action"
-              }
+              "target_type": { "const": "github_action" }
             },
-            "required": [
-              "target_type"
-            ]
+            "required": ["target_type"]
           },
           "then": {
             "properties": {
               "artifact": {
                 "allOf": [
-                  {
-                    "$ref": "#/$defs/PrivateWatchlistArtifact"
-                  },
+                  { "$ref": "#/$defs/PrivateWatchlistArtifact" },
                   {
                     "properties": {
-                      "ecosystem": {
-                        "const": "github-actions"
-                      }
+                      "ecosystem": { "const": "github-actions" }
                     }
                   }
                 ]
@@ -6543,29 +5402,18 @@
         {
           "if": {
             "properties": {
-              "target_type": {
-                "const": "container_image"
-              }
+              "target_type": { "const": "container_image" }
             },
-            "required": [
-              "target_type"
-            ]
+            "required": ["target_type"]
           },
           "then": {
             "properties": {
               "artifact": {
                 "allOf": [
-                  {
-                    "$ref": "#/$defs/PrivateWatchlistArtifact"
-                  },
+                  { "$ref": "#/$defs/PrivateWatchlistArtifact" },
                   {
                     "properties": {
-                      "ecosystem": {
-                        "enum": [
-                          "oci",
-                          "docker"
-                        ]
-                      }
+                      "ecosystem": { "enum": ["oci", "docker"] }
                     }
                   }
                 ]
@@ -6578,22 +5426,10 @@
     "PrivateWatchlistArtifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "ecosystem",
-        "registry_host",
-        "name",
-        "version",
-        "digest"
-      ],
+      "required": ["ecosystem", "registry_host", "name", "version", "digest"],
       "properties": {
         "ecosystem": {
-          "enum": [
-            "npm",
-            "pypi",
-            "github-actions",
-            "oci",
-            "docker"
-          ]
+          "enum": ["npm", "pypi", "github-actions", "oci", "docker"]
         },
         "registry_host": {
           "enum": [
@@ -6613,20 +5449,13 @@
           "pattern": "^[A-Za-z0-9@._/+:-]+$"
         },
         "version": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "maxLength": 200
         },
         "digest": {
           "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
+            { "$ref": "#/$defs/Sha256" },
+            { "type": "null" }
           ]
         }
       },
@@ -6634,30 +5463,16 @@
         {
           "if": {
             "properties": {
-              "ecosystem": {
-                "enum": [
-                  "oci",
-                  "docker"
-                ]
-              }
+              "ecosystem": { "enum": ["oci", "docker"] }
             },
-            "required": [
-              "ecosystem"
-            ]
+            "required": ["ecosystem"]
           },
           "then": {
             "properties": {
               "registry_host": {
-                "enum": [
-                  "docker.io",
-                  "ghcr.io",
-                  "public.ecr.aws",
-                  "quay.io"
-                ]
+                "enum": ["docker.io", "ghcr.io", "public.ecr.aws", "quay.io"]
               },
-              "digest": {
-                "$ref": "#/$defs/Sha256"
-              }
+              "digest": { "$ref": "#/$defs/Sha256" }
             }
           },
           "else": {
@@ -6672,59 +5487,29 @@
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "npm"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "npm" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "registry.npmjs.org"
-              }
-            }
+            "properties": { "registry_host": { "const": "registry.npmjs.org" } }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "pypi"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "pypi" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "pypi.org"
-              }
-            }
+            "properties": { "registry_host": { "const": "pypi.org" } }
           }
         },
         {
           "if": {
-            "properties": {
-              "ecosystem": {
-                "const": "github-actions"
-              }
-            },
-            "required": [
-              "ecosystem"
-            ]
+            "properties": { "ecosystem": { "const": "github-actions" } },
+            "required": ["ecosystem"]
           },
           "then": {
-            "properties": {
-              "registry_host": {
-                "const": "github.com"
-              }
-            }
+            "properties": { "registry_host": { "const": "github.com" } }
           }
         }
       ]
@@ -6737,9 +5522,7 @@
         "export": "tenant-scoped latest set only; no history or excluded fields"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -6752,27 +5535,17 @@
             "expires_unconfirmed_after_days"
           ],
           "properties": {
-            "kind": {
-              "const": "private_watchlist_set"
-            },
-            "data_classification": {
-              "const": "private_watchlists_minimized"
-            },
-            "feature_state": {
-              "const": "disabled"
-            },
-            "synthetic_only": {
-              "const": true
-            },
+            "kind": { "const": "private_watchlist_set" },
+            "data_classification": { "const": "private_watchlists_minimized" },
+            "feature_state": { "const": "disabled" },
+            "synthetic_only": { "const": true },
             "tenant_id": {
               "type": "string",
               "minLength": 16,
               "maxLength": 160,
               "pattern": "^[A-Za-z0-9_-]+$"
             },
-            "replace_current": {
-              "const": true
-            },
+            "replace_current": { "const": true },
             "inventory_revision": {
               "type": "string",
               "minLength": 8,
@@ -6781,13 +5554,9 @@
             "entries": {
               "type": "array",
               "maxItems": 100000,
-              "items": {
-                "$ref": "#/$defs/PrivateWatchlistEntry"
-              }
+              "items": { "$ref": "#/$defs/PrivateWatchlistEntry" }
             },
-            "expires_unconfirmed_after_days": {
-              "const": 45
-            }
+            "expires_unconfirmed_after_days": { "const": 45 }
           }
         }
       ],
@@ -6801,33 +5570,19 @@
         "export": "safe error only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
-          "required": [
-            "request_id",
-            "accepted",
-            "reason_codes",
-            "field_paths",
-            "payload_logged"
-          ],
+          "required": ["request_id", "accepted", "reason_codes", "field_paths", "payload_logged"],
           "properties": {
-            "kind": {
-              "const": "private_watchlist_rejection"
-            },
-            "data_classification": {
-              "const": "internal_control"
-            },
+            "kind": { "const": "private_watchlist_rejection" },
+            "data_classification": { "const": "internal_control" },
             "request_id": {
               "type": "string",
               "minLength": 8,
               "maxLength": 160
             },
-            "accepted": {
-              "const": false
-            },
+            "accepted": { "const": false },
             "reason_codes": {
               "type": "array",
               "minItems": 1,
@@ -6875,9 +5630,7 @@
                 "maxLength": 300
               }
             },
-            "payload_logged": {
-              "const": false
-            }
+            "payload_logged": { "const": false }
           }
         }
       ],
@@ -6886,13 +5639,7 @@
     "ReplayExpectedEvent": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "sequence",
-        "event_type",
-        "recorded_at",
-        "timestamp_precision",
-        "source_record_id"
-      ],
+      "required": ["sequence", "event_type", "recorded_at", "timestamp_precision", "source_record_id"],
       "properties": {
         "sequence": {
           "type": "integer",
@@ -6900,24 +5647,11 @@
           "maximum": 100
         },
         "event_type": {
-          "enum": [
-            "first_public_evidence",
-            "advisory_published",
-            "artifact_removed",
-            "corrected",
-            "disputed",
-            "withdrawn"
-          ]
+          "enum": ["first_public_evidence", "advisory_published", "artifact_removed", "corrected", "disputed", "withdrawn"]
         },
-        "recorded_at": {
-          "$ref": "#/$defs/Timestamp"
-        },
+        "recorded_at": { "$ref": "#/$defs/Timestamp" },
         "timestamp_precision": {
-          "enum": [
-            "exact",
-            "minute",
-            "day"
-          ]
+          "enum": ["exact", "minute", "day"]
         },
         "source_record_id": {
           "type": "string",
@@ -6934,9 +5668,7 @@
         "export": "SmithGuard-authored derived facts and source links only"
       },
       "allOf": [
-        {
-          "$ref": "#/$defs/ContractHeader"
-        },
+        { "$ref": "#/$defs/ContractHeader" },
         {
           "type": "object",
           "required": [
@@ -6956,12 +5688,8 @@
             "fixture_origin"
           ],
           "properties": {
-            "kind": {
-              "const": "replay_case"
-            },
-            "data_classification": {
-              "const": "public"
-            },
+            "kind": { "const": "replay_case" },
+            "data_classification": { "const": "public" },
             "case_id": {
               "type": "string",
               "pattern": "^replay-[0-9]{3}$"
@@ -6972,13 +5700,7 @@
               "maxLength": 160
             },
             "ecosystem": {
-              "enum": [
-                "npm",
-                "pypi",
-                "github-actions",
-                "oci",
-                "docker"
-              ]
+              "enum": ["npm", "pypi", "github-actions", "oci", "docker"]
             },
             "source_record_ids": {
               "type": "array",
@@ -6996,17 +5718,13 @@
               "minItems": 1,
               "maxItems": 20,
               "uniqueItems": true,
-              "items": {
-                "$ref": "#/$defs/Uri"
-              }
+              "items": { "$ref": "#/$defs/Uri" }
             },
             "artifacts": {
               "type": "array",
               "minItems": 1,
               "maxItems": 20,
-              "items": {
-                "$ref": "#/$defs/ReplayArtifactInput"
-              }
+              "items": { "$ref": "#/$defs/ReplayArtifactInput" }
             },
             "affected_expressions": {
               "type": "array",
@@ -7022,9 +5740,7 @@
               "type": "array",
               "minItems": 1,
               "maxItems": 100,
-              "items": {
-                "$ref": "#/$defs/ReplayExpectedEvent"
-              }
+              "items": { "$ref": "#/$defs/ReplayExpectedEvent" }
             },
             "expected_incident_status": {
               "enum": [
@@ -7039,39 +5755,17 @@
               ]
             },
             "expected_correction_state": {
-              "enum": [
-                "current",
-                "corrected",
-                "disputed",
-                "withdrawn",
-                "unknown"
-              ]
+              "enum": ["current", "corrected", "disputed", "withdrawn", "unknown"]
             },
             "expected_receipt_result": {
-              "enum": [
-                "allow",
-                "allow_with_notice",
-                "acknowledgement_required",
-                "approval_required",
-                "deny",
-                "unknown"
-              ]
+              "enum": ["allow", "allow_with_notice", "acknowledgement_required", "approval_required", "deny", "unknown"]
             },
-            "earliest_evidence_replay": {
-              "type": "boolean"
-            },
+            "earliest_evidence_replay": { "type": "boolean" },
             "rights_decision": {
-              "enum": [
-                "approved_public",
-                "approved_link_only",
-                "quarantined"
-              ]
+              "enum": ["approved_public", "approved_link_only", "quarantined"]
             },
             "fixture_origin": {
-              "enum": [
-                "public_fact",
-                "synthetic_derived"
-              ]
+              "enum": ["public_fact", "synthetic_derived"]
             }
           }
         }
@@ -7083,17 +5777,13 @@
       "minItems": 1,
       "maxItems": 100,
       "uniqueItems": true,
-      "items": {
-        "$ref": "#/$defs/StableId"
-      }
+      "items": { "$ref": "#/$defs/StableId" }
     },
     "StableIdList": {
       "type": "array",
       "maxItems": 10000,
       "uniqueItems": true,
-      "items": {
-        "$ref": "#/$defs/StableId"
-      }
+      "items": { "$ref": "#/$defs/StableId" }
     },
     "BoundedTextList": {
       "type": "array",
@@ -7114,437 +5804,6 @@
         "maxLength": 300
       }
     },
-    "PublicAdvisoryContext": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "title",
-        "description",
-        "severity",
-        "attribution",
-        "license_expression",
-        "source_url",
-        "title_sha256",
-        "description_sha256",
-        "title_truncated",
-        "description_truncated",
-        "conditions"
-      ],
-      "properties": {
-        "title": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 300
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 2000
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "severity": {
-          "anyOf": [
-            {
-              "enum": [
-                "low",
-                "medium",
-                "high",
-                "critical",
-                "unknown"
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "attribution": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 200
-        },
-        "license_expression": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 80
-        },
-        "source_url": {
-          "$ref": "#/$defs/PublicIncidentUri"
-        },
-        "title_sha256": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "description_sha256": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "title_truncated": {
-          "type": "boolean"
-        },
-        "description_truncated": {
-          "type": "boolean"
-        },
-        "conditions": {
-          "$ref": "#/$defs/PublicApplicabilityConditions"
-        }
-      },
-      "description": "Literal source text excerpts and source-attributed severity, not instructions or a local risk score. Render as escaped text. Hashes identify full retained source text; truncation is explicit."
-    },
-    "PublicApplicabilityConditions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "state",
-        "coverage",
-        "extraction_method",
-        "source_field",
-        "source_text_sha256",
-        "reviewed_on",
-        "any_of",
-        "local_applicability"
-      ],
-      "properties": {
-        "state": {
-          "enum": [
-            "recorded",
-            "unknown"
-          ]
-        },
-        "coverage": {
-          "enum": [
-            "partial",
-            "unknown"
-          ]
-        },
-        "extraction_method": {
-          "anyOf": [
-            {
-              "enum": [
-                "reviewed_source_text",
-                "structured_source_fields"
-              ]
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "source_field": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "source_text_sha256": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Sha256"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "reviewed_on": {
-          "anyOf": [
-            {
-              "type": "string",
-              "format": "date"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "any_of": {
-          "type": "array",
-          "maxItems": 16,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "all_of"
-            ],
-            "properties": {
-              "all_of": {
-                "type": "array",
-                "maxItems": 16,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "fact",
-                    "values"
-                  ],
-                  "properties": {
-                    "fact": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 80,
-                      "pattern": "^[a-z][a-z0-9_]*$"
-                    },
-                    "values": {
-                      "type": "array",
-                      "maxItems": 32,
-                      "items": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
-                      },
-                      "minItems": 1,
-                      "uniqueItems": true
-                    }
-                  }
-                },
-                "minItems": 1
-              }
-            }
-          }
-        },
-        "local_applicability": {
-          "const": "not_evaluated"
-        }
-      },
-      "description": "OR alternatives of AND necessary conditions. Missing conditions are unknown. Source report identity/revision/URL and text hash bind the extraction; hosted service does not observe the target. Even all listed conditions met does not prove exploitation."
-    },
-    "PublicSourceFixEvidence": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "package_entry_id",
-        "range_index",
-        "range_sha256",
-        "range_type",
-        "expression",
-        "introduced_version",
-        "fixed_version",
-        "source_field",
-        "applies_to_requested_version",
-        "patch_field_state"
-      ],
-      "properties": {
-        "package_entry_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "range_index": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 10000
-        },
-        "range_sha256": {
-          "$ref": "#/$defs/Sha256"
-        },
-        "range_type": {
-          "enum": [
-            "GITHUB",
-            "SEMVER",
-            "ECOSYSTEM",
-            "GIT",
-            "other"
-          ]
-        },
-        "expression": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 1000
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "introduced_version": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "fixed_version": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 200
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "source_field": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 80
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "applies_to_requested_version": {
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "patch_field_state": {
-          "enum": [
-            "absent",
-            "explicit_null",
-            "explicit_value",
-            "invalid",
-            "no_fixed_event",
-            "unsupported_range_type"
-          ]
-        }
-      },
-      "description": "Exact normalized package/range and branch association. Only explicit_value with a named fixed_version is source fix evidence. A true applies flag relates the original requested version to this branch, not proof of local exposure or a safe target. An unresolved or fix-incomplete report cannot support a current fix recommendation; retained rows may describe historical source evidence."
-    },
-    "PublicSourceRangeBound": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "package_entry_id",
-        "range_index",
-        "kind",
-        "version"
-      ],
-      "properties": {
-        "package_entry_id": {
-          "$ref": "#/$defs/StableId"
-        },
-        "range_index": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 10000
-        },
-        "kind": {
-          "enum": [
-            "exclusive_upper",
-            "inclusive_upper",
-            "last_affected",
-            "limit"
-          ]
-        },
-        "version": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 200
-        }
-      },
-      "description": "Source range endpoints, never evidence that a repair was published."
-    },
-    "RegistryProjectContext": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "source_id",
-        "project_name",
-        "source_url",
-        "project_status",
-        "retrieval",
-        "observed_at",
-        "valid_until",
-        "limitation",
-        "attribution"
-      ],
-      "properties": {
-        "source_id": {
-          "const": "gbsec:source:pypi-apis",
-          "type": "string"
-        },
-        "project_name": {
-          "type": "string",
-          "maxLength": 200,
-          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,198}[a-z0-9])?$"
-        },
-        "source_url": {
-          "type": "string",
-          "format": "uri",
-          "maxLength": 240
-        },
-        "project_status": {
-          "type": "string",
-          "enum": [
-            "active",
-            "archived",
-            "deprecated",
-            "quarantined",
-            "unknown"
-          ]
-        },
-        "retrieval": {
-          "type": "string",
-          "enum": [
-            "observed",
-            "unavailable",
-            "not_found",
-            "capacity",
-            "disabled"
-          ]
-        },
-        "observed_at": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "format": "date-time"
-        },
-        "valid_until": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "limitation": {
-          "type": "string",
-          "const": "Project administration status does not establish version availability, malware, vulnerability, or safety."
-        },
-        "attribution": {
-          "const": "Python Package Index",
-          "type": "string"
-        }
-      }
-    }
+    "RegistryProjectContext": {"type": "object", "additionalProperties": false, "required": ["source_id", "project_name", "source_url", "project_status", "retrieval", "observed_at", "valid_until", "limitation", "attribution"], "properties": {"source_id": {"const": "gbsec:source:pypi-apis", "type": "string"}, "project_name": {"type": "string", "maxLength": 200, "pattern": "^[a-z0-9](?:[a-z0-9-]{0,198}[a-z0-9])?$"}, "source_url": {"type": "string", "format": "uri", "maxLength": 240}, "project_status": {"type": "string", "enum": ["active", "archived", "deprecated", "quarantined", "unknown"]}, "retrieval": {"type": "string", "enum": ["observed", "unavailable", "not_found", "capacity", "disabled"]}, "observed_at": {"type": ["string", "null"], "format": "date-time"}, "valid_until": {"type": "string", "format": "date-time"}, "limitation": {"type": "string", "const": "Project administration status does not establish version availability, malware, vulnerability, or safety."}, "attribution": {"const": "Python Package Index", "type": "string"}}}
   }
 }

@@ -27,6 +27,13 @@ These are instructions, not a local scanner, server, automatic deployment gate o
 permission to inspect private inventories. The service runs remotely. Installing
 a skill and connecting its hosted tools are separate setup steps.
 
+## Compact hosted summaries
+
+The [summary interface](docs/product/assessment-summary.md) returns bounded reports
+for one exact public npm or PyPI version through REST and a separate summary-only
+MCP profile. Reports carry explicit freshness, omissions and unsigned assurance.
+Source support and deployment availability are tracked separately.
+
 ## Optional local Python client
 
 The [client](clients/python/README.md) reads metadata from Linux directories you
@@ -39,14 +46,14 @@ scan every environment. Read the [operating guide](docs/operating-guide.md) and
 ## Work on the code
 
 The supported contributor environment is Linux, including Linux under WSL, with
-Git, PostgreSQL server tools, system Python **3.10 or newer**, and uv **0.13.4**. The project pins Python **3.14.7**
+Git, PostgreSQL server tools, Nginx, system Python **3.10 or newer**, and uv **0.13.4**. The project pins Python **3.14.7**
 and all Python dependencies. Tests create isolated temporary PostgreSQL clusters
 with Unix sockets and no TCP listener. Run them as a normal user, not root.
 
 On Ubuntu, install prerequisites with your package manager:
 
 ```sh
-sudo apt-get install git postgresql postgresql-contrib pipx
+sudo apt-get install git postgresql postgresql-contrib nginx pipx
 pipx install uv==0.13.4
 pipx ensurepath
 ```

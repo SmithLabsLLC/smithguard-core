@@ -34,9 +34,10 @@ from smithguard.db.models import (
     CollectorProgressRecord,
 )
 from smithguard.ecosystems import CANONICAL_ECOSYSTEMS
-from smithguard.identifiers import timestamp
+from smithguard.identifiers import require_aware_utc, timestamp
 from smithguard.openssf_budget import CATALOG_FRESHNESS_MAX_AGE
 from smithguard.openssf_git import MAX_PAGE_SIZE
+from smithguard.openssf_resilience import latest_attempt
 from smithguard.source_accounting import current_omission_count
 from smithguard.supplemental_store import (
     EPSS_SOURCE,
@@ -93,6 +94,8 @@ class SourceCoverageLane:
     freshness_state: str
     ecosystems: tuple[str, ...]
     unknowns: tuple[str, ...]
+    unresolved_record_count: int | None = None
+    record_progress: dict | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +140,8 @@ class CoverageReport:
                     "freshness_state": lane.freshness_state,
                     "ecosystems": list(lane.ecosystems),
                     "unknowns": list(lane.unknowns),
+                    "unresolved_record_count": lane.unresolved_record_count,
+                    "record_progress": lane.record_progress,
                 }
                 for lane in self.source_lanes
             ],
@@ -171,7 +176,11 @@ class _CoverageReportCache:
 
     def _current(self, key: tuple[Any, ...], measured_at: datetime) -> CoverageReport | None:
         with self._lock:
-            age = measured_at - self.generated_at if self.generated_at is not None else None
+            age = (
+                require_aware_utc(measured_at) - require_aware_utc(self.generated_at)
+                if self.generated_at is not None
+                else None
+            )
             if (
                 self.report is not None
                 and self.key == key
@@ -407,6 +416,7 @@ def collection_freshness(
     segment: str,
 ) -> CollectionFreshness:
     """Return explicit attempt and success freshness for one catalog lane."""
+    measured_at = require_aware_utc(measured_at)
     if lane not in {"historical", "updates"}:
         raise ValueError("collection lane is invalid")
     if not progress_loaded:
@@ -454,6 +464,7 @@ def collection_freshness(
                 .limit(1)
             )
     freshness_age = UPDATE_FRESHNESS_MAX_AGE if lane == "updates" else HISTORICAL_PROGRESS_MAX_AGE
+    last_success = require_aware_utc(last_success) if last_success is not None else None
     stale_at = last_success + freshness_age if last_success is not None else None
     if progress.state == "failed":
         state = "failed"
@@ -485,7 +496,7 @@ def collection_freshness(
             last_success = None
         else:
             state = "complete"
-            last_success = manifest.observed_at
+            last_success = require_aware_utc(manifest.observed_at)
         return CollectionFreshness(
             lane=lane,
             latest_state=progress.state,
@@ -496,6 +507,8 @@ def collection_freshness(
         )
     elif stale_at is None:
         state = "missing"
+    elif last_success is not None and last_success > measured_at:
+        state = "stale"
     elif measured_at > stale_at:
         # Behind, but still making successful progress (a page accepted or an old
         # window completed recently): a backlog being worked through, not a stopped
@@ -505,7 +518,9 @@ def collection_freshness(
             lane == "updates"
             and progress.state in {"in_progress", "complete"}
             and progress.occurred_at is not None
-            and timedelta(0) <= measured_at - progress.occurred_at <= freshness_age
+            and timedelta(0)
+            <= measured_at - require_aware_utc(progress.occurred_at)
+            <= freshness_age
         )
         state = "catching_up" if catching_up else "stale"
     else:
@@ -679,6 +694,7 @@ def _source_lane(
             "One or more source records were quarantined, so this lane has an unresolved "
             "coverage gap."
         )
+    missing_records: int | None = None
     if source_id == "gbsec:source:github-advisory-database" and segment != "legacy-malware":
         missing_records = unresolved_count(session, source_id=source_id, segment=segment)
         if missing_records:
@@ -718,6 +734,7 @@ def _source_lane(
         freshness_state=freshness_state,
         ecosystems=ecosystems,
         unknowns=tuple(unknowns),
+        unresolved_record_count=missing_records,
     )
 
 
@@ -729,6 +746,8 @@ def _openssf_catalog_lane(
     ecosystems: tuple[str, ...],
     measured_at: datetime,
     omission_record_count: int = 0,
+    unresolved_record_count: int | None = None,
+    record_progress: dict | None = None,
 ) -> SourceCoverageLane:
     """Keep latest attempt separate from the last proven complete source pair."""
     expected_segments = {"openssf-malicious", "openssf-withdrawn"}
@@ -736,7 +755,7 @@ def _openssf_catalog_lane(
     pair_valid = (
         present == expected_segments
         and len({row.source_snapshot.partition(":")[0] for row in complete_manifests}) == 1
-        and len({row.observed_at for row in complete_manifests}) == 1
+        and len({require_aware_utc(row.observed_at) for row in complete_manifests}) == 1
     )
     unknowns: list[str] = []
     if omission_record_count:
@@ -745,10 +764,13 @@ def _openssf_catalog_lane(
             "have package omissions. This can include work from an unfinished collection; "
             "complete tree acquisition does not imply complete package applicability."
         )
-    last_attempt = max((row.observed_at for row in manifests), default=None)
+    last_attempt = max((require_aware_utc(row.observed_at) for row in manifests), default=None)
     last_success = (
-        max((row.observed_at for row in complete_manifests), default=None) if pair_valid else None
+        max((require_aware_utc(row.observed_at) for row in complete_manifests), default=None)
+        if pair_valid
+        else None
     )
+    measured_at = require_aware_utc(measured_at)
     stale_after = last_success + CATALOG_FRESHNESS_MAX_AGE if last_success is not None else None
     if not manifests:
         state, freshness_state = "not_started", "missing"
@@ -773,11 +795,20 @@ def _openssf_catalog_lane(
         unknowns.append(
             "The active and withdrawn OpenSSF catalog proofs do not describe one source snapshot."
         )
+    if unresolved_record_count is None or unresolved_record_count:
+        state, freshness_state = "failed", "unresolved"
+        unknowns.append(
+            "OpenSSF has unresolved rejected records; coverage is incomplete for every exact query."
+            if unresolved_record_count is not None
+            else "OpenSSF unresolved accounting is unavailable."
+        )
     if not ecosystems:
         unknowns.append("No supported exact artifact ecosystem has been accepted.")
     source_record_count = sum(row.record_count for row in complete_manifests) if pair_valid else 0
     return SourceCoverageLane(
         source_id=OPENSSF_SOURCE_ID,
+        unresolved_record_count=unresolved_record_count,
+        record_progress=record_progress,
         lane="historical",
         record_type="malicious_package_catalog",
         state=state,
@@ -805,70 +836,60 @@ def _openssf_manifest_rows(
     tuple[AdvisoryCatalogManifestRecord, ...],
 ]:
     """Latest, latest complete and latest terminal OpenSSF manifests per segment."""
-    latest_manifest_sequences = (
+    latest = (
         select(
-            AdvisoryCatalogManifestRecord.source_id.label("source_id"),
             AdvisoryCatalogManifestRecord.segment.label("segment"),
-            func.max(AdvisoryCatalogManifestRecord.sequence).label("sequence"),
+            func.max(AdvisoryCatalogManifestRecord.sequence).label("latest"),
+            func.max(AdvisoryCatalogManifestRecord.sequence)
+            .filter(AdvisoryCatalogManifestRecord.state == "complete")
+            .label("complete"),
+            func.max(AdvisoryCatalogManifestRecord.sequence)
+            .filter(AdvisoryCatalogManifestRecord.state.in_(("complete", "failed")))
+            .label("terminal"),
         )
         .where(
             AdvisoryCatalogManifestRecord.source_id == OPENSSF_SOURCE_ID,
             AdvisoryCatalogManifestRecord.segment.in_(("openssf-malicious", "openssf-withdrawn")),
         )
-        .group_by(
-            AdvisoryCatalogManifestRecord.source_id,
-            AdvisoryCatalogManifestRecord.segment,
-        )
+        .group_by(AdvisoryCatalogManifestRecord.segment)
         .subquery()
     )
-    openssf_complete_manifests = tuple(
-        session.scalars(
-            select(AdvisoryCatalogManifestRecord)
-            .where(
-                AdvisoryCatalogManifestRecord.source_id == OPENSSF_SOURCE_ID,
-                AdvisoryCatalogManifestRecord.state == "complete",
-                AdvisoryCatalogManifestRecord.segment.in_(
-                    ("openssf-malicious", "openssf-withdrawn")
-                ),
-            )
-            .distinct(AdvisoryCatalogManifestRecord.segment)
-            .order_by(
-                AdvisoryCatalogManifestRecord.segment, AdvisoryCatalogManifestRecord.sequence.desc()
-            )
+    rows = session.execute(
+        select(AdvisoryCatalogManifestRecord, latest.c.latest, latest.c.complete, latest.c.terminal)
+        .join(latest, AdvisoryCatalogManifestRecord.segment == latest.c.segment)
+        .where(
+            AdvisoryCatalogManifestRecord.source_id == OPENSSF_SOURCE_ID,
+            or_(
+                AdvisoryCatalogManifestRecord.sequence == latest.c.latest,
+                AdvisoryCatalogManifestRecord.sequence == latest.c.complete,
+                AdvisoryCatalogManifestRecord.sequence == latest.c.terminal,
+            ),
         )
+        .order_by(AdvisoryCatalogManifestRecord.segment)
+    ).all()
+    return (
+        tuple(row for row, newest, _complete, _terminal in rows if row.sequence == newest),
+        tuple(row for row, _newest, complete, _terminal in rows if row.sequence == complete),
+        tuple(row for row, _newest, _complete, terminal in rows if row.sequence == terminal),
     )
-    openssf_terminal_manifests = tuple(
-        session.scalars(
-            select(AdvisoryCatalogManifestRecord)
-            .where(
-                AdvisoryCatalogManifestRecord.source_id == OPENSSF_SOURCE_ID,
-                AdvisoryCatalogManifestRecord.state.in_(("complete", "failed")),
-                AdvisoryCatalogManifestRecord.segment.in_(
-                    ("openssf-malicious", "openssf-withdrawn")
-                ),
-            )
-            .distinct(AdvisoryCatalogManifestRecord.segment)
-            .order_by(
-                AdvisoryCatalogManifestRecord.segment, AdvisoryCatalogManifestRecord.sequence.desc()
-            )
-        )
-    )
-    openssf_manifests = tuple(
-        session.scalars(
-            select(AdvisoryCatalogManifestRecord)
-            .join(
-                latest_manifest_sequences,
-                and_(
-                    AdvisoryCatalogManifestRecord.source_id
-                    == latest_manifest_sequences.c.source_id,
-                    AdvisoryCatalogManifestRecord.segment == latest_manifest_sequences.c.segment,
-                    AdvisoryCatalogManifestRecord.sequence == latest_manifest_sequences.c.sequence,
-                ),
-            )
-            .order_by(AdvisoryCatalogManifestRecord.segment)
-        )
-    )
-    return openssf_manifests, openssf_complete_manifests, openssf_terminal_manifests
+
+
+def _openssf_record_progress(session: Session) -> dict | None:
+    receipt = latest_attempt(session)
+    if receipt is None:
+        return None
+    document = receipt.document
+    # Failed or interrupted attempts do not earn accepted progress. A prior partial
+    # receipt stays immutable, but is never promoted to the latest attempt's proof.
+    proven = receipt.state in {"partial", "complete"}
+    return {
+        "schema_version": "1.0.0",
+        "attempt_id": receipt.run_id,
+        "state": receipt.state,
+        "accepted_record_count": document.get("accepted_count") if proven else None,
+        "rejected_record_count": document.get("rejected_count") if proven else None,
+        "validated_at": document.get("validated_at") if proven else None,
+    }
 
 
 def openssf_catalog_freshness(session: Session, *, measured_at: datetime) -> str:
@@ -880,6 +901,7 @@ def openssf_catalog_freshness(session: Session, *, measured_at: datetime) -> str
         terminal_manifests=terminal,
         ecosystems=(),
         measured_at=measured_at,
+        unresolved_record_count=unresolved_count(session, source_id=OPENSSF_SOURCE_ID),
     ).freshness_state
 
 
@@ -930,7 +952,9 @@ def _supplemental_coverage_lanes(
                 newest_published_at=None,
                 last_attempt_at=timestamp(attempt.observed_at) if attempt else None,
                 last_success_at=timestamp(complete.observed_at) if complete else None,
-                stale_after=timestamp(complete.observed_at + MAX_AGE) if complete else None,
+                stale_after=timestamp(require_aware_utc(complete.observed_at) + MAX_AGE)
+                if complete
+                else None,
                 freshness_state=state,
                 ecosystems=tuple(ecosystems),
                 unknowns=tuple(unknowns),
@@ -1106,6 +1130,8 @@ def _build_coverage_report(
                 for segment in ("malware", "reviewed", "unreviewed")
             ),
             _openssf_catalog_lane(
+                unresolved_record_count=unresolved_count(session, source_id=OPENSSF_SOURCE_ID),
+                record_progress=_openssf_record_progress(session),
                 manifests=openssf_manifests,
                 complete_manifests=openssf_complete_manifests,
                 terminal_manifests=openssf_terminal_manifests,

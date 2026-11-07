@@ -62,7 +62,12 @@ class LocalPostgres:
     """One loopback-disabled PostgreSQL cluster containing disposable test databases."""
 
     def __init__(self) -> None:
-        self._temporary = tempfile.TemporaryDirectory(prefix="smithguard-tests-", dir="/tmp")
+        # The check entry provides a short, disk-backed task directory. Pass it
+        # explicitly because tempfile may have cached a different default before
+        # TMPDIR was set; standalone tests still use Python's normal fallback.
+        self._temporary = tempfile.TemporaryDirectory(
+            prefix="sg-pg-", dir=os.environ.get("TMPDIR") or None
+        )
         self.root = Path(self._temporary.name)
         self.data = self.root / "data"
         self.socket = self.root / "socket"

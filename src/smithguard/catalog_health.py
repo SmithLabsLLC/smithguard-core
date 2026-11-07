@@ -15,6 +15,7 @@ from smithguard.fsio import FsioError, atomic_write, read_private_file
 from smithguard.identifiers import (
     canonical_json_bytes,
     parse_timestamp,
+    require_aware_utc,
     strict_json_loads,
     timestamp,
 )
@@ -111,10 +112,10 @@ def write_catalog_health(
     valid_pair = (
         len(complete_pair) == 2
         and {row.segment for row in complete_pair} == {"openssf-malicious", "openssf-withdrawn"}
-        and len({row.observed_at for row in complete_pair}) == 1
+        and len({require_aware_utc(row.observed_at) for row in complete_pair}) == 1
         and len({row.source_snapshot.partition(":")[0] for row in complete_pair}) == 1
     )
-    last_success = complete_pair[0].observed_at if valid_pair else None
+    last_success = require_aware_utc(complete_pair[0].observed_at) if valid_pair else None
     last_commit = complete_pair[0].source_snapshot.partition(":")[0] if valid_pair else None
     stale_after = last_success + CATALOG_FRESHNESS_MAX_AGE if last_success else None
     capacity_valid = True
@@ -143,13 +144,18 @@ def write_catalog_health(
         and last_success
         and last_success <= now <= stale_after
         and not attempt.get("missing_upstream_count")
+        and attempt.get("unresolved_record_count") == 0
+        and not attempt.get("rejected_count")
     )
     status = ("success" if succeeded else "degraded") if healthy else "failure"
     checkpoint = attempt.get("commit")
     if not isinstance(checkpoint, str) or COMMIT.fullmatch(checkpoint) is None:
         checkpoint = None
     receipt = {
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
+        "unresolved_record_count": attempt.get("unresolved_record_count"),
+        "accepted_progress_count": attempt.get("accepted_progress_count"),
+        "rejected_record_count": attempt.get("rejected_count"),
         "monitor_source": "catalog",
         "source_id": OPENSSF_MALICIOUS,
         "measured_at": timestamp(now),
@@ -208,10 +214,13 @@ def validate_catalog_health(document) -> dict:
         "filesystem_available_bytes",
         "filesystem_used_percent",
     }
+    version = document.get("schema_version") if isinstance(document, dict) else None
+    if version == "3.0.0":
+        fields |= {"unresolved_record_count", "accepted_progress_count", "rejected_record_count"}
     if not isinstance(document, dict) or set(document) != fields:
         raise CatalogHealthError("catalog receipt shape is invalid")
     if (
-        document["schema_version"] != "2.0.0"
+        document["schema_version"] not in {"2.0.0", "3.0.0"}
         or document["monitor_source"] != "catalog"
         or document["source_id"] != OPENSSF_MALICIOUS
         or type(document["healthy"]) is not bool
@@ -226,6 +235,18 @@ def validate_catalog_health(document) -> dict:
         if type(value) is not int or not 0 <= value <= maximum:
             raise CatalogHealthError("catalog receipt numeric bound is invalid")
 
+    if version == "3.0.0":
+        for key, maximum in (
+            ("unresolved_record_count", 500000),
+            ("accepted_progress_count", 500000),
+            ("rejected_record_count", 10),
+        ):
+            if document[key] is not None:
+                number(document[key], maximum)
+        if document["healthy"] and (
+            document["unresolved_record_count"] != 0 or document["rejected_record_count"]
+        ):
+            raise CatalogHealthError("catalog receipt unresolved state cannot be healthy")
     for key, maximum in (
         ("record_count", 1000000),
         ("package_entry_count", 10000000),

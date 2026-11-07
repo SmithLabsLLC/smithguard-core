@@ -38,6 +38,16 @@ def _request(examples):
     )
 
 
+def _route_request(examples, route):
+    request = _request(examples)
+    if route.endswith("assessment-summary"):
+        return {
+            key: request["artifact"][key]
+            for key in ("ecosystem", "name", "version", "registry_host")
+        }
+    return request
+
+
 def _app(database, *, current=None, store=None):
     return create_public_beta_app(
         session_factory=sessionmaker(database.engine),
@@ -239,11 +249,13 @@ def test_warning_expiring_during_quota_completion_is_not_returned_active(
 
 @pytest.mark.audit_ids("AUD-08")
 @pytest.mark.parametrize("failure", ["database", "capacity"])
+@pytest.mark.parametrize("route", ["/v1/artifacts/assess", "/v1/artifacts/assessment-summary"])
 def test_failed_recheck_after_quota_completion_refunds_the_check(
     database,
     contract_examples,
     monkeypatch,
     failure,
+    route,
 ) -> None:
     """A warning expires during quota completion and the recheck then fails: the
     caller gets a 503 and the completed check is refunded."""
@@ -270,7 +282,7 @@ def test_failed_recheck_after_quota_completion_refunds_the_check(
     store = AnonymousQuotaStore()
     app = _app(database, current=current, store=store)
     with _client(app, raise_server_exceptions=False) as client:
-        response = client.post("/v1/artifacts/assess", json=_request(contract_examples))
+        response = client.post(route, json=_route_request(contract_examples, route))
     assert calls[0] == 2
     assert response.status_code == 503
     assert _completed(store) == 0
@@ -669,8 +681,9 @@ def test_total_request_admission_is_bounded_before_reading_more_bodies(
 
 
 @pytest.mark.audit_ids("AUD-09")
+@pytest.mark.parametrize("route", ["/v1/artifacts/assess", "/v1/artifacts/assessment-summary"])
 def test_http_disconnect_signal_abandons_late_quota_work(
-    database, contract_examples, monkeypatch
+    database, contract_examples, monkeypatch, route
 ) -> None:
     entered, proceed = Event(), Event()
     original = AnonymousQuotaStore.reserve
@@ -703,7 +716,7 @@ def test_http_disconnect_signal_abandons_late_quota_work(
                 supplied = True
                 return {
                     "type": "http.request",
-                    "body": json.dumps(_request(contract_examples)).encode(),
+                    "body": json.dumps(_route_request(contract_examples, route)).encode(),
                     "more_body": False,
                 }
             await disconnected.wait()
@@ -718,8 +731,8 @@ def test_http_disconnect_signal_abandons_late_quota_work(
             "http_version": "1.1",
             "method": "POST",
             "scheme": "https",
-            "path": "/v1/artifacts/assess",
-            "raw_path": b"/v1/artifacts/assess",
+            "path": route,
+            "raw_path": route.encode(),
             "query_string": b"",
             "root_path": "",
             "server": ("security.example", 443),
@@ -746,8 +759,9 @@ def test_http_disconnect_signal_abandons_late_quota_work(
         proceed.set()
 
 
+@pytest.mark.parametrize("route", ["/v1/artifacts/assess", "/v1/artifacts/assessment-summary"])
 def test_a_deadline_during_final_cleanup_never_counts_a_check_without_an_answer(
-    database, contract_examples, monkeypatch
+    database, contract_examples, monkeypatch, route
 ) -> None:
     """The disconnect watcher's cleanup is slowed past the deadline: the caller either
     gets the answer (and the check counts) or a 503 (and the check is refunded)."""
@@ -778,7 +792,7 @@ def test_a_deadline_during_final_cleanup_never_counts_a_check_without_an_answer(
         await inner(scope, slow_receive, send)
 
     with _client(slow_cleanup_app, readiness_app=inner) as client:
-        response = client.post("/v1/artifacts/assess", json=_request(contract_examples))
+        response = client.post(route, json=_route_request(contract_examples, route))
     assert response.status_code in {200, 503}
     assert (response.status_code == 200) == (_completed(store) == 1)
     assert _pending(store) == 0

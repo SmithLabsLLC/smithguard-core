@@ -375,10 +375,55 @@
           "if": {
             "properties": {
               "schema_version": {
+                "const": "2.5.0"
+              }
+            },
+            "required": [
+              "schema_version"
+            ]
+          },
+          "then": {
+            "properties": {
+              "incidents": {
+                "items": {
+                  "properties": {
+                    "source_reports": {
+                      "items": {
+                        "properties": {
+                          "source_state_status": {
+                            "enum": [
+                              "current",
+                              "historical_unresolved"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_state_status"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "source_freshness": {
+                "items": {
+                  "required": [
+                    "unresolved_record_count"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
                 "enum": [
                   "2.2.0",
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -403,7 +448,8 @@
               "schema_version": {
                 "enum": [
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -421,7 +467,10 @@
           "if": {
             "properties": {
               "schema_version": {
-                "const": "2.4.0"
+                "enum": [
+                  "2.4.0",
+                  "2.5.0"
+                ]
               }
             },
             "required": [
@@ -792,7 +841,8 @@
             "2.1.0",
             "2.2.0",
             "2.3.0",
-            "2.4.0"
+            "2.4.0",
+            "2.5.0"
           ]
         },
         "updated_at": {
@@ -1497,6 +1547,13 @@
             {
               "type": "null"
             }
+          ]
+        },
+        "source_state_status": {
+          "enum": [
+            "current",
+            "historical_unresolved",
+            null
           ]
         },
         "source_updated_at": {
@@ -2425,6 +2482,13 @@
         },
         "source_id": {
           "$ref": "#/$defs/StableId"
+        },
+        "unresolved_record_count": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
         }
       },
       "required": [

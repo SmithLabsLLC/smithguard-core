@@ -172,6 +172,13 @@ selects the largest branch version. At most it returns a candidate for applicati
 testing. Missing, changed, conflicting or incomplete evidence yields no verified
 recommendation. Real remediation requires separate authorization and application tests.
 
+Assessment 2.5 adds explicit current/historical source state and a nullable count
+of unresolved source records. Current patch advice requires explicit current
+source state and zero unresolved records in both compared assessments. Missing,
+historical or unknown state cannot qualify a patch. Older 2.4 signatures still
+verify, but their missing source-state provenance cannot support a current patch
+recommendation. This does not change their retained factual findings.
+
 ## Limits
 
 Initial adapter: Linux, Python .dist-info/METADATA only. No recursive discovery,

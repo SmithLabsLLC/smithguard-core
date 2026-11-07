@@ -35,6 +35,11 @@ and allow the next scheduled run to finish within its bounded runtime. The
 maintenance expiry repair requires exact
 live record identities and an active grant, and preserves original content and dates.
 
+The [summary projection](product/assessment-summary.md) shares the assessment
+operation and its quota, cache, deadline and cancellation ownership. Its separate
+MCP profile exposes one bounded derived-report tool and never returns a raw
+assessment fallback. Hosted projection does not run client signature verification.
+
 ## Important boundaries
 
 External content and model output are untrusted data. They cannot select arbitrary

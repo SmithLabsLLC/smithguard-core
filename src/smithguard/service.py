@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
 
@@ -56,7 +56,7 @@ from smithguard.supplemental_store import (
 )
 from smithguard.version_order import is_exact_version
 
-ASSESSMENT_SCHEMA_VERSION = "2.4.0"
+ASSESSMENT_SCHEMA_VERSION = "2.5.0"
 MAX_LISTED_INCIDENTS = 100
 SHORT_REQUEST_FIELDS = frozenset({"ecosystem", "name", "version", "digest", "registry_host"})
 # Range syntax and floating names that never identify one exact published version.
@@ -77,6 +77,8 @@ FULL_SEMVER = re.compile(
     rf"(?:-{_PRE_IDENTIFIER}(?:\.{_PRE_IDENTIFIER})*)?"
     r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"
 )
+ACTION_COMMIT = re.compile(r"^[0-9a-fA-F]{40}$")
+CONTAINER_ECOSYSTEMS = frozenset({"oci", "docker"})
 FRESH_STATES = frozenset({"fresh", "complete"})
 
 
@@ -134,6 +136,13 @@ def require_exact_version(ecosystem: str, version: str | None) -> None:
         or (ecosystem in STRICT_VERSION_ECOSYSTEMS and not is_exact_version(ecosystem, version))
         # SemVer registries publish full X.Y.Z versions; "1.2" is a requirement there.
         or (ecosystem in FULL_SEMVER_ECOSYSTEMS and not FULL_SEMVER.fullmatch(version))
+        # Short release tags move independently of the full release used in ranges.
+        # A full Actions commit is accepted literally, never resolved to a tag.
+        or (
+            ecosystem == "github-actions"
+            and not (FULL_SEMVER.fullmatch(version) or ACTION_COMMIT.fullmatch(version))
+        )
+        or (ecosystem in CONTAINER_ECOSYSTEMS and not FULL_SEMVER.fullmatch(version))
         # Moving builds and wildcards: Composer branches (dev-main, 1.x-dev), wildcard
         # parts (1.x, 1.2.*) and Maven snapshots.
         or (ecosystem == "composer" and _composer_moving(lowered))
@@ -725,6 +734,14 @@ class SmithGuardService:
         """
         if "artifact" not in request:
             request = self._expand_short_request(request)
+        raw = request.get("artifact")
+        if (
+            isinstance(raw, dict)
+            and raw.get("ecosystem") not in CONTAINER_ECOSYSTEMS
+            and raw.get("version") is not None
+            and raw.get("digest") is not None
+        ):
+            raise ServiceError("supply version or digest, not both, for non-container artifacts")
         parsed = parse_contract("PublicArtifactAssessmentRequest", request).model_dump(
             mode="json",
             exclude_none=False,
@@ -852,6 +869,44 @@ class SmithGuardService:
         )
         lane = next(value for value in report.lanes if value.ecosystem == identity["ecosystem"])
         freshness = _relevant_sources(report.source_lanes, identity["ecosystem"])
+        cached_openssf = next(
+            item for item in report.source_lanes if item.source_id == OPENSSF_SOURCE_ID
+        )
+        cached_gap = (
+            cached_openssf.freshness_state == "unresolved"
+            or (cached_openssf.unresolved_record_count or 0) > 0
+        )
+        if catalog_evidence.openssf_unresolved_count or cached_gap:
+            if result == "not_affected":
+                result = "unknown"
+            # Keep the larger live/cached barrier until cached coverage refreshes.
+            # A repaired live gap cannot contradict still-unresolved signed freshness.
+            unresolved_count = (
+                max(
+                    catalog_evidence.openssf_unresolved_count,
+                    cached_openssf.unresolved_record_count or 0,
+                )
+                if catalog_evidence.openssf_unresolved_count
+                else cached_openssf.unresolved_record_count
+            )
+            freshness = tuple(
+                item for item in freshness if item.source_id != OPENSSF_SOURCE_ID
+            ) + tuple(
+                replace(
+                    item,
+                    freshness_state="unresolved",
+                    unresolved_record_count=unresolved_count,
+                )
+                for item in report.source_lanes
+                if item.source_id == OPENSSF_SOURCE_ID
+            )
+        # Segment accounting is source-wide, including quarantines for other
+        # packages/ecosystems. Preserve that uncertainty in the signed verdict
+        # instead of leaving consumers a contradictory negative assessment.
+        if result == "not_affected" and any(
+            (item.unresolved_record_count or 0) > 0 for item in freshness
+        ):
+            result = "unknown"
         warning_aliases = [identity["coordinate"]]
         exact_marker = identity["digest"] or identity["version"]
         if exact_marker is not None:
@@ -908,6 +963,7 @@ class SmithGuardService:
         attach_catalog_context(session, listed_reports)
         for report in listed_reports:
             # Legacy incident-only records did not retain structured patch context.
+            report.setdefault("source_state_status", "current")
             report.setdefault("source_fixed_versions", [])
             report.setdefault("fix_evidence", [])
             report.setdefault("range_bound_evidence", [])
@@ -1040,6 +1096,7 @@ class SmithGuardService:
                     "record_type": item.record_type,
                     "freshness_state": item.freshness_state,
                     "last_success_at": item.last_success_at,
+                    "unresolved_record_count": item.unresolved_record_count,
                 }
                 for item in freshness
             ],

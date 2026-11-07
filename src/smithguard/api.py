@@ -26,7 +26,7 @@ from fastapi.routing import APIRoute
 from sqlalchemy import event, text
 from sqlalchemy.orm import Session
 
-from smithguard import __version__
+from smithguard import __version__, summary_contract
 from smithguard.anonymous_quota import (
     DAILY_SUCCESS_LIMIT,
     AnonymousAssessmentQuota,
@@ -44,7 +44,13 @@ from smithguard.assessment_cache import (
     active_warning_expiry,
     assessment_watermark,
 )
+from smithguard.assessment_summary import (
+    SummaryRejected,
+    project_summary,
+    validate_summary_identity,
+)
 from smithguard.bulletin_api import register as register_bulletin_routes
+from smithguard.contracts.runtime import parse_contract
 from smithguard.coverage import CoverageReportUnavailable
 from smithguard.emerging_leads import public_page as emerging_lead_page
 from smithguard.emerging_leads import publication_enabled
@@ -81,6 +87,7 @@ PUBLIC_BETA_ACTIVE_ROUTE_ALLOWLIST = frozenset(
         ("GET", "/v1/public-keys/{public_key_id}.json"),
         ("POST", "/v1/artifacts/assess"),
         ("GET", "/v1/artifacts/assess"),
+        ("POST", "/v1/artifacts/assessment-summary"),
     }
 )
 # The short request fields, also accepted as query parameters on the GET form.
@@ -214,7 +221,7 @@ class UsageCounter:
             route = scope.get("route")
             template = getattr(route, "path", None) or "unmatched"
             self.usage.counts[(template, method, status[0])] += 1
-            if template == "/v1/artifacts/assess":
+            if template in {"/v1/artifacts/assess", summary_contract.REST_PATH}:
                 elapsed = self.usage.pressure.clock() - started
                 processing = scope.get("smithguard_processing_started")
                 if not disconnected:
@@ -278,7 +285,13 @@ class HeadAsGet:
         if (
             scope.get("type") != "http"
             or scope.get("method") != "HEAD"
-            or scope.get("path") in {"/v1/artifacts/assess", MCP_PATH}
+            or scope.get("path")
+            in {
+                "/v1/artifacts/assess",
+                MCP_PATH,
+                summary_contract.REST_PATH,
+                summary_contract.MCP_PATH,
+            }
         ):
             await self.app(scope, receive, send)
             return
@@ -675,7 +688,34 @@ class _PublicAssessmentRuntime:
     async def assess_public_artifact_by_query(self, request: Request) -> Response:
         return await self._assess(request, query=True)
 
-    async def _assess(self, request: Request, *, query: bool) -> Response:
+    async def assess_summary(self, request: Request) -> Response:
+        try:
+            response = await self._assess(request, query=False, summary=True)
+        except Exception:
+            return JSONResponse(
+                summary_contract.error_document("service_unavailable", retryable=True),
+                status_code=503,
+                headers={**self.response_headers, "Cache-Control": "no-store"},
+            )
+        if response.status_code >= 400:
+            error = json.loads(response.body).get("error", {})
+            return JSONResponse(
+                summary_contract.error_document(
+                    error.get("code"),
+                    retryable=error.get("retryable", False),
+                    retry_after=response.headers.get("retry-after"),
+                ),
+                status_code=response.status_code,
+                headers={
+                    key: value
+                    for key, value in response.headers.items()
+                    if key.lower() not in {"content-length", "content-type"}
+                }
+                | {"Cache-Control": "no-store"},
+            )
+        return response
+
+    async def _assess(self, request: Request, *, query: bool, summary: bool = False) -> Response:
         if self.closing or len(self.owned_requests) >= self.max_requests:
             return self.capacity_response()
         if not self.coverage_ready.is_set():
@@ -694,6 +734,7 @@ class _PublicAssessmentRuntime:
                 stopped=stopped,
                 query=query,
                 answer_ready=answer_ready,
+                summary=summary,
             )
         )
         self.owned_requests[work] = stopped
@@ -776,7 +817,7 @@ class _PublicAssessmentRuntime:
         return bytes(collected)
 
     def _validated_request(
-        self, body: bytes, request: Request, query: bool
+        self, body: bytes, request: Request, query: bool, summary: bool = False
     ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         """Parse and validate the caller's request; every failure is a 400 that names
         the problem (and the JSON pointer of a contract mismatch), never stored data."""
@@ -793,6 +834,8 @@ class _PublicAssessmentRuntime:
             raise RequestRejected("invalid_request", str(error)[:200]) from error
         if not isinstance(document, dict):
             raise RequestRejected("invalid_request", "request must be a JSON object")
+        if summary and not summary_contract.INPUT_VALIDATOR.is_valid(document):
+            raise RequestRejected("invalid_request", "request does not match the summary contract")
         try:
             parsed_request, identity = self.service.validate_public_artifact_request(document)
         except ServiceError as error:
@@ -800,6 +843,38 @@ class _PublicAssessmentRuntime:
         except ValueError as error:
             raise RequestRejected("invalid_request", _contract_message(error)) from error
         return parsed_request, identity, document
+
+    def project_for_caller(self, result: dict, parsed_request: dict, *, summary: bool) -> dict:
+        if summary:
+            validate_summary_identity(result, parsed_request["artifact"])
+        return self.service.project_public_artifact_response(result, parsed_request)
+
+    def summary_for_owned_result(
+        self,
+        result: dict,
+        parsed_request: dict,
+        *,
+        identity: dict,
+        owner: asyncio.Future | None,
+        watermark: str | None,
+        check_active: Callable[[], None],
+    ) -> dict:
+        try:
+            return project_summary(result, parsed_request["artifact"], now=self.local_clock())
+        except SummaryRejected:
+            # Repeated deterministic refusals may reuse only a contract-valid
+            # full result via the ordinary bounded/expiry/watermark cache.
+            # No summary was delivered: finally releases the daily reservation;
+            # the burst attempt is never refunded. Its later abort is owner-checked
+            # and cannot abort a different operation after this completion.
+            parse_contract("PublicArtifactAssessment", result)
+            check_active()
+            if owner is None:
+                raise RuntimeError("assessment completion has no retained owner") from None
+            self.assessment_responses.complete(
+                identity, result, owner=owner, now=self.local_clock(), watermark=watermark
+            )
+            raise
 
     async def assessment_work(
         self,
@@ -809,6 +884,7 @@ class _PublicAssessmentRuntime:
         stopped: Event,
         query: bool = False,
         answer_ready: asyncio.Event | None = None,
+        summary: bool = False,
     ) -> Response:
         loop = asyncio.get_running_loop()
 
@@ -842,7 +918,9 @@ class _PublicAssessmentRuntime:
         try:
             check_active()
             try:
-                parsed_request, identity, document = self._validated_request(body, request, query)
+                parsed_request, identity, document = self._validated_request(
+                    body, request, query, summary
+                )
             except RequestRejected as rejection:
                 return rejection.response(self.response_headers)
             request.scope["smithguard_processing_started"] = self.usage.pressure.clock()
@@ -858,13 +936,15 @@ class _PublicAssessmentRuntime:
                     loop=loop,
                 )
                 if cached is not None:
-                    projected = self.service.project_public_artifact_response(
-                        cached, parsed_request
-                    )
+                    projected = self.project_for_caller(cached, parsed_request, summary=summary)
                     expiry = active_warning_expiry(projected)
                     if expiry is not None and self.local_clock() >= expiry:
                         continue
                     check_active()
+                    if summary:
+                        projected = project_summary(
+                            projected, parsed_request["artifact"], now=self.local_clock()
+                        )
                     return JSONResponse(
                         projected,
                         headers={
@@ -912,11 +992,25 @@ class _PublicAssessmentRuntime:
             while True:
                 result, result_watermark = await self.run_bounded(assess, deadline=deadline)
                 check_active()
-                result = self.service.project_public_artifact_response(result, parsed_request)
+                result = self.project_for_caller(result, parsed_request, summary=summary)
                 expiry = active_warning_expiry(result)
                 if expiry is None or self.local_clock() < expiry:
                     break
 
+            # Projection failure belongs to the same owned operation. Validate it
+            # before counting a successful assessment; never charge for no summary.
+            output = (
+                self.summary_for_owned_result(
+                    result,
+                    parsed_request,
+                    identity=identity,
+                    owner=pending,
+                    watermark=result_watermark,
+                    check_active=check_active,
+                )
+                if summary
+                else result
+            )
             if (
                 quota_reservation is not None
                 and quota_reservation.status == "reserved"
@@ -937,7 +1031,15 @@ class _PublicAssessmentRuntime:
                 ) is not None and self.local_clock() >= expiry:
                     result, result_watermark = await self.run_bounded(assess, deadline=deadline)
                     check_active()
-                    result = self.service.project_public_artifact_response(result, parsed_request)
+                    result = self.project_for_caller(result, parsed_request, summary=summary)
+                    output = (
+                        project_summary(result, parsed_request["artifact"], now=self.local_clock())
+                        if summary
+                        else result
+                    )
+                response = JSONResponse(
+                    output, headers={**self.response_headers, "Cache-Control": "no-store"}
+                )
                 if pending is None:
                     raise RuntimeError("assessment completion has no retained owner")
                 self.assessment_responses.complete(
@@ -965,9 +1067,14 @@ class _PublicAssessmentRuntime:
                 if quota_completed:
                     await self.refund_owned(quota_reservation)
                 raise
-            return JSONResponse(
-                result,
-                headers={**self.response_headers, "Cache-Control": "no-store"},
+            return response
+        except SummaryRejected as error:
+            return _error_response(
+                status_code=503,
+                code=error.code,
+                message="Summary unavailable",
+                retryable=False,
+                headers=self.response_headers,
             )
         except AssessmentCacheCapacityError:
             return self.capacity_response()
@@ -1318,7 +1425,11 @@ def create_public_beta_app(
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
-        async with runtime.lifespan(application), hosted.server.session_manager.run():
+        async with (
+            runtime.lifespan(application),
+            hosted.server.session_manager.run(),
+            summaries.server.session_manager.run(),
+        ):
             yield
 
     local = FastAPI(
@@ -1341,6 +1452,17 @@ def create_public_beta_app(
     )
     transport_route = hosted.route()
     local.router.routes.append(transport_route)
+    summaries = HostedMCP(
+        local,
+        contract=_generated_public_beta_openapi(),
+        hosts={allowed_host, *PUBLIC_API_HOSTS},
+        trusted_proxy_header=trusted_proxy_header,
+        summary=True,
+    )
+    # A second profile must not double the original MCP application's allowance.
+    summaries.slots = hosted.slots
+    summary_route = summaries.route()
+    local.router.routes.append(summary_route)
     # Nginx normalizes every allowed public Host to the canonical one, but the process
     # must accept the canonical and legacy hosts whatever base URL its environment
     # still carries, so the host transition cannot 400 requests in either order.
@@ -1367,6 +1489,7 @@ def create_public_beta_app(
 
     local.post("/v1/artifacts/assess")(runtime.assess_public_artifact)
     local.get("/v1/artifacts/assess")(runtime.assess_public_artifact_by_query)
+    local.post(summary_contract.REST_PATH)(runtime.assess_summary)
 
     _register_public_routes(
         local,
@@ -1394,8 +1517,10 @@ def create_public_beta_app(
     if (
         transport_route.path != MCP_PATH
         or transport_route.methods != MCP_TRANSPORT_METHODS
+        or summary_route.path != summary_contract.MCP_PATH
+        or summary_route.methods != MCP_TRANSPORT_METHODS
         or any(
-            route is not transport_route and not isinstance(route, APIRoute)
+            route not in (transport_route, summary_route) and not isinstance(route, APIRoute)
             for route in local.routes
         )
     ):

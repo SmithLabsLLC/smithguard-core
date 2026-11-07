@@ -14,6 +14,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from time import perf_counter
+from uuid import uuid4
 
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
@@ -32,6 +33,13 @@ from smithguard.catalog_health import (
     resource_measurement,
     write_catalog_health,
 )
+from smithguard.collection_records import (
+    append_outcome,
+    append_replay_membership,
+    append_resolution,
+    unresolved_count,
+    unresolved_statement,
+)
 from smithguard.collectors import (
     COLLECTOR_SPECS,
     OPENSSF_MALICIOUS,
@@ -39,6 +47,7 @@ from smithguard.collectors import (
     CollectorSpec,
     TransportResponse,
 )
+from smithguard.db.locks import advisory_xact_lock
 from smithguard.db.models import (
     AdvisoryCatalogManifestRecord,
     AdvisoryCatalogRecord,
@@ -61,6 +70,7 @@ from smithguard.identifiers import (
     canonical_json_bytes,
     parse_timestamp,
     sha256_id,
+    stable_id,
     strict_json_loads,
     timestamp,
 )
@@ -79,7 +89,17 @@ from smithguard.openssf_git import (
     OpenSSFGitError,
     OpenSSFProvisionalIDError,
     OpenSSFRecord,
+    OpenSSFWithdrawalMismatch,
+    projected_record_size,
     raw_batches,
+)
+from smithguard.openssf_resilience import (
+    MAX_REJECTIONS,
+    OpenSSFResilienceError,
+    append_attempt,
+    partial_writes_enabled,
+    provenance,
+    reject_record,
 )
 from smithguard.openssf_shadow import (
     BOOTSTRAP_COMMIT,
@@ -100,7 +120,7 @@ from smithguard.source_governance import SourceGovernancePolicy
 from smithguard.source_rights import RightsRegistry, SourceRightsError
 
 DEFAULT_STATE_ROOT = Path("/var/lib/smithguard/advisory-catalog/openssf")
-CATALOG_PROCESSING_VERSION = "openssf-full-catalog-3"
+CATALOG_PROCESSING_VERSION = "openssf-full-catalog-4"
 OPENSSF_CATALOG_RUN_LOCK = "openssf-catalog-run"
 OPENSSF_CATALOG_ALREADY_RUNNING = 4
 OPENSSF_CATALOG_DEFERRED = 75
@@ -133,6 +153,75 @@ class OpenSSFCatalogDeferred(OpenSSFCatalogError):
             raise ValueError("deferred catalog commit is invalid")
         self.commit = commit
         super().__init__("OpenSSF candidate retains a recognized provisional advisory identity")
+
+
+class OpenSSFCatalogPartial(OpenSSFCatalogError):
+    """Finalized accepted progress with named rejections is deliberately non-success."""
+
+    def __init__(self, result: dict) -> None:
+        self.result = result
+        super().__init__("OpenSSF catalog retains unresolved record rejections")
+
+
+def _preflight_partition(
+    reader,
+    snapshot,
+    *,
+    factory,
+    evidence,
+    registry,
+    governance_policy,
+    observed_at,
+    run_id,
+    rejections,
+    accepted,
+    package_counts,
+):
+    """No accepted pages precede strict full scan and the durable rejection barrier.
+
+    Only the typed contradiction is isolated. Structural failure/overflow leaves
+    the already committed barriers visible and cannot publish a partition proof.
+    Raw batches stay bounded; no full-source body buffer or spool is retained.
+    """
+    for batch in _raw_batches(snapshot.entries):
+        checkpoint()
+        bodies = reader.read_blobs(batch)
+        for entry, body in zip(batch, bodies, strict=True):
+            checkpoint()
+            try:
+                record = reader.parse_record(entry, body)
+            except OpenSSFWithdrawalMismatch:
+                if len(rejections) >= MAX_REJECTIONS:
+                    raise OpenSSFResilienceError("OpenSSF rejection count exceeds ten") from None
+                with (
+                    evidence.collection_lock(
+                        timeout_seconds=bounded_timeout(COLLECTION_LOCK_TIMEOUT_SECONDS)
+                    ),
+                    factory() as session,
+                    session.begin(),
+                ):
+                    rejection = reject_record(
+                        session,
+                        entry=entry,
+                        body=body,
+                        registry=registry,
+                        governance_policy=governance_policy,
+                        evidence=evidence,
+                        observed_at=observed_at,
+                        run_id=run_id,
+                        processing_version=CATALOG_PROCESSING_VERSION,
+                    )
+                rejections.append(rejection)
+            else:
+                _projected_size(record)
+                digest, package_count = openssf_advisory_identity(
+                    record.projected,
+                    canonical_url=entry.canonical_url,
+                    source_state=entry.source_state,
+                )
+                accepted[entry.source_tree][entry.advisory_id] = digest
+                package_counts[entry.source_tree] += package_count
+    return rejections
 
 
 def _openssf_catalog_validation_page(before: str | None = None):
@@ -181,6 +270,8 @@ def _openssf_catalog_validation_page(before: str | None = None):
 
 def _read_catalog_validation(
     session: Session,
+    *,
+    excluded_ids: frozenset[str] = frozenset(),
 ) -> tuple[dict[str, list[list[str]]], dict[str, int]]:
     """Read every identity in the caller's consistent manifest transaction."""
     records: dict[str, list[list[str]]] = {"malicious": [], "withdrawn": []}
@@ -201,6 +292,8 @@ def _read_catalog_validation(
         if not rows:
             break
         for upstream_record_id, source_sha256, state, package_count in rows:
+            if upstream_record_id in excluded_ids:
+                continue
             tree = "malicious" if state == "active" else "withdrawn"
             records[tree].append([str(upstream_record_id), str(source_sha256)])
             counts[tree] += int(package_count)
@@ -405,21 +498,9 @@ def _entry_signature(entry) -> bytes:
 
 def _projected_size(record) -> tuple[int, int]:
     try:
-        size = len(canonical_json_bytes(record.projected))
-    except ValueError as error:
-        raise OpenSSFCatalogError("OpenSSF record contains an invalid JSON number") from error
-    nodes = 0
-    stack = [(record.projected, 2)]  # acquisition starts with the page list at depth 1
-    while stack:
-        item, depth = stack.pop()
-        nodes += 1
-        if depth > 32 or nodes >= 100_000 or size + 2 > 8 * 1024 * 1024:
-            raise OpenSSFCatalogError("OpenSSF single projected record exceeds acquisition budget")
-        if isinstance(item, dict):
-            stack.extend((value, depth + 1) for value in item.values())
-        elif isinstance(item, list):
-            stack.extend((value, depth + 1) for value in item)
-    return size, nodes
+        return projected_record_size(record.projected)
+    except OpenSSFGitError as error:
+        raise OpenSSFCatalogError(str(error)) from error
 
 
 def _semantic_pages(records):
@@ -495,6 +576,114 @@ def _tree_baseline_matches(snapshot, baseline) -> bool:
     )
 
 
+def _account_accepted_record(
+    session,
+    *,
+    record,
+    appended,
+    outcome,
+    input_sha256,
+    transport_sha256,
+    policy_sha256,
+    rights_revision,
+    observed_at,
+    open_cases,
+):
+    accounted = append_outcome(
+        session,
+        source_id=OPENSSF_SOURCE_ID,
+        segment="openssf-" + record.entry.source_tree,
+        record_key=record.entry.advisory_id,
+        input_sha256=input_sha256,
+        processing_version=CATALOG_PROCESSING_VERSION,
+        policy_sha256=policy_sha256,
+        rights_revision=rights_revision,
+        outcome=outcome,
+        catalog_event_id=appended.catalog_event_id,
+        omissions={},
+        source_updated_at=record.source_modified_at or record.source_published_at,
+        observed_at=observed_at,
+        acquisition_lane="historical",
+        input_encoding="exact_git_blob_sha256_projected_page_evidence_v1",
+        provenance=provenance(record.entry, validated=True),
+    )
+    membership = append_replay_membership(
+        session, outcome=accounted, transport_sha256=transport_sha256, observed_at=observed_at
+    )
+    for prior in open_cases:
+        if prior.record_key == record.entry.advisory_id:
+            append_resolution(
+                session,
+                prior=prior,
+                replacement=accounted,
+                membership=membership,
+                resolved_at=observed_at,
+            )
+
+
+def _accepted_pass_plan(
+    *,
+    snapshot,
+    entries,
+    stored_records,
+    stored_counts,
+    full_verification,
+    validated_records,
+    validated_counts,
+    rejected_ids,
+    repair_ids,
+):
+    stored_hashes = {
+        identity: digest for rows in stored_records.values() for identity, digest in rows.items()
+    }
+    if validated_records is not None:
+        # Strict preflight supplies the CURRENT accepted partition, not a stale
+        # complete baseline. Rejected rows are absent from it. Only new/changed
+        # semantic identities and named repairs need a second read/governed page;
+        # unchanged rows are still validated in the full preflight.
+        expected, counts = validated_records, validated_counts
+        entries = tuple(
+            entry
+            for entry in snapshot.entries
+            if entry.advisory_id not in rejected_ids
+            and (
+                stored_hashes.get(entry.advisory_id)
+                != expected[entry.source_tree][entry.advisory_id]
+                or entry.advisory_id in repair_ids
+            )
+        )
+    else:
+        expected = {
+            tree: {} if full_verification else dict(stored_records[tree])
+            for tree in ("malicious", "withdrawn")
+        }
+        counts = {tree: 0 if full_verification else stored_counts[tree] for tree in expected}
+    return expected, counts, stored_hashes, entries
+
+
+def _validate_accepted_pass_record(
+    record, *, expected, counts, old_counts, full_verification, validated_partition
+):
+    identity, tree = record.entry.advisory_id, record.entry.source_tree
+    digest, package_count = openssf_advisory_identity(
+        record.projected,
+        canonical_url=record.entry.canonical_url,
+        source_state=record.entry.source_state,
+    )
+    if validated_partition:
+        if expected[tree].get(identity) != digest:
+            raise OpenSSFCatalogError("OpenSSF accepted identity changed after strict preflight")
+        return digest, 0  # Already counted in strict preflight; do not double-count.
+    if not full_verification:
+        for previous_tree in expected:
+            if identity in expected[previous_tree]:
+                del expected[previous_tree][identity]
+                counts[previous_tree] -= old_counts.get(identity, 0)
+    expected[tree][identity] = digest
+    counts[tree] += package_count
+    return digest, 1
+
+
 def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
     """Synchronize, validate, ingest, and exactly manifest both OpenSSF trees."""
     if config.evidence_root is None:
@@ -550,10 +739,15 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
             baseline = _latest_complete_pair(session)
             stored_records, stored_counts = _read_catalog_validation(session)
         observed_at = datetime.now(UTC)
+        resilience = partial_writes_enabled()
+        attempt["resilience"] = resilience
+        run_id = attempt.setdefault("run_id", stable_id("openssf-catalog-attempt", uuid4().hex))
         policy_digest = _policy_digest(config)
         last_full = _verification_marker(root, baseline, policy_digest, observed_at)
-        full_verification = last_full is None or not _baseline_matches(
-            baseline, stored_records, stored_counts
+        full_verification = (
+            resilience
+            or last_full is None
+            or not _baseline_matches(baseline, stored_records, stored_counts)
         )
         # The validation API keeps canonical row lists for callers. Retain only
         # compact identity maps while inspecting Git trees; per-row list containers
@@ -604,7 +798,7 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
         except OpenSSFProvisionalIDError as error:
             # Still a failed terminal manifest, not a partial/complete catalog. The
             # service permits one short retry, then the next natural hourly run.
-            # Keep the strict 2.0.0 health receipt readable by the predecessor.
+            # Retain non-success; the compatible reader accepts the 3.0 health receipt.
             raise OpenSSFCatalogDeferred(commit) from error
         if snapshot.unsupported_counts:
             raise OpenSSFCatalogError("full OpenSSF inspection unexpectedly filtered ecosystems")
@@ -621,24 +815,55 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
                 if previous_entries.get(entry.advisory_id) != _entry_signature(entry)
             )
         del previous_entries
+        rejections = []
+        validated_records = validated_counts = None
+        if resilience:
+            validated_records = {tree: {} for tree in ("malicious", "withdrawn")}
+            validated_counts = dict.fromkeys(validated_records, 0)
+            attempt["rejections"] = rejections
+            rejections = _preflight_partition(
+                reader,
+                snapshot,
+                factory=factory,
+                evidence=evidence,
+                registry=registry,
+                governance_policy=governance_policy,
+                observed_at=observed_at,
+                run_id=run_id,
+                rejections=rejections,
+                accepted=validated_records,
+                package_counts=validated_counts,
+            )
+            attempt["rejections"] = rejections
+            rejected_ids = {item["record_key"] for item in rejections}
+        else:
+            rejected_ids = set()
+        with factory() as session:
+            open_cases = (
+                tuple(session.scalars(unresolved_statement(source_id=OPENSSF_SOURCE_ID)))
+                if resilience
+                else ()
+            )
+        repair_ids = {case.record_key for case in open_cases}
         manifest_sha256 = _tree_manifest(snapshot)
         tree_manifest_sha256 = {
             tree: _tree_manifest(snapshot, tree) for tree in ("malicious", "withdrawn")
         }
         source_modified_at = reader.commit_time(commit)
-        expected = {
-            tree: {} if full_verification else dict(stored_records[tree])
-            for tree in ("malicious", "withdrawn")
-        }
-        tree_package_counts = {
-            tree: 0 if full_verification else stored_counts[tree] for tree in expected
-        }
-        stored_hashes = {
-            identity: digest
-            for rows in stored_records.values()
-            for identity, digest in rows.items()
-        }
-        del stored_records
+        expected, tree_package_counts, stored_hashes, entries = _accepted_pass_plan(
+            snapshot=snapshot,
+            entries=entries,
+            stored_records=stored_records,
+            stored_counts=stored_counts,
+            full_verification=full_verification,
+            validated_records=validated_records,
+            validated_counts=validated_counts,
+            rejected_ids=rejected_ids,
+            repair_ids=repair_ids,
+        )
+        # The returned expected map owns the preflight partition. Drop its extra
+        # aliases so the final map cleanup also releases it before Git maintenance.
+        del stored_records, validated_records, validated_counts
         removed_ids = sorted(
             stored_hashes.keys() - {entry.advisory_id for entry in snapshot.entries}
         )
@@ -646,14 +871,16 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
         attempt["missing_upstream_ids"] = removed_ids[:5]
         created_revision_count = 0
         physical_pages = 0
-        parsed_count = 0
+        parsed_count = len(snapshot.entries) if resilience else 0
         for batch in _raw_batches(entries):
             checkpoint()
             bodies = reader.read_blobs(batch)
             records = []
+            record_inputs = {}
             for entry, body in zip(batch, bodies, strict=True):
                 checkpoint()
                 record = reader.parse_record(entry, body)
+                record_inputs[entry.advisory_id] = sha256_id(body)
                 # Only future catalog pages omit unused metadata. The retained reader's
                 # projection and historical evidence bytes remain unchanged.
                 record = replace(
@@ -677,20 +904,16 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
             for record in records:
                 checkpoint()
                 identity = record.entry.advisory_id
-                digest, package_count = openssf_advisory_identity(
-                    record.projected,
-                    canonical_url=record.entry.canonical_url,
-                    source_state=record.entry.source_state,
+                digest, parsed = _validate_accepted_pass_record(
+                    record,
+                    expected=expected,
+                    counts=tree_package_counts,
+                    old_counts=old_counts,
+                    full_verification=full_verification,
+                    validated_partition=resilience,
                 )
-                if not full_verification:
-                    for tree in expected:
-                        if identity in expected[tree]:
-                            del expected[tree][identity]
-                            tree_package_counts[tree] -= old_counts.get(identity, 0)
-                expected[record.entry.source_tree][identity] = digest
-                tree_package_counts[record.entry.source_tree] += package_count
-                parsed_count += 1
-                if stored_hashes.get(identity) != digest:
+                parsed_count += parsed
+                if stored_hashes.get(identity) != digest or identity in repair_ids:
                     changed_records.append(record)
             del records
             for page_records in _semantic_pages(changed_records):
@@ -720,6 +943,10 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
                         session.begin(),
                     ):
                         set_statement_budget(session)
+                        if resilience:
+                            advisory_xact_lock(
+                                session, "collection-accounting:" + OPENSSF_SOURCE_ID
+                            )
                         run = runner.run_public(
                             session,
                             source_id=OPENSSF_MALICIOUS,
@@ -754,6 +981,21 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
                                 raise OpenSSFCatalogError(
                                     "OpenSSF semantic identity changed during append"
                                 )
+                            if resilience:
+                                _account_accepted_record(
+                                    session,
+                                    record=record,
+                                    appended=appended,
+                                    outcome=run.outcome,
+                                    input_sha256=record_inputs[record.entry.advisory_id],
+                                    transport_sha256=sha256_id(page_body),
+                                    policy_sha256=governance_policy.policy_sha256,
+                                    rights_revision=registry.get(OPENSSF_SOURCE_ID).source[
+                                        "revision"
+                                    ],
+                                    observed_at=observed_at,
+                                    open_cases=open_cases,
+                                )
                             created_revision_count += int(appended.created)
                     require_finalized(session)
                     physical_pages += 1
@@ -771,8 +1013,12 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
             )
         # Inspection guarantees unique source IDs. Equal total size and membership
         # in the exact source tree prove equality without copying whole ID sets.
-        if sum(len(values) for values in expected.values()) != len(snapshot.entries) or any(
-            entry.advisory_id not in expected[entry.source_tree] for entry in snapshot.entries
+        if sum(len(values) for values in expected.values()) + len(rejections) != len(
+            snapshot.entries
+        ) or any(
+            (entry.advisory_id not in expected[entry.source_tree])
+            != (entry.advisory_id in rejected_ids)
+            for entry in snapshot.entries
         ):
             raise OpenSSFCatalogError("OpenSSF expected identity differs from the full tree")
         # Exact source membership is now proved. Keep only the result counters;
@@ -783,8 +1029,17 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
         completed = []
         with factory() as session, session.begin():
             session.execute(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ"))
-            actual_records, actual_counts = _read_catalog_validation(session)
+            actual_records, actual_counts = (
+                _read_catalog_validation(session, excluded_ids=frozenset(rejected_ids))
+                if rejected_ids
+                else _read_catalog_validation(session)
+            )
             package_omission_counts = _current_package_omissions(session)
+            if not resilience and unresolved_count(session, source_id=OPENSSF_SOURCE_ID):
+                raise OpenSSFCatalogError(
+                    "OpenSSF unresolved records prohibit complete proof "
+                    "while partial writing is disabled"
+                )
             for tree in ("malicious", "withdrawn"):
                 expected_records = expected[tree]
                 if len(actual_records[tree]) != len(expected_records) or any(
@@ -798,20 +1053,63 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
                     raise OpenSSFCatalogError(
                         f"OpenSSF {tree} database package count differs from the full tree"
                     )
-                completed.append(
-                    append_catalog_manifest(
-                        session,
-                        source_id=OPENSSF_SOURCE_ID,
-                        segment=f"openssf-{tree}",
-                        state="complete",
-                        source_snapshot=f"{commit}:{tree_manifest_sha256[tree]}",
-                        cursor_value=None,
-                        record_count=len(expected_records),
-                        package_entry_count=actual_counts[tree],
-                        manifest_sha256=_array_digest(actual_records[tree]),
-                        observed_at=observed_at,
+                if not rejections:
+                    completed.append(
+                        append_catalog_manifest(
+                            session,
+                            source_id=OPENSSF_SOURCE_ID,
+                            segment=f"openssf-{tree}",
+                            state="complete",
+                            source_snapshot=f"{commit}:{tree_manifest_sha256[tree]}",
+                            cursor_value=None,
+                            record_count=len(expected_records),
+                            package_entry_count=actual_counts[tree],
+                            manifest_sha256=_array_digest(actual_records[tree]),
+                            observed_at=observed_at,
+                        )
                     )
+            if resilience:
+                outstanding = tuple(
+                    session.scalars(unresolved_statement(source_id=OPENSSF_SOURCE_ID))
                 )
+                if {case.record_key for case in outstanding} != rejected_ids:
+                    raise OpenSSFCatalogError(
+                        "OpenSSF unresolved identities differ from the pinned partition"
+                    )
+                document = {
+                    "schema_version": "1.0.0",
+                    "commit": commit,
+                    "tree_sha256": tree_manifest_sha256,
+                    "scanned_count": record_count,
+                    "accepted_count": record_count - len(rejections),
+                    "rejected_count": len(rejections),
+                    "rejections": rejections,
+                    "accepted_sha256": {
+                        tree: _array_digest(sorted(expected[tree].items())) for tree in expected
+                    },
+                    "validated_at": timestamp(observed_at),
+                }
+                append_attempt(
+                    session,
+                    run_id=run_id,
+                    state="partial" if rejections else "complete",
+                    observed_at=observed_at,
+                    document=document,
+                )
+        attempt["terminal_receipt"] = resilience
+        if rejections:
+            attempt["accepted_progress_count"] = record_count - len(rejections)
+            attempt["rejected_count"] = len(rejections)
+            attempt["terminal_receipt"] = True
+            raise OpenSSFCatalogPartial(
+                {
+                    "status": "partial",
+                    "commit": commit,
+                    "accepted_record_count": record_count - len(rejections),
+                    "rejected_record_count": len(rejections),
+                    "created_revision_count": created_revision_count,
+                }
+            )
         try:
             atomic_write(
                 root / "verification.json",
@@ -865,18 +1163,33 @@ def collect_openssf_catalog() -> dict[str, object]:
     config = load_runtime_config(require_evidence=True)
     engine = _engine(config)
     factory = _session_factory(engine)
-    attempt = {}
+    attempt = {"run_id": stable_id("openssf-catalog-attempt", uuid4().hex)}
     succeeded = False
     try:
         with catalog_budget():
             _attempt(factory, "in_progress")
             try:
                 result = _collect_openssf_catalog(config, engine, attempt)
+                if result.get("status") != "complete":
+                    raise OpenSSFCatalogError("OpenSSF collector returned non-complete success")
                 succeeded = True
                 return result
             except Exception:
                 try:
                     _attempt(factory, "failed", attempt.get("commit", "pending"))
+                    if attempt.get("resilience") and not attempt.get("terminal_receipt"):
+                        with factory() as session, session.begin():
+                            append_attempt(
+                                session,
+                                run_id=attempt["run_id"],
+                                state="failed",
+                                observed_at=datetime.now(UTC),
+                                document={
+                                    "schema_version": "1.0.0",
+                                    "commit": attempt.get("commit"),
+                                    "rejections": attempt.get("rejections", []),
+                                },
+                            )
                 except Exception:
                     sys.stderr.write("collection_diagnostic:attempt_receipt_failed\n")
                 raise
@@ -887,6 +1200,9 @@ def collect_openssf_catalog() -> dict[str, object]:
             if receipt_path is not None:
                 with factory() as session:
                     complete_pair = _latest_complete_pair(session)
+                    attempt["unresolved_record_count"] = unresolved_count(
+                        session, source_id=OPENSSF_SOURCE_ID
+                    )
                 write_catalog_health(
                     Path(receipt_path),
                     state_root=_state_root(),
@@ -934,6 +1250,8 @@ def main() -> int:
             return OPENSSF_CATALOG_ALREADY_RUNNING
         with _exclusive_lock(_state_root() / "run.lock"):
             result = collect_openssf_catalog()
+        if result.get("status") != "complete":
+            raise OpenSSFCatalogError("OpenSSF process cannot report non-complete success")
         fields = {
             key: canonical_json_bytes(value).decode("ascii") if isinstance(value, dict) else value
             for key, value in result.items()
@@ -947,6 +1265,15 @@ def main() -> int:
     except OpenSSFStateBusy:
         sys.stderr.write("openssf_catalog_already_running\n")
         return OPENSSF_CATALOG_ALREADY_RUNNING
+    except OpenSSFCatalogPartial as error:
+        sys.stderr.write(
+            "runtime_error:openssf_catalog_partial accepted="
+            + str(error.result["accepted_record_count"])
+            + " rejected="
+            + str(error.result["rejected_record_count"])
+            + "\n"
+        )
+        return 3
     except OpenSSFCatalogDeferred as error:
         sys.stderr.write(
             "runtime_error:openssf_catalog_deferred reason=provisional_upstream_ids "

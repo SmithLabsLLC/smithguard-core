@@ -2225,6 +2225,59 @@
         "privacy": "public metadata; referenced payload may be customer_local"
       }
     },
+    "OpenSSFRecordProgress": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_record_count": {
+          "maximum": 500000,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "attempt_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "rejected_record_count": {
+          "maximum": 10,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "state": {
+          "enum": [
+            "partial",
+            "complete",
+            "failed"
+          ]
+        },
+        "validated_at": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "attempt_id",
+        "state",
+        "accepted_record_count",
+        "rejected_record_count",
+        "validated_at"
+      ],
+      "type": "object"
+    },
     "PageInput": {
       "additionalProperties": false,
       "properties": {
@@ -3751,10 +3804,55 @@
           "if": {
             "properties": {
               "schema_version": {
+                "const": "2.5.0"
+              }
+            },
+            "required": [
+              "schema_version"
+            ]
+          },
+          "then": {
+            "properties": {
+              "incidents": {
+                "items": {
+                  "properties": {
+                    "source_reports": {
+                      "items": {
+                        "properties": {
+                          "source_state_status": {
+                            "enum": [
+                              "current",
+                              "historical_unresolved"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_state_status"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "source_freshness": {
+                "items": {
+                  "required": [
+                    "unresolved_record_count"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
                 "enum": [
                   "2.2.0",
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -3779,7 +3877,8 @@
               "schema_version": {
                 "enum": [
                   "2.3.0",
-                  "2.4.0"
+                  "2.4.0",
+                  "2.5.0"
                 ]
               }
             },
@@ -3797,7 +3896,10 @@
           "if": {
             "properties": {
               "schema_version": {
-                "const": "2.4.0"
+                "enum": [
+                  "2.4.0",
+                  "2.5.0"
+                ]
               }
             },
             "required": [
@@ -4168,7 +4270,8 @@
             "2.1.0",
             "2.2.0",
             "2.3.0",
-            "2.4.0"
+            "2.4.0",
+            "2.5.0"
           ]
         },
         "updated_at": {
@@ -4194,7 +4297,33 @@
         {
           "properties": {
             "artifact": {
-              "$ref": "#/$defs/PublicArtifactInput"
+              "allOf": [
+                {
+                  "$ref": "#/$defs/PublicArtifactInput"
+                },
+                {
+                  "else": {
+                    "properties": {
+                      "digest": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "ecosystem": {
+                        "enum": [
+                          "oci",
+                          "docker"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "ecosystem"
+                    ]
+                  }
+                }
+              ]
             },
             "data_classification": {
               "const": "public"
@@ -4209,6 +4338,7 @@
           "type": "object"
         }
       ],
+      "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
       "title": "Public artifact assessment request",
       "unevaluatedProperties": false,
       "x-smithguard-handling": {
@@ -4219,7 +4349,7 @@
     },
     "PublicArtifactAssessmentShortRequest": {
       "additionalProperties": false,
-      "description": "The simple request form: an ecosystem, a package name and an exact version (or an immutable digest). The registry host defaults to the ecosystem's public registry and is required only for container images.",
+      "description": "Non-container requests require an exact version and no digest. GitHub Actions accept a full X.Y.Z release (optional v prefix and prerelease) or a full 40-character commit ID. Containers require an immutable digest and registry_host; an optional version must be a full X.Y.Z release tag. Moving or shortened tags are refused. A release label does not prove installed bytes. Other registry hosts default to the ecosystem's public registry.",
       "examples": [
         {
           "ecosystem": "npm",
@@ -4968,6 +5098,13 @@
             {
               "type": "null"
             }
+          ]
+        },
+        "source_state_status": {
+          "enum": [
+            "current",
+            "historical_unresolved",
+            null
           ]
         },
         "source_updated_at": {
@@ -5896,6 +6033,13 @@
         },
         "source_id": {
           "$ref": "#/$defs/StableId"
+        },
+        "unresolved_record_count": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
         }
       },
       "required": [
@@ -7179,7 +7323,8 @@
             "failed",
             "stale",
             "fresh",
-            "complete"
+            "complete",
+            "unresolved"
           ]
         },
         "lane": {
@@ -7236,6 +7381,16 @@
           "minimum": 0,
           "type": "integer"
         },
+        "record_progress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenSSFRecordProgress"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "record_type": {
           "pattern": "^[a-z][a-z0-9_]{2,79}$",
           "type": "string"
@@ -7274,6 +7429,13 @@
           "maxItems": 20,
           "type": "array",
           "uniqueItems": true
+        },
+        "unresolved_record_count": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
         }
       },
       "required": [

@@ -62,6 +62,7 @@ def _freshness(lane: str, state: str) -> CollectionFreshness:
 
 def _healthy_inputs() -> OperationalHealthInputs:
     return OperationalHealthInputs(
+        openssf_quarantined_records=0,
         measured_at=NOW,
         database_available=True,
         migration_current=True,
@@ -94,14 +95,29 @@ def _healthy_inputs() -> OperationalHealthInputs:
 @pytest.mark.parametrize(
     "quarantined,expected", [(0, "healthy"), (1, "critical"), (None, "critical")]
 )
+@pytest.mark.parametrize("source", ["github", "openssf"])
 @pytest.mark.audit_ids("COL-06")
-def test_unresolved_current_quarantines_use_existing_health_alarm(quarantined, expected):
-    inputs = replace(_healthy_inputs(), github_quarantined_records=quarantined)
+def test_unresolved_current_quarantines_use_existing_health_alarm(source, quarantined, expected):
+    inputs = replace(_healthy_inputs(), **{f"{source}_quarantined_records": quarantined})
     report = evaluate_operational_health(inputs)
-    check = next(item for item in report.checks if item.code == "github_record_quarantine")
+    check = next(item for item in report.checks if item.code == f"{source}_record_quarantine")
     assert check.status == expected
     metrics = {item.name: item.value for item in build_metric_receipt(inputs, report).metrics}
     assert metrics["HealthCritical"] == (0 if expected == "healthy" else 1)
+
+
+def test_missing_openssf_accounting_defaults_to_unknown_health():
+    known = _healthy_inputs()
+    values = {
+        name: getattr(known, name)
+        for name in OperationalHealthInputs.__dataclass_fields__
+        if name != "openssf_quarantined_records"
+    }
+    unknown = OperationalHealthInputs(**values)
+    assert unknown.openssf_quarantined_records is None
+    report = evaluate_operational_health(unknown)
+    check = next(item for item in report.checks if item.code == "openssf_record_quarantine")
+    assert check.status == "critical" and "unavailable" in check.summary
 
 
 def _openssf_monitor(*, age: timedelta = timedelta(minutes=30)) -> OpenSSFMonitorReceipt:
@@ -460,8 +476,8 @@ def test_public_readiness_requires_a_current_openssf_catalog(public_runtime_data
 
 def test_reviewed_migration_matches_the_candidate_runtime_release() -> None:
     journal = json.loads(MIGRATION_JOURNAL.read_text(encoding="ascii"))
-    assert journal["migrations"][-1]["revision"] == "0037_bulletin_intake_health"
-    assert EXPECTED_MIGRATION == "0037_bulletin_intake_health"
+    assert journal["migrations"][-1]["revision"] == "0038_openssf_resilience"
+    assert EXPECTED_MIGRATION == "0038_openssf_resilience"
     files = {"app/migrations/journal.json": MIGRATION_JOURNAL.read_bytes()}
     for entry in journal["migrations"]:
         files[f"app/migrations/{entry['file']}"] = (

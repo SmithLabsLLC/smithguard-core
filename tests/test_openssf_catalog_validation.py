@@ -17,6 +17,7 @@ from smithguard.runtime import DEFAULT_AUTHORITY_POLICY, RuntimeConfig
 from smithguard.runtime import _engine as runtime_engine
 from smithguard.source_governance import DEFAULT_GOVERNANCE_POLICY_PATH
 
+from .fixture_clock import FixtureDateTime
 from .governance_fixtures import RIGHTS_REGISTER
 from .test_advisory_catalog import _github_event_stream
 from .test_openssf_git import _repository
@@ -161,7 +162,7 @@ def test_repeatable_validation_snapshot_excludes_mid_scan_commits(database, monk
 
 
 @pytest.fixture
-def catalog_runner(database, tmp_path, monkeypatch):
+def catalog_runner(database, tmp_path, monkeypatch, fixed_openssf_clock):
     repository, commit, license_sha256 = _repository(tmp_path)
     state_root = tmp_path / "catalog-state"
     state_root.mkdir()
@@ -386,7 +387,7 @@ def test_invalid_or_expired_marker_forces_full_verification_without_new_evidence
         marker["baseline_ids"] = []
     elif marker_change in {"expired", "future"}:
         marker["full_verified_at"] = (
-            datetime.now(UTC) + timedelta(hours=-25 if marker_change == "expired" else 1)
+            FixtureDateTime.now(UTC) + timedelta(hours=-25 if marker_change == "expired" else 1)
         ).isoformat()
     path.write_text("not-json" if marker_change == "corrupt" else json.dumps(marker))
     result = catalog_runner()
@@ -602,7 +603,7 @@ def test_provisional_snapshot_preserves_complete_evidence_until_finalized(
     monkeypatch.setattr(
         openssf_catalog, "sync_official_repository", lambda _paths: (repository, candidate)
     )
-    measured = datetime.now(UTC) + timedelta(hours=3 if stale else 0)
+    measured = FixtureDateTime.now(UTC) + timedelta(hours=3 if stale else 0)
 
     class ReceiptClock(datetime):
         @classmethod
@@ -654,7 +655,7 @@ def test_provisional_snapshot_preserves_complete_evidence_until_finalized(
         ),
     )
     candidate = _commit(repository, "assign final identity")
-    monkeypatch.setattr(catalog_health, "datetime", datetime)
+    monkeypatch.setattr(catalog_health, "datetime", FixtureDateTime)
     assert catalog_runner()["status"] == "complete"
     recovered = catalog_health.load_catalog_health(receipt_path)
     assert recovered["status"] == "success" and recovered["last_success_commit"] == candidate
@@ -859,7 +860,7 @@ def test_catalog_health_failure_keeps_original_error(
     def collect(*args):
         if primary:
             raise RuntimeError("original acquisition failure")
-        return {"synthetic": True}
+        return {"synthetic": True, "status": "complete"}
 
     def failed(*args, **kwargs):
         raise ValueError("receipt unavailable")
@@ -913,7 +914,7 @@ def test_complete_tree_accounts_for_untyped_record_and_preserves_exact_correctio
     with Session(database.engine) as session:
         before = catalog_omissions(session, source="openssf")
         assert len(before["records"]) == 1
-        report = build_coverage_report(session, measured_at=datetime.now(UTC))
+        report = build_coverage_report(session, measured_at=FixtureDateTime.now(UTC))
         lane = next(
             row for row in report.source_lanes if row.record_type == "malicious_package_catalog"
         )

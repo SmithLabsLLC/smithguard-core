@@ -87,6 +87,39 @@ class OpenSSFGitError(ValueError):
     """A local OpenSSF Git snapshot crossed its reviewed boundary."""
 
 
+def projected_record_size(projected: Mapping[str, Any]) -> tuple[int, int]:
+    """Apply the same governed-page bounds before acceptance OR named rejection."""
+    # This top-level metadata is stripped before governed page ingestion in both
+    # modes. Raw JSON/blob bounds still apply, including to ignored metadata.
+    projected = {key: value for key, value in projected.items() if key != "database_specific"}
+    try:
+        size = len(canonical_json_bytes(projected))
+    except ValueError as error:
+        raise OpenSSFGitError("OpenSSF record contains an invalid JSON number") from error
+    nodes = 0
+    stack = [(projected, 2)]  # The acquisition page list occupies depth 1.
+    while stack:
+        item, depth = stack.pop()
+        nodes += 1
+        if depth > 32 or nodes >= 100_000 or size + 2 > 8 * 1024 * 1024:
+            raise OpenSSFGitError("OpenSSF single projected record exceeds acquisition budget")
+        if isinstance(item, dict):
+            stack.extend((value, depth + 1) for value in item.values())
+        elif isinstance(item, list):
+            stack.extend((value, depth + 1) for value in item)
+    return size, nodes
+
+
+class OpenSSFWithdrawalMismatch(OpenSSFGitError):
+    """Only the strictly validated record/tree withdrawal contradiction is isolatable."""
+
+    reason = "openssf_tree_withdrawal_mismatch"
+
+    def __init__(self, entry: OpenSSFGitEntry) -> None:
+        self.entry = entry
+        super().__init__("OpenSSF tree and record withdrawal states differ")
+
+
 class OpenSSFProvisionalIDError(OpenSSFGitError):
     """An otherwise reviewed OpenSSF path still has a temporary advisory identity."""
 
@@ -693,8 +726,6 @@ class LocalOpenSSFGitRepository:
         if projected.get("id") != entry.advisory_id:
             raise OpenSSFGitError("OpenSSF path and record identities differ")
         withdrawn = projected.get("withdrawn")
-        if (entry.source_state == "withdrawn") != (withdrawn is not None):
-            raise OpenSSFGitError("OpenSSF tree and record withdrawal states differ")
         _source_time(withdrawn, field="withdrawn")
         affected = projected.get("affected")
         if not isinstance(affected, list) or not affected:
@@ -727,12 +758,26 @@ class LocalOpenSSFGitRepository:
                 break
         if not matched_path and not package_less_git:
             raise OpenSSFGitError("OpenSSF path and affected package differ")
+        published = _source_time(projected.get("published"), field="published")
+        modified = _source_time(projected.get("modified"), field="modified")
+        if (entry.source_state == "withdrawn") != (withdrawn is not None):
+            projected_record_size(projected)
+            # Check the remaining catalog shape before classifying the ONE allowed
+            # contradiction. This does not accept or persist any of these facts.
+            from smithguard.advisory_catalog import openssf_advisory_identity
+
+            openssf_advisory_identity(
+                projected,
+                canonical_url=entry.canonical_url,
+                source_state="withdrawn" if withdrawn is not None else "active",
+            )
+            raise OpenSSFWithdrawalMismatch(entry)
         return OpenSSFRecord(
             entry=entry,
             raw_body=raw_body,
             projected=projected,
-            source_published_at=_source_time(projected.get("published"), field="published"),
-            source_modified_at=_source_time(projected.get("modified"), field="modified"),
+            source_published_at=published,
+            source_modified_at=modified,
         )
 
     def read_record(self, entry: OpenSSFGitEntry) -> OpenSSFRecord:

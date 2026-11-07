@@ -1,0 +1,130 @@
+{
+  "summary_schema_version": "1.0.0",
+  "projection_version": "1.0.0",
+  "report_origin": "hosted_projection",
+  "client_signature_verified": false,
+  "action_authorized": false,
+  "check_state": "partial",
+  "artifact": {
+    "digest": null,
+    "ecosystem": "npm",
+    "name": "event-stream",
+    "public_visibility": "asserted_public",
+    "registry_host": "registry.npmjs.org",
+    "version": "3.3.6"
+  },
+  "assessment": {
+    "schema_version": "2.5.0",
+    "revision": 1,
+    "created_at": "2026-08-05T12:00:00Z",
+    "updated_at": "2026-08-05T12:00:00Z"
+  },
+  "generated_at": "2026-08-05T12:00:00Z",
+  "valid_until": "2026-08-05T12:05:00Z",
+  "assessment_freshness": "fresh",
+  "result": "affected",
+  "reason_codes": [
+    "identity_unverified",
+    "source_unavailable"
+  ],
+  "identity_assurance": "caller_asserted",
+  "local_applicability": "not_evaluated",
+  "registry_state": "unknown",
+  "coverage": {
+    "as_of": "2026-08-05T12:00:00Z",
+    "ecosystem": "npm",
+    "result": "supported",
+    "stage": "matched"
+  },
+  "not_applicable_incident_count": 0,
+  "source_freshness": [
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "malware_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "reviewed_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "unreviewed_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "malicious_package_catalog",
+      "source_id": "gbsec:source:openssf-malicious-packages",
+      "unresolved_record_count": 0
+    }
+  ],
+  "incidents": [
+    {
+      "aliases": [
+        "GHSA-2345-6789-2222"
+      ],
+      "applies_to_version": true,
+      "confidence": "confirmed",
+      "fix_evidence_incomplete": true,
+      "incident_id": "gbsec:catalog-incident:ca91589d86127392d1c97f82d7fde71f1ed766d6",
+      "last_changed_at": "2023-01-02T00:00:00Z",
+      "revision": 1,
+      "source_reports": [
+        {
+          "applies_to_version": true,
+          "fix_evidence": [],
+          "fix_evidence_incomplete": true,
+          "historical_metadata_incomplete": false,
+          "observed_at": "2026-08-05T12:00:00Z",
+          "range_bound_evidence": [],
+          "source_context_state": "unavailable",
+          "source_fixed_versions": [],
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_state_status": "current",
+          "source_updated_at": "2023-01-02T00:00:00Z",
+          "state": "active",
+          "upstream_record_id": "GHSA-2345-6789-2222"
+        }
+      ],
+      "source_reports_truncated": false,
+      "status": "confirmed",
+      "citations": [
+        "https://github.com/advisories/GHSA-2345-6789-2222"
+      ]
+    }
+  ],
+  "limitations": [
+    "Advisory evidence only; not a safety verdict or permission to install or change software.",
+    "Service-issued derived report; no client signature verification ran.",
+    "Original source and assessment clocks remain authoritative; recheck before a later decision.",
+    "Source-listed fixes and range boundaries are different; neither is a tested application repair.",
+    "Source prose, original responses and raw lookup references are excluded; omissions are explicit."
+  ],
+  "omissions": {
+    "incidents": 0,
+    "source_reports": 0,
+    "fix_evidence": 1,
+    "range_bound_evidence": 0,
+    "source_fixed_versions": 0,
+    "citations": 0,
+    "aliases": 0,
+    "source_contexts": 0,
+    "incident_titles": 1,
+    "unknown_texts": 5,
+    "preliminary_warnings": 0,
+    "cve_contexts": 0,
+    "registry_project_context": false,
+    "upstream_incidents_truncated": false,
+    "upstream_source_reports_truncated": false,
+    "upstream_warnings_truncated": false
+  }
+}

@@ -2183,7 +2183,28 @@ class CollectionRecordResolution(Base):
     record_hash: Mapped[str] = mapped_column(String(71), nullable=False)
 
 
+class OpenSSFCatalogAttempt(Base):
+    """Terminal receipt; partial progress never replaces a complete manifest pair."""
+
+    __tablename__ = "openssf_catalog_attempts"
+    __table_args__ = (
+        PrimaryKeyConstraint("run_id"),
+        CheckConstraint(f"run_id ~ '{STABLE_ID_SQL}'", name="run_id"),
+        CheckConstraint("state IN ('partial','complete','failed')", name="state"),
+        CheckConstraint("jsonb_typeof(document) = 'object'", name="document"),
+        CheckConstraint("octet_length(document::text) <= 16384", name="document_size"),
+        CheckConstraint(f"record_hash ~ '{SHA256_SQL}'", name="record_hash"),
+        Index("ix_openssf_attempts_observed", "observed_at"),
+    )
+    run_id: Mapped[str] = mapped_column(String(160))
+    state: Mapped[str] = mapped_column(String(20), nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    document: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    record_hash: Mapped[str] = mapped_column(String(71), nullable=False)
+
+
 APPEND_ONLY_MODELS: tuple[type, ...] = (
+    OpenSSFCatalogAttempt,
     _bulletin_models.BulletinIdentity,
     _bulletin_models.BulletinMaintenanceReceipt,
     _bulletin_models.BulletinRevision,

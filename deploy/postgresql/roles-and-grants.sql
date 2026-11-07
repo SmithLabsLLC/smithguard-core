@@ -319,6 +319,13 @@ DO $record_accounting_grants$ BEGIN
     END IF;
 END $record_accounting_grants$;
 
+DO $openssf_attempt_grants$ BEGIN
+    IF to_regclass('smithguard.openssf_catalog_attempts') IS NOT NULL THEN
+        GRANT SELECT, INSERT ON TABLE smithguard.openssf_catalog_attempts TO "smithguard-collector";
+        GRANT SELECT ON TABLE smithguard.openssf_catalog_attempts TO "smithguard-api", "smithguard-health";
+    END IF;
+END $openssf_attempt_grants$;
+
 -- Bulletin private originals and publication decisions are never API-readable.
 DO $bulletin_grants$ BEGIN
     IF to_regclass('smithguard.bulletin_stream') IS NOT NULL THEN

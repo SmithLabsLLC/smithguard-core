@@ -205,3 +205,26 @@ def test_public_openapi_is_the_only_generated_service_contract() -> None:
     assert {path.name for path in GENERATED_ROOT.glob("openapi*.json")} == {
         "openapi-public-beta.json"
     }
+
+
+def test_exported_request_schemas_preserve_noncontainer_digest_constraint(contract_examples):
+    value = deepcopy(
+        next(
+            e["value"]
+            for e in contract_examples
+            if e["definition"] == "PublicArtifactAssessmentRequest"
+        )
+    )
+    individual = json.loads(
+        (GENERATED_ROOT / "schemas/PublicArtifactAssessmentRequest.schema.json").read_text()
+    )
+    bundle = json.loads((GENERATED_ROOT / "schemas/contract-models.schema.json").read_text())
+    for schema in (
+        individual,
+        {"$ref": "#/$defs/PublicArtifactAssessmentRequest", "$defs": bundle["$defs"]},
+    ):
+        validator = Draft202012Validator(schema)
+        assert validator.is_valid(value)
+        invalid = deepcopy(value)
+        invalid["artifact"]["digest"] = "sha256:" + "a" * 64
+        assert not validator.is_valid(invalid)

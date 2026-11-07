@@ -246,6 +246,8 @@ def assessment_reason_codes(
     if not artifact_evidence:
         reasons.add("artifact_evidence_missing")
     for source in freshness:
+        if (getattr(source, "unresolved_record_count", None) or 0) > 0:
+            reasons.add("source_unavailable")
         if source.freshness_state == "stale":
             reasons.add("source_stale")
         elif source.freshness_state not in {"fresh", "complete"}:

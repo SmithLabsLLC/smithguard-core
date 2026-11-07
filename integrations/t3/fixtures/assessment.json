@@ -1,0 +1,160 @@
+{
+  "affected_range_ids": [
+    "gbsec:advisory-package:c1ee04f7a6ab9ca0a7d27bb9ec5e0bd9a132ced5"
+  ],
+  "artifact": {
+    "digest": null,
+    "ecosystem": "npm",
+    "name": "event-stream",
+    "public_visibility": "asserted_public",
+    "registry_host": "registry.npmjs.org",
+    "version": "3.3.6"
+  },
+  "coverage": {
+    "as_of": "2026-08-05T12:00:00Z",
+    "ecosystem": "npm",
+    "result": "supported",
+    "stage": "matched"
+  },
+  "created_at": "2026-08-05T12:00:00Z",
+  "cve_context": [],
+  "data_classification": "public",
+  "evidence_maturity": {
+    "composition": "present",
+    "deployment": "unknown",
+    "provenance": "present",
+    "runtime": "unknown",
+    "signature": "unknown",
+    "vex": "unknown"
+  },
+  "feed_revision": "gbsec:feed-revision:150c6ad017d3c67b0ca9512d9a86d952ca30ae9e",
+  "id": "gbsec:assessment:cbb473375b8f683c540a2cc94182f90f3a342980",
+  "identity_assurance": "caller_asserted",
+  "incident_ids": [
+    "gbsec:catalog-incident:ca91589d86127392d1c97f82d7fde71f1ed766d6"
+  ],
+  "incidents": [
+    {
+      "affected_range_ids": [
+        "gbsec:advisory-package:c1ee04f7a6ab9ca0a7d27bb9ec5e0bd9a132ced5"
+      ],
+      "aliases": [
+        "GHSA-2345-6789-2222"
+      ],
+      "applies_to_version": true,
+      "classification": "vulnerable",
+      "confidence": "confirmed",
+      "fix_evidence_incomplete": false,
+      "fixed_versions": [],
+      "incident_id": "gbsec:catalog-incident:ca91589d86127392d1c97f82d7fde71f1ed766d6",
+      "last_changed_at": "2023-01-02T00:00:00Z",
+      "local_applicability": "not_evaluated",
+      "relationship_basis": "catalog_assignment",
+      "report_relationship": "single_report",
+      "revision": 1,
+      "source_fixed_versions": [],
+      "source_reports": [
+        {
+          "applies_to_version": true,
+          "catalog_event_id": "gbsec:advisory-catalog:14d84d6080a880f6879d75b529fe101ef92d20eb",
+          "catalog_source_sha256": "sha256:78f2a456e519f39d76fd765630a94228b2c45de8132a91a4b1ecdf96bd91c42d",
+          "evidence_id": "gbsec:evidence:catalog-family-000",
+          "field_policy_id": null,
+          "fix_evidence": [
+            {
+              "applies_to_requested_version": true,
+              "expression": "= 3.3.6",
+              "fixed_version": null,
+              "introduced_version": null,
+              "package_entry_id": "gbsec:advisory-package:c1ee04f7a6ab9ca0a7d27bb9ec5e0bd9a132ced5",
+              "patch_field_state": "absent",
+              "range_index": 0,
+              "range_sha256": "sha256:75e55fc4c1fbfb9057a1421b13bcf9183a01e0f25bdc9d3b8514e9e9e32c79d9",
+              "range_type": "GITHUB",
+              "source_field": null
+            }
+          ],
+          "fix_evidence_incomplete": false,
+          "fixed_versions": [],
+          "historical_metadata_incomplete": false,
+          "local_applicability": "not_evaluated",
+          "observed_at": "2026-08-05T12:00:00Z",
+          "origin_context": null,
+          "range_bound_evidence": [],
+          "source_context": null,
+          "source_context_state": "unavailable",
+          "source_fixed_versions": [],
+          "source_id": "gbsec:source:github-advisory-database",
+          "source_name": "GitHub Advisory Database",
+          "source_revision": 1,
+          "source_state_status": "current",
+          "source_updated_at": "2023-01-02T00:00:00Z",
+          "state": "active",
+          "upstream_record_id": "GHSA-2345-6789-2222"
+        }
+      ],
+      "source_reports_truncated": false,
+      "status": "confirmed",
+      "title": "SYNTHETIC_RAW_BODY_CANARY_DO_NOT_RETAIN",
+      "upstream_urls": [
+        "https://github.com/advisories/GHSA-2345-6789-2222"
+      ]
+    }
+  ],
+  "incidents_truncated": false,
+  "kind": "public_artifact_assessment",
+  "local_applicability": "not_evaluated",
+  "not_applicable_incident_count": 0,
+  "preliminary_warnings": [],
+  "preliminary_warnings_truncated": false,
+  "reason_codes": [
+    "identity_unverified",
+    "source_unavailable"
+  ],
+  "recommended_action_ids": [],
+  "registry_project_context": null,
+  "registry_state": "unknown",
+  "relationship_state": "single_incident_record",
+  "result": "affected",
+  "revision": 1,
+  "schema_version": "2.5.0",
+  "signature": null,
+  "source_freshness": [
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "malware_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "reviewed_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "unreviewed_advisory",
+      "source_id": "gbsec:source:github-advisory-database",
+      "unresolved_record_count": null
+    },
+    {
+      "freshness_state": "missing",
+      "last_success_at": null,
+      "record_type": "malicious_package_catalog",
+      "source_id": "gbsec:source:openssf-malicious-packages",
+      "unresolved_record_count": 0
+    }
+  ],
+  "unknowns": [
+    "GitHub malware advisory updates are not collected yet, so recent reports may be missing.",
+    "GitHub reviewed advisory updates are not collected yet, so recent reports may be missing.",
+    "GitHub unreviewed advisory updates are not collected yet, so recent reports may be missing.",
+    "The OpenSSF malicious-package catalog is not collected yet, so recent reports may be missing.",
+    "SYNTHETIC_RAW_BODY_CANARY_DO_NOT_RETAIN"
+  ],
+  "updated_at": "2026-08-05T12:00:00Z"
+}

@@ -114,3 +114,13 @@ def public_runtime_database(postgres_cluster: LocalPostgres) -> DatabaseHandle:
 @pytest.fixture(scope="session")
 def contract_examples() -> list[dict[str, Any]]:
     return json.loads(CONTRACT_EXAMPLES.read_text(encoding="utf-8"))["examples"]
+
+
+@pytest.fixture
+def fixed_openssf_clock(monkeypatch):
+    """Catalog behavior uses one known review date; expiry tests supply their own date."""
+    from smithguard import catalog_health, openssf_catalog
+    from tests.fixture_clock import FixtureDateTime
+
+    monkeypatch.setattr(openssf_catalog, "datetime", FixtureDateTime)
+    monkeypatch.setattr(catalog_health, "datetime", FixtureDateTime)

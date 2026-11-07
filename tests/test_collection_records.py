@@ -116,6 +116,14 @@ def test_bad_record_does_not_block_good_siblings_or_next_page_and_gap_persists(d
         report = build_coverage_report(session, measured_at=NOW + timedelta(seconds=1))
         assert "1 source record(s) have unresolved collection omissions" in str(report)
         assert unresolved_count(session, source_id=GITHUB_ADVISORY, segment="reviewed") == 1
+        lane = next(
+            item
+            for item in report.source_lanes
+            if item.source_id == GITHUB_ADVISORY
+            and item.lane == "updates"
+            and item.record_type == "reviewed_advisory"
+        )
+        assert lane.unresolved_record_count == 1
     assert all(b"private field" not in store.read_bytes(blob.digest) for blob in store.manifest())
     assert not store.pending_manifest()
 
@@ -197,6 +205,43 @@ def test_known_quarantine_invalidates_cache_and_only_named_repair_resolves_it(da
         )
         assert repaired.fingerprint != blocked.fingerprint
         assert repaired.families[0].evaluations == (True,)
+    assert not store.pending_manifest()
+
+
+@pytest.mark.parametrize("transition", ["withdrawn", "removed_package"])
+def test_github_non_active_rows_stay_absent_after_same_segment_quarantine(
+    database, tmp_path, transition
+):
+    from smithguard.service import SmithGuardService
+
+    current = [advisory()]
+    instance, store = collector(tmp_path, lambda req: response(req, current))
+    with Session(database.engine) as session, session.begin():
+        instance.run(session, lane="updates")
+    current[0]["updated_at"] = "2026-08-05T11:01:00Z"
+    if transition == "withdrawn":
+        current[0]["withdrawn_at"] = "2026-08-05T11:01:00Z"
+    else:
+        current[0]["vulnerabilities"] = []
+    with Session(database.engine) as session, session.begin():
+        instance.run(session, lane="updates")
+    request = {"ecosystem": "npm", "name": "accounting-package", "version": "1.0.0"}
+    service = SmithGuardService(clock=lambda: NOW)
+    with Session(database.engine) as session:
+        before = service.assess_public_artifact(session, request)
+        assert before["incidents"] == []
+    current[0]["updated_at"] = "2026-08-05T11:02:00Z"
+    current[0]["published_at"] = "invalid"
+    with Session(database.engine) as session, session.begin():
+        instance.run(session, lane="updates")
+    with Session(database.engine) as session:
+        assert actionable_quarantine_count(session, source_id=GITHUB_ADVISORY) == 1
+        evidence = catalog_evidence_for_package(
+            session, ecosystem="npm", name="accounting-package", version="1.0.0"
+        )
+        assert evidence.families == ()
+        after = service.assess_public_artifact(session, request)
+        assert after["incidents"] == [] and after["result"] == before["result"]
     assert not store.pending_manifest()
 
 

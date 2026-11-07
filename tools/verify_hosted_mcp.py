@@ -11,7 +11,7 @@ import re
 import sys
 import time
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from importlib.metadata import version
 from pathlib import Path
 
@@ -21,6 +21,7 @@ from mcp.client.streamable_http import streamable_http_client
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from smithguard import summary_contract
 from smithguard.contracts.runtime import parse_contract
 from tools.verification import canonical, exclusive_json, timestamp, verify_signature
 
@@ -76,23 +77,30 @@ def utc_now():
 class BoundedClient(httpx2.AsyncClient):
     """Bound the official SDK's actual wire reads and forbid redirects or replay."""
 
-    def __init__(self, output, **kwargs):
+    def __init__(self, output, *, summary=False, **kwargs):
         super().__init__(timeout=REQUEST_SECONDS, trust_env=False, follow_redirects=False, **kwargs)
         self.output = output
         self.started = time.monotonic()
         self.requests = []
         self.seen = set()
         self.bulletin_identity = None
+        self.target = API + summary_contract.MCP_PATH if summary else TARGET
+        self.paths = {summary_contract.TOOL_NAME: summary_contract.REST_PATH} if summary else PATHS
 
     async def send(self, request, **kwargs):
         allowed = {
-            TARGET,
-            *(API + path for path in PATHS.values()),
-            API + PATHS["get_emerging_leads"] + "?limit=5",
-            API + PATHS["list_bulletins"] + "?limit=1",
-            API + PATHS["get_bulletin_changes"] + "?limit=1",
+            self.target,
+            *(API + path for path in self.paths.values()),
         }
-        if self.bulletin_identity is not None:
+        if self.paths is PATHS:
+            allowed.update(
+                {
+                    API + PATHS["get_emerging_leads"] + "?limit=5",
+                    API + PATHS["list_bulletins"] + "?limit=1",
+                    API + PATHS["get_bulletin_changes"] + "?limit=1",
+                }
+            )
+        if self.paths is PATHS and self.bulletin_identity is not None:
             allowed.add(API + PATHS["get_bulletin"].format(identity=self.bulletin_identity))
         require(str(request.url) in allowed, "target_refused")
         require(request.method in {"GET", "POST"}, "method_refused")
@@ -126,7 +134,7 @@ class BoundedClient(httpx2.AsyncClient):
                 require(not 300 <= response.status_code < 400, "redirect_refused")
                 require("mcp-session-id" not in response.headers, "stateful_session_refused")
                 require("set-cookie" not in response.headers, "cookie_response_refused")
-                if str(request.url).split("?", 1)[0] == TARGET or request.url.path.startswith(
+                if str(request.url).split("?", 1)[0] == self.target or request.url.path.startswith(
                     ("/v1/artifacts/assess", "/v1/bulletin")
                 ):
                     require(
@@ -257,7 +265,7 @@ def validate_result(name, result, args):
     if name == "assess_public_artifact":
         require(
             data.get("kind") == "public_artifact_assessment"
-            and data.get("schema_version") in {"2.1.0", "2.2.0", "2.3.0", "2.4.0"},
+            and data.get("schema_version") in {"2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"},
             "assessment_contract_changed",
         )
         require(
@@ -268,7 +276,7 @@ def validate_result(name, result, args):
             isinstance(data.get("incidents"), list) and "signature" in data,
             "assessment_unsigned_or_invalid",
         )
-        if data["schema_version"] in {"2.2.0", "2.3.0", "2.4.0"}:
+        if data["schema_version"] in {"2.2.0", "2.3.0", "2.4.0", "2.5.0"}:
             require(
                 isinstance(data.get("cve_context"), list) and len(data["cve_context"]) <= 2000,
                 "assessment_cve_context_invalid",
@@ -462,6 +470,137 @@ async def run_suite(client, report):
     report["status"] = "pass"
 
 
+SUMMARY_COORDINATE = {
+    "ecosystem": "pypi",
+    "name": "django",
+    "version": "2.2.17",
+    "registry_host": "pypi.org",
+}
+
+
+def validate_summary_document(document, args):
+    require(
+        isinstance(document, dict) and len(canonical(document)) <= summary_contract.MAX_BYTES,
+        "summary_document_size_invalid",
+    )
+    require(summary_contract.SUMMARY_VALIDATOR.is_valid(document), "summary_contract_invalid")
+    require(
+        all(document["artifact"][key] == value for key, value in args.items()),
+        "summary_identity_mismatch",
+    )
+    require(
+        document["client_signature_verified"] is False and document["action_authorized"] is False,
+        "summary_assurance_changed",
+    )
+    generated = timestamp(document["generated_at"])
+    require(
+        abs((utc_now() - generated).total_seconds()) <= TOTAL_SECONDS,
+        "summary_generation_clock_invalid",
+    )
+    require(
+        timestamp(document["valid_until"])
+        == timestamp(document["assessment"]["updated_at"])
+        + timedelta(seconds=summary_contract.MAX_AGE_SECONDS),
+        "summary_expiry_changed",
+    )
+    if document["assessment_freshness"] == "stale":
+        require(document["check_state"] == "partial", "summary_stale_completion_claim")
+    else:
+        require(
+            utc_now() < timestamp(document["valid_until"]) + timedelta(seconds=30),
+            "summary_freshness_claim_expired",
+        )
+    return document
+
+
+def validate_summary_result(result, args):
+    require(result.is_error is False, "summary_tool_error")
+    document = result.structured_content
+    validate_summary_document(document, args)
+    require(len(result.content) == 1 and result.content[0].type == "text", "summary_text_shape")
+    try:
+        text = json.loads(result.content[0].text)
+    except (ValueError, TypeError, RecursionError):
+        raise Refusal("summary_text_json_invalid") from None
+    require(text == document, "summary_text_structured_mismatch")
+    return document
+
+
+async def run_summary_suite(client, report):
+    """One fixed summary case; no full-assessment/coverage/key fallback."""
+    require(client.target == API + summary_contract.MCP_PATH, "summary_profile_required")
+    async with asyncio.timeout(TOTAL_SECONDS):
+        async with Client(
+            streamable_http_client(client.target, http_client=client, terminate_on_close=False),
+            mode="legacy",
+            cache=None,
+            read_timeout_seconds=REQUEST_SECONDS,
+            input_required_max_rounds=0,
+        ) as session:
+            require(session.protocol_version == "2025-11-25", "protocol_version_changed")
+            capabilities = session.server_capabilities.model_dump(by_alias=True, exclude_none=True)
+            require(
+                "tools" in capabilities
+                and set(capabilities) <= {"tools", "experimental"}
+                and not capabilities.get("experimental"),
+                "server_capabilities_changed",
+            )
+            listed = await session.list_tools()
+            tools = [tool.model_dump(by_alias=True, exclude_none=True) for tool in listed.tools]
+            require(
+                len(tools) == 1
+                and tools[0]["name"] == summary_contract.TOOL_NAME
+                and listed.next_cursor is None,
+                "summary_tool_catalog_changed",
+            )
+            tool = tools[0]
+            require(
+                tool["inputSchema"] == summary_contract.INPUT
+                and tool["outputSchema"]
+                == {
+                    "type": "object",
+                    "oneOf": [summary_contract.SUMMARY, summary_contract.ERROR],
+                },
+                "summary_tool_schema_changed",
+            )
+            require(
+                tool.get("annotations", {}).get("readOnlyHint") is True
+                and tool.get("annotations", {}).get("destructiveHint") is False
+                and tool.get("_meta", {}).get("securitySchemes") == [{"type": "noauth"}],
+                "summary_tool_authority_changed",
+            )
+            report["checks"].append({"name": "summary_only_catalog", "status": "pass", "count": 1})
+            response = await client.post(API + summary_contract.REST_PATH, json=SUMMARY_COORDINATE)
+            require(response.status_code == 200, "summary_rest_unavailable")
+            rest = validate_summary_document(response.json(), SUMMARY_COORDINATE)
+            result = await session.call_tool(summary_contract.TOOL_NAME, SUMMARY_COORDINATE)
+            document = validate_summary_result(result, SUMMARY_COORDINATE)
+            first, second = deepcopy(rest), deepcopy(document)
+            require(
+                abs(
+                    (
+                        timestamp(first.pop("generated_at")) - timestamp(second.pop("generated_at"))
+                    ).total_seconds()
+                )
+                <= 30,
+                "summary_request_clock_difference",
+            )
+            require(first == second, "summary_rest_parity_failed")
+            report["checks"].append(
+                {
+                    "name": "summary_rest_mcp_parity",
+                    "status": "pass",
+                    "parity": "exact_except_validated_generated_at",
+                    "summary_sha256": hashlib.sha256(canonical(document)).hexdigest(),
+                    "check_state": document["check_state"],
+                    "result": document["result"],
+                    "client_signature_verified": False,
+                    "action_authorized": False,
+                }
+            )
+    report["status"] = "pass"
+
+
 def failure_metadata(error):
     """Keep fixed refusal reasons through SDK task groups, never response text."""
     pending, types, reasons = [error], set(), set()
@@ -483,6 +622,11 @@ def main():
         required=True,
         help="New directory under ignored local state; parent must exist",
     )
+    parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Verify only the bounded unsigned summary REST/MCP profile",
+    )
     args = parser.parse_args()
     output = args.output
     require(
@@ -495,9 +639,11 @@ def main():
     )
     output.mkdir(mode=0o700)
     report = {
-        "target": TARGET,
+        "target": API + summary_contract.MCP_PATH if args.summary else TARGET,
         "verifier_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "fixed_cases_sha256": hashlib.sha256(canonical(CASES)).hexdigest(),
+        "fixed_cases_sha256": hashlib.sha256(
+            canonical(SUMMARY_COORDINATE if args.summary else CASES)
+        ).hexdigest(),
         "official_mcp_sdk_version": version("mcp"),
         "started_at": utc_now().isoformat(),
         "status": "incomplete",
@@ -505,12 +651,17 @@ def main():
         "limits": {
             "maximum_requests": MAX_REQUESTS,
             "maximum_response_bytes": MAX_RESPONSE,
-            "maximum_document_bytes": MAX_DOCUMENT,
+            "maximum_document_bytes": summary_contract.MAX_BYTES if args.summary else MAX_DOCUMENT,
             "request_seconds": REQUEST_SECONDS,
             "total_seconds": TOTAL_SECONDS,
             "automatic_retries": False,
         },
         "limitations": (
+            "Unsigned service projection; no client signature verification, local "
+            "applicability, provider qualification or software action is established."
+        )
+        if args.summary
+        else (
             "Fixed public smoke cases; no semantic accuracy or safety claim, provider call, "
             "publication, supported-client UX test or directory acceptance. "
             "Verification keys share the service HTTPS trust anchor."
@@ -518,9 +669,13 @@ def main():
     }
 
     async def run():
-        async with BoundedClient(output, transport=httpx2.AsyncHTTPTransport(retries=0)) as client:
+        async with BoundedClient(
+            output, summary=args.summary, transport=httpx2.AsyncHTTPTransport(retries=0)
+        ) as client:
             try:
-                await run_suite(client, report)
+                await (
+                    run_summary_suite(client, report) if args.summary else run_suite(client, report)
+                )
             finally:
                 report["requests"] = client.requests
 

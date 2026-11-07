@@ -531,12 +531,14 @@ def _build_public_beta_openapi(
             },
         },
     }
+    from smithguard import summary_contract
     from smithguard.bulletin_contract import COMPONENTS as BULLETIN_COMPONENTS
     from smithguard.bulletin_contract import openapi_paths as bulletin_paths
     from smithguard.lead_public_contract import LEAD, PAGE, PATH
 
     paths["/v1/emerging-leads.json"] = deepcopy(PATH)
     paths.update(deepcopy(bulletin_paths()))
+    paths[summary_contract.REST_PATH] = summary_contract.openapi_path()
     all_components = {
         **deepcopy(definitions),
         **deepcopy(BULLETIN_COMPONENTS),
@@ -544,6 +546,9 @@ def _build_public_beta_openapi(
         "EmergingLeadPage": deepcopy(PAGE),
         "ErrorResponse": error_response,
         "PublicKeyDocument": public_key_document,
+        "PublicArtifactSummaryRequest": deepcopy(summary_contract.INPUT),
+        "PublicArtifactSummary": deepcopy(summary_contract.SUMMARY),
+        "PublicArtifactSummaryError": deepcopy(summary_contract.ERROR),
     }
     components = _reachable_components(paths, all_components)
     return {
@@ -560,6 +565,18 @@ def _build_public_beta_openapi(
         "components": {"schemas": components},
         "x-smithguard-contract-version": schema["x-smithguard-contract-version"],
         "x-smithguard-service-state": "public_beta",
+        "x-smithguard-summary-mcp": {
+            "url": f"{PUBLIC_API_SERVER}{summary_contract.MCP_PATH}",
+            "transport": "streamable-http",
+            "authentication": "none",
+            "read_only": True,
+            "tools": [summary_contract.TOOL_NAME],
+            "client_signature_verified": False,
+            "retention": (
+                "Derived reports may persist in the authorized provider/client "
+                "history; recheck for a later decision."
+            ),
+        },
         "x-smithguard-mcp": {
             "url": f"{PUBLIC_API_SERVER}/mcp",
             "transport": "streamable-http",
@@ -580,6 +597,16 @@ def _build_public_beta_openapi(
     }
 
 
+def _restore_request_constraints(output, source):
+    # Pydantic/codegen cannot represent JSON Schema conditionals. Preserve the
+    # authoritative request-only constraint in every exported schema as well.
+    artifact = output["properties"]["artifact"]
+    constraint = source["$defs"]["PublicArtifactAssessmentRequest"]["allOf"][1]["properties"][
+        "artifact"
+    ]["allOf"][1]
+    output["properties"]["artifact"] = {"allOf": [artifact, deepcopy(constraint)]}
+
+
 def _generate_tree(destination: Path) -> None:
     model_path = _generate_models(destination)
     module = _load_models(model_path)
@@ -596,10 +623,12 @@ def _generate_tree(destination: Path) -> None:
     for name in PRIMARY_MODELS:
         model = getattr(module, name)
         output = model.model_json_schema(mode="validation")
+        if name == "PublicArtifactAssessmentRequest":
+            _restore_request_constraints(output, schema)
         (schema_root / f"{name}.schema.json").write_bytes(_canonical_json(output))
-    (schema_root / "contract-models.schema.json").write_bytes(
-        _canonical_json(module.SmithguardV1ContractBundle.model_json_schema(mode="validation"))
-    )
+    models_schema = module.SmithguardV1ContractBundle.model_json_schema(mode="validation")
+    _restore_request_constraints(models_schema["$defs"]["PublicArtifactAssessmentRequest"], schema)
+    (schema_root / "contract-models.schema.json").write_bytes(_canonical_json(models_schema))
     (artifact_root / "openapi-public-beta.json").write_bytes(
         _canonical_json(_build_public_beta_openapi(schema, catalog))
     )
@@ -628,6 +657,9 @@ def _generate_tree(destination: Path) -> None:
             str(UPSTREAM_SCHEMA.relative_to(REPO_ROOT)): _hash_file(UPSTREAM_SCHEMA),
             str(OPERATION_CATALOG.relative_to(REPO_ROOT)): _hash_file(OPERATION_CATALOG),
             str(DEPLOY_APPROVAL_SCHEMA.relative_to(REPO_ROOT)): _hash_file(DEPLOY_APPROVAL_SCHEMA),
+            "src/smithguard/summary_contract.py": _hash_file(
+                REPO_ROOT / "src/smithguard/summary_contract.py"
+            ),
         },
         "artifacts": {
             str(path.relative_to(destination)): _hash_file(path) for path in artifact_files

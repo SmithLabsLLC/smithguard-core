@@ -8,9 +8,10 @@ installation.
 | Surface | Bound and behavior |
 | --- | --- |
 | Origin, all public routes | Per address: 10 requests/second, burst 20, 20 connections; origin 429 may omit `Retry-After` |
-| `POST /v1/artifacts/assess` and all `/mcp` traffic | Also share a service-wide 100 requests/second origin limiter, burst 200; key/metadata MCP calls consume this route budget too |
+| Full/summary assessment POST routes and `/mcp` / `/mcp/summaries` | Also share a service-wide 100 requests/second origin limiter, burst 200; key/metadata MCP calls consume this route budget too |
 | Exact assessment quota | 100 cache-miss attempts per 10 seconds and 100,000 distinct successful checks per network per UTC day; 429 on limits, 409 for an identical running request |
 | MCP application | 16 concurrent requests, 12-second elapsed limit, 16,384 request bytes, 1,048,576 document bytes and 2,200,000 wire-response bytes |
+| Summary-only profile | Same assessment operation/quota; 32,768 summary bytes and 81,920 total MCP response bytes; only one summary tool, no raw fallback |
 | Origin proxy | 15-second read timeout; this is not a client budget or a cancellation guarantee for every downstream operation |
 
 Protocol initialization, tool listing, key/coverage reads and assessments are
@@ -28,6 +29,13 @@ local retention policy; it is not a signature-verifiable copy of the raw answer.
 Re-read current status rather than reusing a prior report as current authority.
 The service's internal assessment cache and immutable upstream evidence storage
 have different purposes and do not grant downstream response-retention rights.
+
+The [hosted summary representation](product/assessment-summary.md) has an explicit
+derived-report retention policy: its selected public coordinate and compact
+evidence may remain in the authorized provider/client conversation. It excludes
+the original response, signature, source prose and raw lookup references. No
+client signature verification ran; HTTP `no-store` does not delete transcripts.
+Recheck evidence before a later decision. Original-response rules above remain.
 
 Bound connect/read/write/pool time, total wall time, response bytes, concurrency
 and the total number of requests. In an interactive policy hook, additionally cap

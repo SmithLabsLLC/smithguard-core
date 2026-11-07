@@ -21,8 +21,7 @@ from smithguard.operational_health import (
 from tests.test_operational_health import NOW, _healthy_inputs, _openssf_monitor
 
 
-@pytest.fixture
-def receipt_boundary(tmp_path, monkeypatch):
+def make_receipt_boundary(tmp_path, monkeypatch):
     monkeypatch.setattr(
         catalog_health.grp, "getgrnam", lambda _: SimpleNamespace(gr_gid=os.getegid())
     )
@@ -50,13 +49,18 @@ def receipt_boundary(tmp_path, monkeypatch):
     return parent / "openssf.json", root, pair
 
 
+@pytest.fixture
+def receipt_boundary(tmp_path, monkeypatch):
+    return make_receipt_boundary(tmp_path, monkeypatch)
+
+
 def test_catalog_receipt_preserves_success_then_failure_and_missing_ids(receipt_boundary):
     path, root, pair = receipt_boundary
     first = write_catalog_health(
         path,
         state_root=root,
         complete_pair=pair,
-        attempt={"commit": "a" * 40},
+        attempt={"unresolved_record_count": 0, "commit": "a" * 40},
         succeeded=True,
         started=perf_counter(),
     )
@@ -68,6 +72,7 @@ def test_catalog_receipt_preserves_success_then_failure_and_missing_ids(receipt_
         state_root=root,
         complete_pair=pair,
         attempt={
+            "unresolved_record_count": 0,
             "commit": "b" * 40,
             "missing_upstream_count": 1,
             "missing_upstream_ids": ["MAL-2026-1"],
@@ -91,7 +96,7 @@ def test_catalog_capacity_opt_in_does_not_relax_shadow(receipt_boundary):
         path,
         state_root=root,
         complete_pair=pair,
-        attempt={"commit": "a" * 40},
+        attempt={"unresolved_record_count": 0, "commit": "a" * 40},
         succeeded=True,
         started=perf_counter(),
     )
@@ -107,7 +112,7 @@ def test_catalog_receipt_refuses_unsafe_or_inconsistent_proof(receipt_boundary, 
         path,
         state_root=root,
         complete_pair=pair,
-        attempt={"commit": "a" * 40},
+        attempt={"unresolved_record_count": 0, "commit": "a" * 40},
         succeeded=True,
         started=perf_counter(),
     )
@@ -270,7 +275,7 @@ def test_collected_health_inputs_read_the_selected_catalog_receipt(
         path,
         state_root=root,
         complete_pair=pair,
-        attempt={"commit": "a" * 40},
+        attempt={"unresolved_record_count": 0, "commit": "a" * 40},
         succeeded=True,
         started=perf_counter(),
     )

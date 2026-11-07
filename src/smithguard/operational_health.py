@@ -153,6 +153,7 @@ class OperationalHealthInputs:
     host_pressure: str = "unavailable"
     supplemental_sources: Mapping[str, str] | None = None
     github_quarantined_records: int | None = 0
+    openssf_quarantined_records: int | None = None
     bulletin_status: str | None = None
     official_intake_status: str | None = None
 
@@ -393,6 +394,16 @@ def evaluate_operational_health(inputs: OperationalHealthInputs) -> OperationalH
             f"{quarantine_count} current-segment GitHub record(s) need named quarantine repair."
             if quarantine_count is not None
             else "GitHub record quarantine count is unavailable."
+        ),
+    )
+    _add(
+        checks,
+        code="openssf_record_quarantine",
+        status="healthy" if inputs.openssf_quarantined_records == 0 else "critical",
+        summary=(
+            f"{inputs.openssf_quarantined_records} OpenSSF record(s) need named quarantine repair."
+            if inputs.openssf_quarantined_records is not None
+            else "OpenSSF record quarantine count is unavailable."
         ),
     )
     required_active_units = (
@@ -1168,6 +1179,7 @@ def collect_operational_inputs(
     warning_count: int | None = None
     warning_lane_health: WarningLaneHealth | None = None
     github_quarantined_records: int | None = None
+    openssf_quarantined_records: int | None = None
     engine = create_engine(
         config.database_url,
         pool_pre_ping=True,
@@ -1216,6 +1228,9 @@ def collect_operational_inputs(
                 )
                 github_quarantined_records = actionable_quarantine_count(
                     session, source_id=GITHUB_ADVISORY
+                )
+                openssf_quarantined_records = actionable_quarantine_count(
+                    session, source_id=OPENSSF_MALICIOUS
                 )
                 supplemental_sources = {
                     source_id: source_state(session, source_id, now=measured_at)[0]
@@ -1292,6 +1307,7 @@ def collect_operational_inputs(
         bulletin_status=bulletin_status,
         official_intake_status=official_intake_status,
         github_quarantined_records=github_quarantined_records,
+        openssf_quarantined_records=openssf_quarantined_records,
         openssf_monitor=openssf_monitor,
         openssf_monitor_source=config.openssf_monitor_source,
         openssf_schedule_expected=config.openssf_schedule_expected,

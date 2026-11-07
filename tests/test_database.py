@@ -336,12 +336,13 @@ def test_migration_upgrade_downgrade_rebuild_and_model_parity(
         # The historical schema stays migration-owned after its unpublished ORM is removed.
         assert len(private_watchlists_tables) == 6
         registered_tables = {model.__tablename__ for model in APPEND_ONLY_MODELS}
-        assert len(APPEND_ONLY_MODELS) == len(registered_tables) == 45
+        assert len(APPEND_ONLY_MODELS) == len(registered_tables) == 46
         triggers_by_table = {
             table_name: {trigger for row_table, trigger in trigger_rows if row_table == table_name}
             for table_name in registered_tables
         }
         extra_triggers = {
+            "openssf_catalog_attempts": {"validate_openssf_attempt"},
             "collection_record_outcomes": {"validate_collection_outcome"},
             "collection_record_resolutions": {"validate_collection_resolution"},
             "collection_record_memberships": {"validate_collection_membership"},
@@ -469,7 +470,7 @@ def test_warning_receipt_migration_preserves_prior_projection_and_adds_bounded_i
         with engine.begin() as connection:
             assert (
                 connection.scalar(text("SELECT version_num FROM public.alembic_version"))
-                == "0037_bulletin_intake_health"
+                == "0038_openssf_resilience"
             )
             connection.execute(
                 text(

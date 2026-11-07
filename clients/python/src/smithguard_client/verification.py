@@ -19,7 +19,7 @@ from jsonschema.exceptions import ValidationError
 
 MAX_RESPONSE_BYTES = 1_048_576
 CANONICALIZATION = "smithguard-canonical-json-v1"
-SCHEMAS = frozenset({"2.1.0", "2.2.0", "2.3.0", "2.4.0"})
+SCHEMAS = frozenset({"2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"})
 
 
 def canonical(value: Any) -> bytes:

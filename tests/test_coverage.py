@@ -40,6 +40,11 @@ def test_empty_coverage_is_honest_and_agent_extensions_remain_research(database)
     assert report.human_review_hours == 0
     assert all(not lane.continuous_monitoring_claimed for lane in report.lanes)
     assert len(report.source_lanes) == 11
+    assert all(
+        lane.unresolved_record_count is None
+        for lane in report.source_lanes
+        if lane.source_id == GITHUB_ADVISORY
+    )
     openssf = next(
         lane
         for lane in report.source_lanes
@@ -149,6 +154,24 @@ def _openssf_lane(database):
             for item in build_coverage_report(session, measured_at=NOW).source_lanes
             if item.source_id == OPENSSF_SOURCE_ID
         )
+
+
+def test_openssf_coverage_missing_accounting_defaults_to_unknown():
+    from smithguard.coverage import _openssf_catalog_lane
+
+    pair = tuple(
+        _openssf_manifest(segment="openssf-" + tree) for tree in ("malicious", "withdrawn")
+    )
+    lane = _openssf_catalog_lane(
+        manifests=pair,
+        complete_manifests=pair,
+        terminal_manifests=pair,
+        ecosystems=("npm",),
+        measured_at=NOW,
+    )
+    assert lane.unresolved_record_count is None
+    assert lane.state == "failed" and lane.freshness_state == "unresolved"
+    assert "OpenSSF unresolved accounting is unavailable." in lane.unknowns
 
 
 def test_openssf_source_coverage_requires_both_catalog_trees_at_one_snapshot(database) -> None:
@@ -330,6 +353,7 @@ def test_source_coverage_exposes_attempt_success_deadline_and_failure(database) 
         assert lane.last_success_at == "2026-08-05T12:00:00Z"
         assert lane.stale_after == "2026-08-05T14:30:00Z"
         assert lane.freshness_state == "fresh"
+        assert lane.unresolved_record_count == 0
 
     with Session(database.engine) as session, session.begin():
         session.add(

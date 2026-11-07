@@ -85,7 +85,7 @@ def candidate_decision(
     except InvalidVersion:
         reasons.add("candidate_comparison_unknown")
     for body in (before, after):
-        if body["schema_version"] != "2.4.0":
+        if body["schema_version"] not in {"2.4.0", "2.5.0"}:
             reasons.add("source_fix_schema_unavailable")
         if body["coverage"]["result"] != "supported":
             reasons.add("coverage_incomplete")
@@ -102,6 +102,8 @@ def candidate_decision(
             reasons.add("assessment_limitations")
         if not body["source_freshness"] or any(
             source["freshness_state"] not in {"fresh", "complete"}
+            or body["schema_version"] == "2.5.0"
+            and source.get("unresolved_record_count") != 0
             for source in body["source_freshness"]
         ):
             reasons.add("source_freshness_unqualified")
@@ -128,6 +130,7 @@ def candidate_decision(
                 or report.get("applies_to_version") is not True
                 or report.get("fix_evidence_incomplete") is not False
                 or report.get("historical_metadata_incomplete") is not False
+                or report.get("source_state_status") != "current"
             ):
                 reasons.add("source_fix_unqualified")
                 continue

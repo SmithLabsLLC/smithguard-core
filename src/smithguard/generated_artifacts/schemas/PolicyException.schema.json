@@ -93,7 +93,7 @@
       "title": "Sha256",
       "type": "string"
     },
-    "State11": {
+    "State13": {
       "enum": [
         "active",
         "expired",
@@ -101,7 +101,7 @@
         "superseded",
         "recheck_required"
       ],
-      "title": "State11",
+      "title": "State13",
       "type": "string"
     },
     "Visibility": {
@@ -219,7 +219,7 @@
       "type": "string"
     },
     "state": {
-      "$ref": "#/$defs/State11"
+      "$ref": "#/$defs/State13"
     },
     "updated_at": {
       "format": "date-time",

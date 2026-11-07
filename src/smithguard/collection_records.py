@@ -46,6 +46,8 @@ def append_outcome(
     source_updated_at: datetime | None,
     observed_at: datetime,
     acquisition_lane: str,
+    input_encoding: str = "parsed_json_array_sorted_ascii_nonfinite_v1",
+    provenance: Mapping[str, Any] | None = None,
 ) -> CollectionRecordOutcome:
     disposition = (
         "quarantined"
@@ -66,7 +68,8 @@ def append_outcome(
         "policy_sha256": policy_sha256,
         "batch_id": outcome.batch_id,
         "document": {
-            "input_encoding": "parsed_json_array_sorted_ascii_nonfinite_v1",
+            "input_encoding": input_encoding,
+            **({"openssf_git": dict(provenance)} if provenance is not None else {}),
             "governed_input_sha256": outcome.input_sha256 if outcome.raw_evidence_id else None,
             "rights_revision": rights_revision,
             "acquisition_lane": acquisition_lane,
@@ -228,7 +231,7 @@ def unresolved_statement(*, source_id: str, segment: str | None = None):
     return statement
 
 
-def unresolved_count(session: Session, *, source_id: str, segment: str) -> int:
+def unresolved_count(session: Session, *, source_id: str, segment: str | None = None) -> int:
     cases = unresolved_statement(source_id=source_id, segment=segment).subquery()
     return int(session.scalar(select(func.count(func.distinct(cases.c.record_key)))) or 0)
 
@@ -251,6 +254,11 @@ def actionable_quarantines_statement(*, source_id: str):
         .correlate(CollectionRecordOutcome)
         .scalar_subquery()
     )
+    if source_id == "gbsec:source:openssf-malicious-packages":
+        # A rejected move/revival remains actionable over an older withdrawn row.
+        return unresolved_statement(source_id=source_id).where(
+            CollectionRecordOutcome.disposition == "quarantined"
+        )
     return unresolved_statement(source_id=source_id).where(
         CollectionRecordOutcome.disposition == "quarantined",
         or_(current_type.is_(None), current_type == CollectionRecordOutcome.segment),
@@ -286,13 +294,26 @@ def append_resolution(
     membership: CollectionRecordMembership,
     resolved_at: datetime,
 ) -> None:
+    openssf_transition = (
+        prior.source_id == replacement.source_id == "gbsec:source:openssf-malicious-packages"
+        and prior.segment in {"openssf-malicious", "openssf-withdrawn"}
+        and replacement.segment in {"openssf-malicious", "openssf-withdrawn"}
+        and prior.document.get("openssf_git", {}).get("reason")
+        == "openssf_tree_withdrawal_mismatch"
+        and replacement.document.get("openssf_git", {}).get("validated") is True
+    )
+    if prior.source_id == "gbsec:source:openssf-malicious-packages" and not openssf_transition:
+        raise RecordAccountingError("OpenSSF resolution requires exact validated Git provenance")
     if (
         replacement.disposition != "accepted"
         or replacement.document["evidence_id"] is None
-        or (prior.source_id, prior.segment, prior.record_key)
-        != (replacement.source_id, replacement.segment, replacement.record_key)
-        or (prior.input_sha256, prior.processing_version, prior.policy_sha256)
-        == (replacement.input_sha256, replacement.processing_version, replacement.policy_sha256)
+        or (prior.source_id, prior.record_key) != (replacement.source_id, replacement.record_key)
+        or (prior.segment != replacement.segment and not openssf_transition)
+        or (
+            (prior.input_sha256, prior.processing_version, prior.policy_sha256)
+            == (replacement.input_sha256, replacement.processing_version, replacement.policy_sha256)
+            and not (openssf_transition and prior.segment != replacement.segment)
+        )
         or membership.outcome_id != replacement.outcome_id
         or membership.observed_at < prior.observed_at
         or membership.observed_at > resolved_at
