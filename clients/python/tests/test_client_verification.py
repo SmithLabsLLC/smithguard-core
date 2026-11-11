@@ -92,7 +92,7 @@ def test_original_signed_document_and_old_schema(signed, schema):
     signed[0]["schema_version"] = schema
     if schema == "2.5.0":
         for source in signed[0]["source_freshness"]:
-            source["unresolved_record_count"] = 0
+            source["unresolved_record_count"] = None
         for incident in signed[0]["incidents"]:
             for report in incident["source_reports"]:
                 report["source_state_status"] = "current"
@@ -101,24 +101,6 @@ def test_original_signed_document_and_old_schema(signed, schema):
     changed = v.document
     changed["artifact"]["name"] = "changed"
     assert v.document["artifact"]["name"] != "changed"
-
-
-@pytest.mark.parametrize("field", ["source_state_status", "unresolved_record_count"])
-def test_v25_required_source_state_cannot_be_omitted(signed, field):
-    body = signed[0]
-    body["schema_version"] = "2.5.0"
-    for lane in body["source_freshness"]:
-        lane["unresolved_record_count"] = 0
-    for incident in body["incidents"]:
-        for report in incident["source_reports"]:
-            report["source_state_status"] = "current"
-    target = (
-        body["incidents"][0]["source_reports"][0]
-        if field == "source_state_status"
-        else body["source_freshness"][0]
-    )
-    target.pop(field)
-    assert check(signed).reason == "schema_validation_failed"
 
 
 @pytest.mark.parametrize(
@@ -216,15 +198,6 @@ def test_signed_new_schema_incomplete_source_report_rejected(signed, field):
     assert check(signed).reason == "schema_validation_failed"
 
 
-@pytest.mark.parametrize("seconds,eligible", [(30, True), (31, False), (-300, True), (-301, False)])
-def test_response_clock_skew_is_bounded(signed, seconds, eligible):
-    signed[0]["updated_at"] = (NOW + timedelta(seconds=seconds)).isoformat().replace("+00:00", "Z")
-    value = check(signed)
-    assert value.status == "verified"
-    assert value.response_fresh is eligible
-    assert value.current_decision_eligible is eligible
-
-
 @pytest.mark.parametrize("missing", ["source_state_status", "unresolved_record_count"])
 def test_signed_25_missing_rejection_read_model_field_is_rejected(signed, missing):
     body = signed[0]
@@ -242,4 +215,31 @@ def test_signed_25_missing_rejection_read_model_field_is_rejected(signed, missin
     )
     del target[missing]
     # Re-signing makes this a genuine schema refusal, not a signature mismatch.
+    assert check(signed).reason == "schema_validation_failed"
+
+
+@pytest.mark.parametrize("seconds,eligible", [(30, True), (31, False), (-300, True), (-301, False)])
+def test_response_clock_skew_is_bounded(signed, seconds, eligible):
+    signed[0]["updated_at"] = (NOW + timedelta(seconds=seconds)).isoformat().replace("+00:00", "Z")
+    value = check(signed)
+    assert value.status == "verified"
+    assert value.response_fresh is eligible
+    assert value.current_decision_eligible is eligible
+
+
+@pytest.mark.parametrize("field", ["source_state_status", "unresolved_record_count"])
+def test_v25_required_source_state_cannot_be_omitted(signed, field):
+    body = signed[0]
+    body["schema_version"] = "2.5.0"
+    for lane in body["source_freshness"]:
+        lane["unresolved_record_count"] = 0
+    for incident in body["incidents"]:
+        for report in incident["source_reports"]:
+            report["source_state_status"] = "current"
+    target = (
+        body["incidents"][0]["source_reports"][0]
+        if field == "source_state_status"
+        else body["source_freshness"][0]
+    )
+    target.pop(field)
     assert check(signed).reason == "schema_validation_failed"

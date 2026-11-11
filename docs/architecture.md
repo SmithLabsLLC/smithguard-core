@@ -63,9 +63,20 @@ database isolation; they are reference material, not a turnkey installer. Produc
 publication still requires current source rights and checked operating authority.
 A code contribution or successful unit test never grants that authority.
 
+Migration `0038_openssf_resilience` is forward-only. A compatible fallback build
+must understand both that migration and catalog-health receipt schema `3.0.0`,
+which is emitted even while partial writes are disabled. An older build expecting
+migration 0037 or only receipt `2.0.0` is not a compatible fallback. This is a
+format-compatibility requirement, not a deployment or rollback instruction;
+production selection and verification remain outside this source distribution.
+
 The source-rights register is an application policy input. It is not a substitute
 for a third party's terms and does not relicense their content. Contributors adding
 sources must make acquisition, output rights and coverage limits explicit.
+The checked-in register supports contributor fixtures; it does not describe the
+current hosted rights or deployment state. Elapsed review dates fail closed; do
+not extend them to run live collectors. This source snapshot and the service's
+deployed policy are separate records.
 
 ### Product browser assessment reads
 

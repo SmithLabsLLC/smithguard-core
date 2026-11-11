@@ -7,6 +7,14 @@ explicitly authorized local-preview workflow and links the maintained
 client, approve local discovery, permit disclosure, connect hosted MCP or enable
 an automatic release gate.
 
+The unchanged six-file 0.3.0 release and its dated qualification below describe
+assessment 2.4.0. They are separate from the optional client 0.1.1 reader's
+[2.4 and 2.5 compatibility](verification-v1.md). Publishing client compatibility
+guidance does not replace an installed skill, republish its archive, qualify it
+against 2.5 responses or activate a hosted release. Preserve the legacy skill's
+unknown-schema boundary; do not reinterpret an unrecognized answer as 2.4.0 or
+claim the October 26 skill checks covered 2.5.0.
+
 The new result guidance distinguishes complete-response signature verification,
 current key/freshness eligibility, source-listed fixes and incomplete evidence.
 Local conditions use explicit dated target facts. A candidate must meet every

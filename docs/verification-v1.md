@@ -46,10 +46,22 @@ is insufficient. The current executable reference is the Python 3.14 client in
 ## Signature and key checks
 
 Parse and validate the original document. The client recognizes assessment schema
-versions 2.1.0, 2.2.0, 2.3.0 and 2.4.0 and validates them with its bundled assessment
+versions 2.1.0, 2.2.0, 2.3.0, 2.4.0 and 2.5.0 and validates them with its bundled assessment
 JSON Schema (including format checks). Unknown schemas or signature formats are
 `unchecked`, never successful evidence. This list is a client compatibility list,
 not permission to skip fields required by the bundled schema.
+
+For schema 2.5.0, every `incidents[].source_reports[]` entry must include
+`source_state_status` with exactly `current` or `historical_unresolved`; null,
+missing or other values fail schema validation. Every `source_freshness[]` entry
+must include `unresolved_record_count`, which is a nonnegative integer or null.
+Null means the count is unknown, not zero. Omitting either required field returns
+`invalid` / `schema_validation_failed`, even for otherwise correctly signed bytes.
+Older supported answers may omit these fields and retain their original signed
+semantics. Do not insert defaults or rewrite them as 2.5.0. Their absent source-state
+provenance cannot qualify current patch advice: that separate helper requires
+explicit current reports and zero unresolved records in both compared answers.
+Signature verification alone does not establish those source qualifications.
 
 Remove only the top-level `signature` member. Canonicalize **every other member**,
 including nested fields, using the rules above. Verify the detached Ed25519
@@ -106,7 +118,7 @@ occurs; do not continue to a later check to replace the earlier result.
 | Order | Condition or operation | Returned status / reason | Signature valid |
 | --- | --- | --- | --- |
 | 1 | Strictly parse assessment JSON | Continue, or exception outcome | false until step 12 |
-| 2 | Schema version outside the four listed versions | `unchecked` / `unsupported_schema` | false |
+| 2 | Schema version outside the five listed versions | `unchecked` / `unsupported_schema` | false |
 | 3 | Signature member absent or not an object | `unchecked` / `missing_signature` | false |
 | 4 | Signature algorithm or canonicalization unsupported | `unchecked` / `unsupported_signature_format` | false |
 | 5 | Validate the bundled assessment schema and formats | Continue, or `invalid` / `schema_validation_failed` | false |

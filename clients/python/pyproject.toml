@@ -1,6 +1,6 @@
 [project]
 name = "smithguard-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "Explicitly authorized local Python metadata checks through hosted SmithGuard"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"

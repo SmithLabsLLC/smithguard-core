@@ -1,8 +1,13 @@
 # SmithGuard operating guide
 
-Validated October 26, 2026. Use the hosted service to assess an explicitly selected
-public package coordinate. The optional smithguard-client 0.1.0 performs local
-orchestration; its assessment engine and evidence database remain hosted.
+Original workflow validation: October 26, 2026, with client 0.1.0. This revision
+documents optional smithguard-client 0.1.1 and its assessment 2.5 compatibility;
+it does not renew that dated live validation. Package checks, live client
+qualification and hosted release activation have separate evidence.
+
+Use the hosted service to assess an explicitly selected public package coordinate.
+The optional client performs local orchestration; its assessment engine and
+evidence database remain hosted.
 
 ## Start with identity and permission
 
@@ -33,6 +38,14 @@ It rejects ambiguous JSON, unsupported formats, changed fields, wrong coordinate
 wrong key identity and invalid Ed25519 signatures. It does not verify a hand-picked
 summary. Public REST and hosted MCP return the same assessment contract.
 
+Client 0.1.1 recognizes assessment schemas 2.1.0 through 2.5.0 under the
+[versioned verification contract](verification-v1.md). In 2.5, each source report
+must state `current` or `historical_unresolved`, and each source-freshness row must
+include its unresolved-record count. A null count remains unknown. Older supported
+signatures still verify, but absent source-state fields cannot qualify current
+patch advice. This compatibility does not claim that a hosted release emitting
+2.5 has been activated or that an older installed client has been upgraded.
+
 - **Verified** means the signature matched the original response and expected key.
 - **Invalid** means a check failed; do not use the response as trusted evidence.
 - **Unchecked** means necessary verification was unavailable or unsupported; display
@@ -59,7 +72,7 @@ conditions only against explicit, dated target facts; never assume the target OS
 is the scanner's OS. Missing, stale, malformed or prose-only conditions remain
 uncertain. A condition that does not match does not erase the version finding.
 
-The [schema 2.4 evidence guide](assessment-evidence.md) separates source-listed
+The [source-fix evidence guide](assessment-evidence.md) separates source-listed
 fixes from legacy inferred candidates. Check
 source, affected branch, exact patch field state, provenance, corrected or withdrawn
 records and evidence limits. An exclusive upper range boundary alone does not

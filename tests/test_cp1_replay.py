@@ -98,6 +98,7 @@ def test_one_hundred_synthetic_records_rebuild_deterministically(
         registry=RightsRegistry.from_path(RIGHTS_REGISTER),
         evidence_store=LocalImmutableEvidenceStore(tmp_path / "evidence"),
         transport=transport,
+        clock=lambda: NOW,
     )
     with Session(database.engine) as session, session.begin():
         collected = runner.run_public(session, source_id=GITHUB_ADVISORY)

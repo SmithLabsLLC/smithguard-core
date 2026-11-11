@@ -604,7 +604,10 @@ def test_inventory_orchestration_rolls_back_then_commits_one_exact_page(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    cutoff = datetime.now(UTC).replace(microsecond=0) - timedelta(minutes=1)
+    from .fixture_clock import FixtureDateTime
+
+    monkeypatch.setattr(runtime, "datetime", FixtureDateTime)
+    cutoff = FixtureDateTime.now(UTC).replace(microsecond=0) - timedelta(minutes=1)
     with Session(database.engine) as session, session.begin():
         session.add(
             _progress(

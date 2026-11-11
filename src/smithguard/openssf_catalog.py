@@ -740,6 +740,10 @@ def _collect_openssf_catalog(config, engine, attempt) -> dict[str, object]:
             stored_records, stored_counts = _read_catalog_validation(session)
         observed_at = datetime.now(UTC)
         resilience = partial_writes_enabled()
+        if resilience:
+            # The 0038 trigger compares the attempt column with the whole-second
+            # JSON timestamp and requires all rejection memberships at or before it.
+            observed_at = observed_at.replace(microsecond=0)
         attempt["resilience"] = resilience
         run_id = attempt.setdefault("run_id", stable_id("openssf-catalog-attempt", uuid4().hex))
         policy_digest = _policy_digest(config)

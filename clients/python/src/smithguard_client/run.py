@@ -13,7 +13,7 @@ from .interpretation import evaluate_conditions
 from .transport import PublicReader, ReadFailure, approved_coordinates
 from .verification import canonical
 
-TOOL_VERSION = "0.1.0"
+TOOL_VERSION = "0.1.1"
 REPORT_BUDGET = 16 * 1024 * 1024
 ITEM_BUDGET = 256 * 1024
 ANNOTATION_BUDGET = 1024 * 1024

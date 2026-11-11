@@ -10,7 +10,7 @@ can use a different Python version because its code is never run.
 ## Install the released client
 
 Download the wheel, source archive and `SHA256SUMS.txt` from the
-[client 0.1.0 release](https://github.com/SmithLabsLLC/smithguard-core/releases/tag/client-v0.1.0).
+[client 0.1.1 release](https://github.com/SmithLabsLLC/smithguard-core/releases/tag/client-v0.1.1).
 Keep all three in a new directory you control and compare the checksums before
 extracting or installing. Checksums detect changed bytes; they are not an
 independent publisher signature. The wheel contains the client; the source archive
@@ -20,10 +20,10 @@ With Linux, Python 3.14.7 and uv 0.13.4 available, use a dedicated tool environm
 
 ```sh
 sha256sum --check SHA256SUMS.txt
-tar -xzf smithguard_client-0.1.0.tar.gz
-uv sync --locked --no-dev --no-install-project --project smithguard_client-0.1.0
-uv pip install --python smithguard_client-0.1.0/.venv/bin/python --no-deps smithguard_client-0.1.0-py3-none-any.whl
-smithguard_client-0.1.0/.venv/bin/smithguard-client --help
+tar -xzf smithguard_client-0.1.1.tar.gz
+uv sync --locked --no-dev --no-install-project --project smithguard_client-0.1.1
+uv pip install --python smithguard_client-0.1.1/.venv/bin/python --no-deps smithguard_client-0.1.1-py3-none-any.whl
+smithguard_client-0.1.1/.venv/bin/smithguard-client --help
 ```
 
 Run the later examples with that full executable path, or activate only that

@@ -21,9 +21,9 @@ from smithguard.db.models import (
     CollectionRecordResolution,
     OpenSSFCatalogAttempt,
 )
-from smithguard.identifiers import strict_json_loads
+from smithguard.identifiers import strict_json_loads, timestamp
 from smithguard.service import SmithGuardService
-from tests.fixture_clock import FIXTURE_NOW
+from tests.fixture_clock import FIXTURE_NOW, FixtureDateTime
 from tests.test_catalog_health import receipt_boundary  # noqa: F401
 from tests.test_openssf_catalog_validation import catalog_runner  # noqa: F401
 from tests.test_openssf_git import _commit, _record, _write_record
@@ -53,6 +53,46 @@ def bad_record(*, withdrawn=True):
 
 def scalar_count(session, model):
     return session.scalar(select(func.count()).select_from(model))
+
+
+@pytest.mark.parametrize("state", ["complete", "partial"])
+def test_resilience_persists_one_partition_time_with_fractional_clock(
+    database, resilience_runner, monkeypatch, state
+):
+    if state == "partial":
+        assert resilience_runner()["status"] == "complete"
+        set_tree(monkeypatch, bad_record())
+
+    clock_time = FIXTURE_NOW + timedelta(seconds=1, microseconds=123456)
+
+    class FractionalClock(FixtureDateTime):
+        @classmethod
+        def now(cls, tz=None):
+            return clock_time.astimezone(tz) if tz is not None else clock_time.replace(tzinfo=None)
+
+    monkeypatch.setattr(openssf_catalog, "datetime", FractionalClock)
+    if state == "partial":
+        with pytest.raises(openssf_catalog.OpenSSFCatalogPartial):
+            resilience_runner()
+    else:
+        assert resilience_runner()["status"] == "complete"
+
+    expected_time = clock_time.replace(microsecond=0)
+    with Session(database.engine) as session:
+        receipt = openssf_resilience.latest_attempt(session)
+        assert receipt.state == state
+        assert receipt.observed_at == expected_time
+        assert receipt.document["validated_at"] == timestamp(expected_time)
+        pair = openssf_catalog._latest_complete_pair(session)
+        assert len(pair) == 2
+        if state == "partial":
+            assert all(manifest.observed_at == FIXTURE_NOW for manifest in pair)
+            (rejection,) = receipt.document["rejections"]
+            member = session.get(CollectionRecordMembership, rejection["membership_id"])
+            outcome = session.get(CollectionRecordOutcome, rejection["outcome_id"])
+            assert member.observed_at == outcome.observed_at == expected_time
+        else:
+            assert all(manifest.observed_at == expected_time for manifest in pair)
 
 
 @pytest.mark.parametrize("prior_withdrawn", [False, True])
