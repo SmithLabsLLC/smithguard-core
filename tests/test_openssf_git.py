@@ -206,6 +206,7 @@ def test_snapshot_is_bounded_paged_and_projects_only_reviewed_fields(tmp_path: P
     ]
 
 
+@pytest.mark.usefixtures("fixed_openssf_clock")
 def test_full_catalog_runner_has_no_ecosystem_allowlist_and_repeats_cleanly(
     database,
     tmp_path: Path,

@@ -44,7 +44,9 @@ correctness, provenance and tests; the contributor remains responsible for the p
 
 ## What happens after review
 
-Core source paths are kept consistent with the hosted service's maintained source.
+Core source paths are synchronized periodically with the hosted service's
+maintained source. Between synchronizations, the hosted service may run newer
+fixes than this repository.
 Maintainers verify the reviewed commit, reconcile concurrent changes, run the full
 private operating gate, and release through a separate controlled process. Public
 CI has no production credentials or deployment authority. PR comments and workflow
