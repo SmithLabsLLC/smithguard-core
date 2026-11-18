@@ -1570,7 +1570,7 @@ def test_legacy_alias_merge_never_borrows_nonmatching_catalog_authority(
                     ],
                 },
                 canonical_url="https://github.com/ossf/malicious-packages/blob/"
-                "0123456789012345678901234567890123456789/example.json",
+                "0123456789012345678901234567890123456789/osv/malicious/npm/event-stream/MAL-2026-54321.json",
                 source_state="active",
                 evidence_id="gbsec:evidence:api-match-openssf",
                 governance_decision_id="gbsec:governance:api-match-openssf",

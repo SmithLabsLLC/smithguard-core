@@ -6,7 +6,11 @@ from copy import deepcopy
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from smithguard.openssf_attribution import LICENSE, MAX_URL_CHARS, SOURCE_NAME
+from smithguard.openssf_git import OPENSSF_MALICIOUS
+
 VERSION = "1.0.0"
+ATTRIBUTED_VERSION = "1.1.0"
 REST_PATH = "/v1/artifacts/assessment-summary"
 MCP_PATH = "/mcp/summaries"
 TOOL_NAME = "assess_public_artifact_summary"
@@ -151,6 +155,29 @@ SOURCE_REPORT = closed(
         "source_context_state": {"enum": ["available", "unavailable", "omitted_budget"]},
     }
 )
+# Older answers retain the original format. The additive 1.1 response requires
+# credit and the exact pinned source record alongside each visible OpenSSF row.
+SOURCE_REPORT["properties"]["source_attribution"] = closed(
+    {
+        "name": {"const": SOURCE_NAME},
+        "license": {"const": LICENSE},
+        "record_url": text(
+            MAX_URL_CHARS,
+            pattern=(
+                r"^https://github\.com/ossf/malicious-packages/blob/[0-9a-f]{40}/"
+                r"osv/(?:malicious|withdrawn)/[A-Za-z0-9:@%+._/-]+/MAL-[0-9]{4}-[0-9]+\.json$"
+            ),
+        ),
+    }
+)
+SOURCE_REPORT["allOf"] = [
+    {
+        "if": {"properties": {"source_id": {"const": OPENSSF_MALICIOUS}}},
+        "then": {"required": ["source_attribution"]},
+        "else": {"not": {"required": ["source_attribution"]}},
+    }
+]
+
 INCIDENT = closed(
     {
         "incident_id": INCIDENT_ID,
@@ -209,8 +236,8 @@ OMISSIONS = closed(
 )
 SUMMARY = closed(
     {
-        "summary_schema_version": {"const": VERSION},
-        "projection_version": {"const": VERSION},
+        "summary_schema_version": {"enum": [VERSION, ATTRIBUTED_VERSION]},
+        "projection_version": {"enum": [VERSION, ATTRIBUTED_VERSION]},
         "report_origin": {"const": "hosted_projection"},
         "client_signature_verified": {"const": False},
         "action_authorized": {"const": False},
@@ -271,6 +298,40 @@ SUMMARY = closed(
         },
     }
 )
+# The two version fields identify the actual representation on the wire.
+SUMMARY["allOf"] = [
+    {
+        "if": {
+            "properties": {
+                "incidents": {
+                    "contains": {
+                        "properties": {
+                            "source_reports": {
+                                "contains": {
+                                    "properties": {"source_id": {"const": OPENSSF_MALICIOUS}}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "then": {
+            "properties": {
+                "summary_schema_version": {"const": ATTRIBUTED_VERSION},
+                "projection_version": {"const": ATTRIBUTED_VERSION},
+            }
+        },
+        "else": {
+            "properties": {
+                "summary_schema_version": {"const": VERSION},
+                "projection_version": {"const": VERSION},
+            }
+        },
+    }
+]
+
+
 ERROR_CODES = [
     "invalid_request",
     "version_not_exact",

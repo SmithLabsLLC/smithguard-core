@@ -13,6 +13,8 @@ from smithguard import summary_contract as contract
 from smithguard.contracts.runtime import parse_contract
 from smithguard.identifiers import canonical_json_bytes, parse_timestamp, timestamp
 from smithguard.normalization import normalize_artifact_identity
+from smithguard.openssf_attribution import LICENSE, SOURCE_NAME, verified_record_url
+from smithguard.openssf_git import OPENSSF_MALICIOUS
 
 # Only canonical record pages, never arbitrary paths, redirects, queries or URLs
 # containing a second destination. A new source needs an explicit reviewed rule.
@@ -78,6 +80,18 @@ def _source(source: dict, *, unresolved: bool) -> dict:
     simple = {
         key: value for key, value in source.items() if key in contract.SOURCE_REPORT["properties"]
     }
+    if source["source_id"] == OPENSSF_MALICIOUS:
+        context = source.get("source_context") or {}
+        url = verified_record_url(
+            context.get("source_url"), upstream_record_id=source["upstream_record_id"]
+        )
+        if (
+            not url
+            or context.get("attribution") != SOURCE_NAME
+            or context.get("license_expression") != LICENSE
+        ):
+            raise SummaryRejected("summary_unavailable")
+        simple["source_attribution"] = {"name": SOURCE_NAME, "license": LICENSE, "record_url": url}
     simple["fix_evidence"] = _bounded_items(
         [
             {key: value for key, value in fix.items() if key in contract.FIX["properties"]}
@@ -117,6 +131,10 @@ def _incident(incident: dict, unresolved_sources: set[str]) -> dict:
         for key, value in incident.items()
         if key in contract.INCIDENT["properties"]
     }
+    # A shared family can carry facts from records beyond the four-row limit.
+    # A compact answer cannot represent those facts without their source credit.
+    if any(row["source_id"] == OPENSSF_MALICIOUS for row in incident["source_reports"][4:]):
+        raise SummaryRejected("summary_limit_exceeded")
     result["aliases"] = _bounded_items(incident["aliases"], contract.RECORD_ID, 20)
     result["citations"] = [url for url in incident["upstream_urls"] if CITATION.fullmatch(url)][:4]
     result["source_reports"] = [
@@ -236,7 +254,18 @@ def project_summary(document: dict, expected_artifact: dict, *, now: datetime) -
             ],
             "limitations": deepcopy(contract.SUMMARY["properties"]["limitations"]["const"]),
         }
+        openssf_incidents = {
+            item["incident_id"]
+            for item in document["incidents"]
+            if any(row["source_id"] == OPENSSF_MALICIOUS for row in item["source_reports"])
+        }
+        if openssf_incidents:
+            result["summary_schema_version"] = result["projection_version"] = (
+                contract.ATTRIBUTED_VERSION
+            )
         while True:
+            if not openssf_incidents.issubset(item["incident_id"] for item in result["incidents"]):
+                raise SummaryRejected("summary_limit_exceeded")
             result["omissions"] = _omissions(document, result["incidents"])
             result["check_state"] = (
                 "partial"

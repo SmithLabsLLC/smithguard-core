@@ -3383,6 +3383,49 @@
       },
       "PublicArtifactSummary": {
         "additionalProperties": false,
+        "allOf": [
+          {
+            "else": {
+              "properties": {
+                "projection_version": {
+                  "const": "1.0.0"
+                },
+                "summary_schema_version": {
+                  "const": "1.0.0"
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "incidents": {
+                  "contains": {
+                    "properties": {
+                      "source_reports": {
+                        "contains": {
+                          "properties": {
+                            "source_id": {
+                              "const": "gbsec:source:openssf-malicious-packages"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "projection_version": {
+                  "const": "1.1.0"
+                },
+                "summary_schema_version": {
+                  "const": "1.1.0"
+                }
+              }
+            }
+          }
+        ],
         "properties": {
           "action_authorized": {
             "const": false
@@ -3595,6 +3638,29 @@
                 "source_reports": {
                   "items": {
                     "additionalProperties": false,
+                    "allOf": [
+                      {
+                        "else": {
+                          "not": {
+                            "required": [
+                              "source_attribution"
+                            ]
+                          }
+                        },
+                        "if": {
+                          "properties": {
+                            "source_id": {
+                              "const": "gbsec:source:openssf-malicious-packages"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "source_attribution"
+                          ]
+                        }
+                      }
+                    ],
                     "properties": {
                       "applies_to_version": {
                         "type": [
@@ -3744,6 +3810,29 @@
                         },
                         "maxItems": 8,
                         "type": "array"
+                      },
+                      "source_attribution": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "license": {
+                            "const": "Apache-2.0"
+                          },
+                          "name": {
+                            "const": "OpenSSF Malicious Packages"
+                          },
+                          "record_url": {
+                            "maxLength": 4096,
+                            "minLength": 1,
+                            "pattern": "^https://github\\.com/ossf/malicious-packages/blob/[0-9a-f]{40}/osv/(?:malicious|withdrawn)/[A-Za-z0-9:@%+._/-]+/MAL-[0-9]{4}-[0-9]+\\.json$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "license",
+                          "record_url"
+                        ],
+                        "type": "object"
                       },
                       "source_context_state": {
                         "enum": [
@@ -3966,7 +4055,10 @@
             "type": "object"
           },
           "projection_version": {
-            "const": "1.0.0"
+            "enum": [
+              "1.0.0",
+              "1.1.0"
+            ]
           },
           "reason_codes": {
             "items": {
@@ -4066,7 +4158,10 @@
             "type": "array"
           },
           "summary_schema_version": {
-            "const": "1.0.0"
+            "enum": [
+              "1.0.0",
+              "1.1.0"
+            ]
           },
           "valid_until": {
             "format": "date-time",

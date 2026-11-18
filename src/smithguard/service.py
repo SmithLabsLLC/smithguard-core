@@ -21,7 +21,11 @@ from smithguard.advisory_catalog import (
     catalog_evidence_for_package,
 )
 from smithguard.assessment_evidence import assessment_reason_codes, incident_fix_evidence
-from smithguard.catalog_context import attach_catalog_context
+from smithguard.catalog_context import (
+    RequiredAttributionLimit,
+    RequiredAttributionUnavailable,
+    attach_catalog_context,
+)
 from smithguard.contracts.runtime import parse_contract
 from smithguard.coverage import build_coverage_report, refresh_coverage_report
 from smithguard.db.models import (
@@ -477,11 +481,10 @@ def _project_assessment_incidents(
     """Every incident with its applicability; the caller lists and counts them."""
     projected_incidents = []
     for incident in incidents:
-        all_reports = sorted(
+        reports = sorted(
             reports_by_incident.get(incident["id"], []),
             key=lambda item: (item["source_id"], item["upstream_record_id"]),
         )
-        reports = all_reports[:100]
         projected_incidents.append(
             {
                 "incident_id": incident["id"],
@@ -499,7 +502,6 @@ def _project_assessment_incidents(
                 ),
                 "relationship_basis": ("not_available" if not reports else "catalog_assignment"),
                 "source_reports": reports,
-                "source_reports_truncated": len(all_reports) > len(reports),
                 "applies_to_version": applicability.get(incident["id"], (None, ()))[0],
                 "affected_range_ids": list(applicability.get(incident["id"], (None, ()))[1]),
                 "fixed_versions": [],
@@ -520,22 +522,7 @@ def _project_assessment_incidents(
         legacy_incident_id = legacy_incident_by_ghsa.get(family.family_key.upper())
         if legacy_incident_id is not None and legacy_incident_id in projected_by_id:
             projected = projected_by_id[legacy_incident_id]
-            reports = {
-                (report["source_id"], report["upstream_record_id"]): report
-                for report in projected["source_reports"]
-            }
-            reports.update(
-                {
-                    (report["source_id"], report["upstream_record_id"]): report
-                    for report in family.source_reports
-                }
-            )
-            all_reports = [reports[key] for key in sorted(reports)]
-            projected["source_reports"] = all_reports[:100]
-            projected["source_reports_truncated"] = len(all_reports) > 100
-            projected["report_relationship"] = (
-                "single_report" if len(all_reports) == 1 else "same_incident_record"
-            )
+            projected["source_reports"].extend(family.source_reports)
             projected["relationship_basis"] = "catalog_assignment"
             # Authority is lent only by a confirmed assertion that matches this version;
             # a reviewed advisory that does not apply keeps its label on its own family.
@@ -578,7 +565,6 @@ def _project_assessment_incidents(
                 ),
                 "relationship_basis": "catalog_assignment",
                 "source_reports": list(family.source_reports),
-                "source_reports_truncated": False,
                 "applies_to_version": family.applies,
                 "affected_range_ids": list(family.matched_range_ids),
                 "fixed_versions": list(family.fixed_versions),
@@ -586,6 +572,24 @@ def _project_assessment_incidents(
                 "upstream_urls": list(family.upstream_urls),
             }
         )
+    for item in projected_incidents:
+        # Merge all source identities before imposing the public response limit.
+        unique = {
+            (report["source_id"], report["upstream_record_id"]): report
+            for report in item["source_reports"]
+        }
+        keys = sorted(unique)
+        if len(keys) > 100:
+            # Retain each OpenSSF assertion behind the displayed family/aliases.
+            keys.sort(key=lambda key: key[0] != OPENSSF_SOURCE_ID)
+            if any(key[0] == OPENSSF_SOURCE_ID for key in keys[100:]):
+                raise ResponseLimitExceeded("OpenSSF source reports exceed the incident limit")
+        item["source_reports"] = [unique[key] for key in sorted(keys[:100])]
+        item["source_reports_truncated"] = len(unique) > 100
+        if unique:
+            item["report_relationship"] = (
+                "single_report" if len(unique) == 1 else "same_incident_record"
+            )
     projected_incidents.sort(key=lambda item: item["incident_id"])
     return projected_incidents
 
@@ -604,6 +608,14 @@ def _listed_incidents(
         candidates,
         key=lambda item: (item["applies_to_version"] is not True, item["incident_id"]),
     )
+    # Omitted applicable families still contribute identifiers/range evidence to the
+    # signed result. Their required attribution must therefore fit the display.
+    if any(
+        report["source_id"] == OPENSSF_SOURCE_ID
+        for item in ranked[MAX_LISTED_INCIDENTS:]
+        for report in item["source_reports"]
+    ):
+        raise ResponseLimitExceeded("OpenSSF attribution exceeds the listed incident limit")
     listed = sorted(ranked[:MAX_LISTED_INCIDENTS], key=lambda item: item["incident_id"])
     return listed, not_applicable, len(candidates) > MAX_LISTED_INCIDENTS
 
@@ -962,7 +974,12 @@ class SmithGuardService:
             all_incidents
         )
         listed_reports = [r for i in projected_incidents for r in i["source_reports"]]
-        attach_catalog_context(session, listed_reports)
+        try:
+            attach_catalog_context(session, listed_reports)
+        except RequiredAttributionUnavailable as error:
+            raise InternalStateError(str(error)) from error
+        except RequiredAttributionLimit as error:
+            raise ResponseLimitExceeded(str(error)) from error
         for report in listed_reports:
             # Legacy incident-only records did not retain structured patch context.
             report.setdefault("source_state_status", "current")
@@ -1019,6 +1036,15 @@ class SmithGuardService:
             ],
             sorted(source_names.items()),
         )
+        credited_urls = [
+            (r["upstream_record_id"], r["source_context"]["source_url"])
+            for r in listed_reports
+            if r["source_id"] == OPENSSF_SOURCE_ID
+        ]
+        if credited_urls:
+            feed_revision = stable_id(
+                "feed-revision", feed_revision, "openssf-attribution-v1", credited_urls
+            )
         if not projected_incidents:
             relationship_state = "no_incidents"
         elif len(projected_incidents) > 1:

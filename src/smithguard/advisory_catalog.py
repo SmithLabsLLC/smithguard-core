@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, aliased
 
 from smithguard.advisory_context import github_public_context
 from smithguard.assessment_evidence import HISTORICAL_GITHUB_POLICIES, source_fix_evidence
+from smithguard.catalog_context import openssf_record_context
 from smithguard.collection_records import actionable_quarantines_statement
 from smithguard.db.locks import advisory_xact_lock
 from smithguard.db.models import (
@@ -1402,6 +1403,10 @@ def catalog_evidence_for_package(
                 "evidence_id": catalog.evidence_id,
                 "field_policy_id": field_policies.get(catalog.governance_decision_id),
             }
+            if catalog.source_id == OPENSSF_SOURCE_ID:
+                reports[(catalog.source_id, catalog.upstream_record_id)]["source_context"] = (
+                    openssf_record_context(catalog.canonical_url, catalog.upstream_record_id)
+                )
             if evaluation is True:
                 matched_ids.append(package.package_event_id)
         for report_key, entries in report_values.items():

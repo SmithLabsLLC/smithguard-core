@@ -483,8 +483,12 @@ def _append_match_document(database, value: dict[str, Any], *, openssf: bool = F
             append_openssf_advisory(
                 session,
                 document=value,
-                canonical_url="https://github.com/ossf/malicious-packages/blob/"
-                "0123456789012345678901234567890123456789/example.json",
+                canonical_url=(
+                    "https://github.com/ossf/malicious-packages/blob/"
+                    "0123456789012345678901234567890123456789/osv/malicious/"
+                    f"{value['affected'][0]['package']['ecosystem']}/"
+                    f"{value['affected'][0]['package']['name']}/{value['id']}.json"
+                ),
                 source_state="withdrawn" if value.get("withdrawn") else "active",
                 evidence_id=EVIDENCE_ID,
                 governance_decision_id=GOVERNANCE_ID,

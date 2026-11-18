@@ -29,7 +29,7 @@ or falls back to a full-response tool.
 
 The generated OpenAPI contains closed `PublicArtifactSummaryRequest`,
 `PublicArtifactSummary` and `PublicArtifactSummaryError` schemas. Summary and
-projection versions are `1.0.0`, consuming assessment `2.4.0` or `2.5.0`. Unknown
+projection versions are `1.0.0`, or `1.1.0` for answers with OpenSSF source records, consuming assessment `2.4.0` or `2.5.0`. Unknown
 underlying schemas and mismatched artifact identities fail closed. Both MCP representations
 contain exactly the same derived document, without the full-tool `data/source_url`
 wrapper. Returned errors are content-free. REST statuses 413, 429 and 503 accept
@@ -116,3 +116,13 @@ closed schemas, exact identity, clocks, unsigned assurance, matching text/struct
 content and REST/MCP parity. It does not fall back to raw assessment, coverage or
 key tools. It is separate from the synthetic-only native qualification matrix,
 does not call a model provider and does not prove local applicability or safety.
+
+### OpenSSF record attribution
+
+Each displayed OpenSSF record in a 1.1 summary includes the credit **OpenSSF
+Malicious Packages**, the Apache-2.0 license identifier, and the upstream record
+link from the retained catalog. The link names the exact Git commit, advisory
+directory and matching record ID. Source-specific attribution travels with its
+record, independently of the four general incident citations. When a display
+limit would remove a required source record, the compact endpoint returns its
+existing bounded error response. Other summaries keep their 1.0 representation.
