@@ -88,6 +88,7 @@ def test_real_service_pair_reaches_client_with_measured_github_counts(database, 
     decision = candidate_decision(
         before,
         after,
+        now=NOW,
         compatibility="reviewed_supported",
         installed_identity="independently_verified",
     )

@@ -179,6 +179,7 @@ def test_injected_public_collector_is_retry_safe_and_traceable(
         registry=RightsRegistry.from_path(RIGHTS_REGISTER),
         evidence_store=evidence,
         transport=transport,
+        clock=lambda: NOW,
         governance_policy=active_governance_policy(OPENSSF_MALICIOUS),
     )
     with Session(database.engine) as session, session.begin():
@@ -218,6 +219,7 @@ def test_collector_rejects_an_injected_off_endpoint_response(
         registry=RightsRegistry.from_path(RIGHTS_REGISTER),
         evidence_store=LocalImmutableEvidenceStore(tmp_path / "evidence"),
         transport=transport,
+        clock=lambda: NOW,
         governance_policy=active_governance_policy(OPENSSF_MALICIOUS),
     )
     with (

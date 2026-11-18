@@ -235,3 +235,10 @@ def test_pypi_comparators_treat_local_builds_as_their_public_version(version, ex
     from smithguard.range_evaluation import pep440_matches
 
     assert pep440_matches(version, expression) is expected
+
+
+@pytest.mark.parametrize("ecosystem", ["go", "rust", "swift"])
+def test_explicit_zero_lower_bound_excludes_earlier_prerelease(ecosystem):
+    assert comparator_list_matches(ecosystem, "0.0.0-beta.1", ">=0.0.0") is False
+    assert comparator_list_matches(ecosystem, "0.0.0", ">=0.0.0") is True
+    assert comparator_list_matches(ecosystem, "0.0.0-beta.1", "*") is True

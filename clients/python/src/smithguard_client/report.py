@@ -432,6 +432,17 @@ def _html_report(report, *, compact):
                         )
                         + ". These are evidence candidates, not upgrade instructions.</p>"
                     )
+                    if source.get("source_state_status") == "historical_unresolved":
+                        parts.append("<p>This record is historical and unresolved.</p>")
+                    elif any(
+                        lane.get("source_id") == source["source_id"]
+                        and (lane.get("unresolved_record_count") or 0) > 0
+                        for lane in assessment.get("source_freshness", [])
+                    ):
+                        parts.append(
+                            "<p>Other records from this source remain unresolved. "
+                            "Its fix evidence may be incomplete.</p>"
+                        )
                     if source.get("fix_evidence_incomplete") is not False:
                         parts.append("<p><strong>Fix evidence is incomplete.</strong></p>")
                     parts.append(details("Complete source and branch evidence", source))

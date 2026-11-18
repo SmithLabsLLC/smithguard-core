@@ -74,6 +74,27 @@ class Verification:
     key_status_current: bool
     response_fresh: bool
     original: bytes
+    verified_at: datetime | None = None
+    key_fetched_at: datetime | None = None
+    response_at: datetime | None = None
+    max_age_seconds: int = 300
+
+    def eligible_at(self, now: datetime) -> bool:
+        """Check eligibility at the point of use, including the key observation."""
+        return (
+            self.current_decision_eligible
+            and self.signature_valid
+            and self.verified_at is not None
+            and self.key_fetched_at is not None
+            and self.response_at is not None
+            and all(
+                t.utcoffset() is not None
+                for t in (now, self.verified_at, self.key_fetched_at, self.response_at)
+            )
+            and now >= self.verified_at
+            and 0 <= (now - self.key_fetched_at).total_seconds() <= 300
+            and -30 <= (now - self.response_at).total_seconds() <= self.max_age_seconds
+        )
 
     @property
     def document(self) -> dict[str, Any]:
@@ -86,6 +107,7 @@ class Verification:
 
     @property
     def current_decision_eligible(self) -> bool:
+        """Snapshot at verification time. Use eligible_at for a later decision."""
         return (
             self.status == "verified"
             and self.key_status == "active"
@@ -115,11 +137,24 @@ def verify_assessment(
     key_status = "unknown"
     key_current = False
     fresh = False
+    stamp = None
 
     def result(status, reason, valid=False):
         # An invalid/unchecked document stays available for explicitly labeled
         # display, but downstream decisions must check current_decision_eligible.
-        return Verification(status, reason, valid, key_status, key_current, fresh, raw)
+        return Verification(
+            status,
+            reason,
+            valid,
+            key_status,
+            key_current,
+            fresh,
+            raw,
+            now,
+            key_fetched_at,
+            stamp,
+            max_age_seconds,
+        )
 
     try:
         body = strict_json(raw)

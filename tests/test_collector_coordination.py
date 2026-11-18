@@ -28,6 +28,8 @@ from smithguard.evidence import (
 from smithguard.evidence_finalization import register_evidence_stage
 from smithguard.identifiers import stable_id
 
+pytestmark = pytest.mark.usefixtures("fixed_openssf_clock")
+
 
 def _hold_process_lock(root: str, connection) -> None:
     store = LocalImmutableEvidenceStore(Path(root))

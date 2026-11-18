@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 from packaging.version import InvalidVersion, Version
@@ -51,6 +52,7 @@ def candidate_decision(
     original: Verification,
     candidate: Verification,
     *,
+    now: datetime | None = None,
     compatibility: str = "not_evaluated",
     installed_identity: str = "unverified",
 ) -> dict[str, Any]:
@@ -60,7 +62,8 @@ def candidate_decision(
     Compatibility and installed identity require independent, local evidence.
     """
     reasons = set()
-    if not original.current_decision_eligible or not candidate.current_decision_eligible:
+    now = now or datetime.now(UTC)
+    if not original.eligible_at(now) or not candidate.eligible_at(now):
         reasons.add("verification_or_freshness_unqualified")
     if compatibility != "reviewed_supported":
         reasons.add("application_compatibility_unverified")

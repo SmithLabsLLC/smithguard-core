@@ -307,6 +307,36 @@ def test_report_refuses_unsafe_source_links(tmp_path, url):
     assert b"Open the original source" not in page
 
 
+@pytest.mark.parametrize(
+    "state,message",
+    [
+        ("current", b"Other records from this source remain unresolved"),
+        ("historical_unresolved", b"This record is historical and unresolved"),
+    ],
+)
+def test_html_qualifies_fixes_next_to_source(tmp_path, state, message):
+    from smithguard_client.report import html_report
+
+    preview = make_preview(tmp_path)
+    report, _ = run(preview, preview["approval_sha256"], reader=Reader())
+    for row in report["coordinate_results"].values():
+        assessment = row["assessment"]
+        for incident in assessment["incidents"]:
+            for source in incident["source_reports"]:
+                source["source_state_status"] = state
+                assessment["source_freshness"] = [
+                    {"source_id": source["source_id"], "unresolved_record_count": 1}
+                ]
+    page = html_report(report)
+    assert message in page
+    assert (
+        message
+        in page.split(b"Explicit source fixes across branches: ", 1)[1].split(
+            b"Complete source and branch evidence", 1
+        )[0]
+    )
+
+
 @pytest.mark.parametrize("schema", ["2.1.0", "2.2.0", "2.3.0"])
 def test_pre24_null_fields_render_and_never_qualify_candidate(tmp_path, schema):
     from importlib.resources import files
@@ -351,7 +381,7 @@ def test_pre24_null_fields_render_and_never_qualify_candidate(tmp_path, schema):
         installed_identity="independently_verified",
     )
     assert decision["outcome"] == "no_verified_recommendation"
-    assert "source_fix_schema_unavailable" in decision["reasons"]
+    assert "verification_or_freshness_unqualified" in decision["reasons"]
 
 
 def test_unverified_answers_separate_counts_and_labels(tmp_path):

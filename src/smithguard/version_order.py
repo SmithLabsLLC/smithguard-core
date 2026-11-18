@@ -21,9 +21,7 @@ from smithguard.range_evaluation import RangeEvaluationError, SemVer
 
 MAX_VERSION_LENGTH = 200
 COMPARATOR = re.compile(r"^\s*(<=|>=|==|!=|<|>|=)?\s*([^\s<>=!,]+)\s*$")
-# Source spellings of "every version". A strict bound such as "> 0.0.0" is an ordinary
-# comparison (it excludes 0.0.0 itself), never a sentinel.
-ALL_VERSIONS = frozenset({"*", ">=0", ">=0.0", ">=0.0.0"})
+# Numeric bounds use the ecosystem comparator, including at version zero.
 SEMVER_ECOSYSTEMS = frozenset(
     {"go", "rust", "github-actions", "swift", "erlang", "vscode", "open-vsx", "pub"}
 )
@@ -356,7 +354,7 @@ def comparator_list_matches(ecosystem: str, version: str, expression: object) ->
     """Evaluate a comma-separated comparator list; None when it cannot be decided."""
     if not isinstance(expression, str) or not expression.strip() or len(expression) > 1000:
         return None
-    if expression.replace(" ", "") in ALL_VERSIONS:
+    if expression.strip() == "*":
         return True
     try:
         candidate = version_key(ecosystem, version)

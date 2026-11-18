@@ -70,10 +70,11 @@ def pair(signed, change=None):
     return verify(body), verify(after)
 
 
-def decide(before, after):
+def decide(before, after, now=NOW):
     return candidate_decision(
         before,
         after,
+        now=now,
         compatibility="reviewed_supported",
         installed_identity="independently_verified",
     )
@@ -151,6 +152,31 @@ def test_candidate_must_resolve_all_evidence(signed, case):
 
     before, after = pair(signed, change)
     assert decide(before, after)["outcome"] == "no_verified_recommendation"
+
+
+def test_decision_rechecks_both_responses_and_key_at_use(signed):
+    from dataclasses import replace
+
+    before, after = pair(signed)
+    assert decide(before, after, NOW + timedelta(seconds=300))["outcome"] == (
+        "candidate_for_application_testing"
+    )
+    for a, b, at in [
+        (before, after, NOW + timedelta(seconds=301)),
+        (before, after, NOW - timedelta(seconds=1)),
+        (
+            replace(before, key_fetched_at=NOW - timedelta(seconds=30)),
+            after,
+            NOW + timedelta(seconds=271),
+        ),
+        (
+            before,
+            replace(after, response_at=NOW - timedelta(seconds=30)),
+            NOW + timedelta(seconds=271),
+        ),
+        (replace(before, verified_at=None), after, NOW),
+    ]:
+        assert "verification_or_freshness_unqualified" in decide(a, b, at)["reasons"]
 
 
 def test_largest_version_is_never_selected_from_branch_union(signed):
