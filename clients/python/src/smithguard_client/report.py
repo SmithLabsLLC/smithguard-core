@@ -40,6 +40,24 @@ def evidence_label(assessment):
     )
 
 
+def warning_note(assessment):
+    """Audit SG22-10: active preliminary warnings beside the result, kept distinct from
+    exact applicability. Returns None when there are none and none were truncated."""
+    if not assessment:
+        return None
+    if assessment.get("evidence_truncated"):
+        count = assessment.get("preliminary_warning_count") or 0
+    else:
+        count = len(assessment.get("preliminary_warnings") or [])
+    truncated = bool(assessment.get("preliminary_warnings_truncated"))
+    if not count and not truncated:
+        return None
+    return (
+        f"Preliminary warnings: {count} active{' (more not listed)' if truncated else ''}; "
+        "unverified advisories, separate from the exact result above."
+    )
+
+
 def text_report(report):
     counts = report["counts"]
     lines = Parts(
@@ -97,6 +115,9 @@ def text_report(report):
                 )
                 + "\n"
             )
+            note = warning_note(assessment)
+            if note:
+                lines.append(note + "\n")
             if assessment:
                 lines.append(
                     "Service limits: "
@@ -329,6 +350,9 @@ def _html_report(report, *, compact):
                 "Signature: " + text(assessment["signature_status"]) + ". "
                 "Answer time: " + text(assessment["assessed_at"]) + ".</p>"
             )
+            note = warning_note(assessment)
+            if note:
+                parts.append("<p><strong>" + text(note) + "</strong></p>")
             parts.append(
                 "<p>Limits: "
                 + text(", ".join(assessment["reason_codes"]) or "See source scope below")

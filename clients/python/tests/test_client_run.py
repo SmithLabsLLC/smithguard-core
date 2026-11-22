@@ -27,10 +27,24 @@ def make_preview(tmp_path):
     )
 
 
-def verified(coord, status="verified"):
+def verified(coord, status="verified", at=None):
+    from datetime import UTC, datetime
+
     body = json.loads(Path(__file__).with_name("assessment-example.json").read_text())
     body["artifact"] = coord
-    return Verification(status, "signature_verified", True, "active", True, True, canonical(body))
+    at = at or datetime.now(UTC)
+    return Verification(
+        status,
+        "signature_verified",
+        True,
+        "active",
+        True,
+        True,
+        canonical(body),
+        verified_at=at,
+        key_fetched_at=at,
+        response_at=at,
+    )
 
 
 class Reader:
@@ -593,8 +607,18 @@ def test_service_omissions_remain_incomplete_in_full_and_compact_reports(
             body["incidents"][0]["source_reports"][0]["source_context_state"] = "omitted_budget"
         else:
             body["incidents"][0]["fix_evidence_incomplete"] = True
+        now = datetime.now(UTC)
         return Verification(
-            "verified", "signature_verified", True, "active", True, True, canonical(body)
+            "verified",
+            "signature_verified",
+            True,
+            "active",
+            True,
+            True,
+            canonical(body),
+            verified_at=now,
+            key_fetched_at=now,
+            response_at=now,
         )
 
     reader.assess = limited
@@ -613,3 +637,102 @@ def test_service_omissions_remain_incomplete_in_full_and_compact_reports(
         if incomplete:
             assert b"Evidence complete: False" in output
             assert b"evidence_truncated_not_evaluated" in output
+
+
+def test_conditions_are_not_derived_after_the_answer_expires_mid_run(tmp_path):
+    """Audit SG22-09: two coordinates; the clock crosses 300 seconds before evaluation."""
+    from datetime import UTC, datetime, timedelta
+
+    preview = make_preview(tmp_path)
+    start = datetime.now(UTC)
+    facts = {
+        item["installation_id"]: {
+            "target": "Synthetic target",
+            "observed_at": start.isoformat(),
+            "evidence": "Synthetic explicit facts",
+            "values": {"os": "linux"},
+        }
+        for item in preview["installations"]
+        if item["coordinate"] is not None
+    }
+
+    def run_at(seconds):
+        return run(
+            preview,
+            preview["approval_sha256"],
+            reader=Reader(),
+            local_facts=facts,
+            clock=lambda: datetime.now(UTC) + timedelta(seconds=seconds),
+        )
+
+    fresh, _ = run_at(0)
+    assert any(
+        x.get("local_applicability_status") == "listed_conditions_evaluated"
+        for x in fresh["installations"]
+    )
+    late, _ = run_at(301)
+    statuses = {
+        x.get("local_applicability_status") for x in late["installations"] if x["coordinate"]
+    }
+    assert "answer_expired_not_evaluated" in statuses
+    assert "listed_conditions_evaluated" not in statuses
+    assert not late["interpretation_complete"]
+    # The historical signed answers stay visible.
+    assert all(r["assessment"]["incidents"] for r in late["coordinate_results"].values())
+
+
+@pytest.mark.parametrize("compact", [False, True])
+@pytest.mark.parametrize("warnings,truncated", [(1, False), (2, True), (0, True), (0, False)])
+def test_active_warning_is_shown_beside_a_negative_result(
+    tmp_path, monkeypatch, compact, warnings, truncated
+):
+    """Audit SG22-10: full, summary (compact), truncated and no-warning text and HTML."""
+    import importlib
+    from datetime import UTC, datetime
+
+    from smithguard_client.report import html_report, text_report
+
+    module = importlib.import_module("smithguard_client.run")
+    if compact:
+        monkeypatch.setattr(module, "ITEM_BUDGET", 1)
+    preview = make_preview(tmp_path)
+    reader = Reader()
+
+    def warned(coord):
+        body = verified(coord).document
+        body.update(
+            result="not_affected",
+            preliminary_warnings=[
+                {"warning_id": f"gbsec:warning:synthetic-{n}"} for n in range(warnings)
+            ],
+            preliminary_warnings_truncated=truncated,
+        )
+        now = datetime.now(UTC)
+        return Verification(
+            "verified",
+            "signature_verified",
+            True,
+            "active",
+            True,
+            True,
+            canonical(body),
+            verified_at=now,
+            key_fetched_at=now,
+            response_at=now,
+        )
+
+    reader.assess = warned
+    report, _ = run(preview, preview["approval_sha256"], reader=reader)
+    text, html = text_report(report), html_report(report)
+    if warnings or truncated:
+        expected = f"Preliminary warnings: {warnings} active".encode()
+        assert expected in text and expected in html
+        assert b"unverified advisories, separate from the exact result" in text
+        assert (b"(more not listed)" in text) is truncated
+        # The exact result is unchanged and still shown.
+        assert b"not_affected" in text
+    else:
+        assert (
+            b"active; unverified advisories" not in text
+            and b"active; unverified advisories" not in html
+        )

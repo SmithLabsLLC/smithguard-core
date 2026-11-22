@@ -625,3 +625,56 @@ def test_composer_stable_suffix_is_the_release_for_ranges(database) -> None:
             client, {"ecosystem": "composer", "name": "vendor/lib", "version": "1.0.0-stable1"}
         ).json()
     assert body["result"] == "affected"
+
+
+@pytest.mark.parametrize(
+    ("range_type", "version", "expected"),
+    [
+        ("SEMVER", "1.0.0-1", "affected"),  # a SemVer prerelease sorts before 1.0.0
+        ("ECOSYSTEM", "1.0.0-1", "not_affected"),  # PEP 440 reads 1.0.0.post1, after the fix
+        (
+            "SEMVER",
+            "1.0.0.post1",
+            "possibly_affected",
+        ),  # outside SemVer: unknown order, never excluded
+        ("SEMVER", "1.0.1", "not_affected"),
+        ("ECOSYSTEM", "0.9", "affected"),
+    ],
+)
+def test_pypi_record_follows_its_declared_range_type(
+    database, range_type, version, expected
+) -> None:
+    """Audit SG22-05: a source that explicitly used SemVer is ordered by SemVer; an
+    ECOSYSTEM range keeps the Python ordering. Complete synthetic assessment."""
+    with Session(database.engine) as session, session.begin():
+        append_openssf_advisory(
+            session,
+            document={
+                "id": "MAL-2026-55555",
+                "published": "2026-08-30T00:00:00Z",
+                "modified": "2026-08-31T00:00:00Z",
+                "affected": [
+                    {
+                        "package": {"ecosystem": "PyPI", "name": "example-semver"},
+                        "ranges": [
+                            {
+                                "type": range_type,
+                                "events": [{"introduced": "0"}, {"fixed": "1.0.0"}],
+                            }
+                        ],
+                    }
+                ],
+            },
+            canonical_url="https://github.com/ossf/malicious-packages/blob/"
+            "0123456789012345678901234567890123456789/osv/malicious/pypi/example-semver/MAL-2026-55555.json",
+            source_state="active",
+            evidence_id="gbsec:evidence:pypi-semver-" + range_type.lower(),
+            governance_decision_id="gbsec:governance:pypi-semver-" + range_type.lower(),
+            observed_at=NOW,
+        )
+    with _public_client(database) as client:
+        response = _post(
+            client, {"ecosystem": "pypi", "name": "example-semver", "version": version}
+        )
+    assert response.status_code == 200, response.text
+    assert response.json()["result"] == expected

@@ -26,6 +26,12 @@ SEMVER_ECOSYSTEMS = frozenset(
     {"go", "rust", "github-actions", "swift", "erlang", "vscode", "open-vsx", "pub"}
 )
 ORDERED_ECOSYSTEMS = SEMVER_ECOSYSTEMS | {"npm", "pypi", "maven", "rubygems", "nuget", "composer"}
+# Audit SG22-11 (ported from private main 842e137): short registry operands can name either
+# the padded version or the whole series. Action major tags are distinct refs and retain
+# their existing padded reading.
+SHORT_OPERAND_ECOSYSTEMS = SEMVER_ECOSYSTEMS - {"github-actions"}
+_SHORT_OPERAND = re.compile(r"^v?[0-9]+(?:\.[0-9]+)?(?:[-+].*)?$")
+_SHORT_SERIES = re.compile(r"^v?(?:0|[1-9][0-9]*)(?:\.(?:0|[1-9][0-9]*))?$")
 
 
 class VersionOrderError(ValueError):
@@ -328,6 +334,11 @@ def exact_version_matches(ecosystem: str, version: str, expected: str) -> bool |
     """
     if ecosystem not in ORDERED_ECOSYSTEMS:
         return version == expected
+    if ecosystem in SHORT_OPERAND_ECOSYSTEMS and _SHORT_OPERAND.fullmatch(expected):
+        series = _short_series(expected)
+        if series is None or not is_exact_version(ecosystem, version):
+            return True if version == expected else None
+        return _short_compare(version_key(ecosystem, version), "=", *series)
     try:
         candidate = version_key(ecosystem, version)
         target = version_key(ecosystem, expected)
@@ -350,6 +361,33 @@ def _compare(left: Any, operator: str, right: Any) -> bool:
     }[operator]
 
 
+def _short_series(operand: str) -> tuple[_Release, _Release] | None:
+    """Bounds of an unlabelled short operand; refuse invalid or overlong values."""
+    if len(operand) > MAX_VERSION_LENGTH or not _SHORT_SERIES.fullmatch(operand):
+        return None
+    parts = [int(part) for part in operand.removeprefix("v").split(".")]
+    following = [*parts[:-1], parts[-1] + 1]
+    return (
+        _Release(tuple(parts + [0] * (3 - len(parts))), ()),
+        _Release(tuple(following + [0] * (3 - len(following))), ()),
+    )
+
+
+def _short_compare(candidate: Any, operator: str, low: _Release, high: _Release) -> bool | None:
+    """Decide only where the padded and whole-series readings agree."""
+    if operator in {"<", ">="}:
+        return _compare(candidate, operator, low)
+    if operator in {"=", "==", "!="}:
+        if candidate == low:
+            return operator != "!="
+        if candidate < low or candidate >= high:
+            return operator == "!="
+        return None
+    if operator == "<=":
+        return True if candidate <= low else False if candidate >= high else None
+    return True if candidate >= high else False if candidate <= low else None
+
+
 def comparator_list_matches(ecosystem: str, version: str, expression: object) -> bool | None:
     """Evaluate a comma-separated comparator list; None when it cannot be decided."""
     if not isinstance(expression, str) or not expression.strip() or len(expression) > 1000:
@@ -358,13 +396,22 @@ def comparator_list_matches(ecosystem: str, version: str, expression: object) ->
         return True
     try:
         candidate = version_key(ecosystem, version)
-        results = []
+        results: list[bool | None] = []
         for part in expression.split(","):
             match = COMPARATOR.fullmatch(part)
             if match is None:
                 return None
             operator = match.group(1) or "="
-            results.append(_compare(candidate, operator, version_key(ecosystem, match.group(2))))
+            operand = match.group(2)
+            if ecosystem in SHORT_OPERAND_ECOSYSTEMS and _SHORT_OPERAND.fullmatch(operand):
+                series = _short_series(operand)
+                results.append(
+                    None if series is None else _short_compare(candidate, operator, *series)
+                )
+            else:
+                results.append(_compare(candidate, operator, version_key(ecosystem, operand)))
     except VersionOrderError:
         return None
-    return all(results)
+    if False in results:
+        return False
+    return None if None in results else True

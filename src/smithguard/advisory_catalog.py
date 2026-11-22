@@ -27,7 +27,7 @@ from smithguard.db.models import (
     SourceGovernanceDecisionRecord,
     SupplementalPayloadRecord,
 )
-from smithguard.db.package_lookup import package_name_predicate
+from smithguard.db.package_lookup import package_lookup_key, package_name_predicate, swift_bare_name
 from smithguard.identifiers import (
     CWE_ID,
     canonical_json_bytes,
@@ -1158,6 +1158,7 @@ def catalog_evidence_for_package(
                 ecosystem_column=AdvisoryPackageRecord.ecosystem,
                 ecosystem=ecosystem,
                 name=name,
+                include_swift_bare_name=True,
             ),
         )
         .distinct()
@@ -1241,6 +1242,7 @@ def catalog_evidence_for_package(
                         ecosystem_column=AdvisoryPackageRecord.ecosystem,
                         ecosystem=ecosystem,
                         name=name,
+                        include_swift_bare_name=True,
                     ),
                 ),
             )
@@ -1331,13 +1333,24 @@ def catalog_evidence_for_package(
         active_members.append((catalog, package))
     grouped = _alias_components(active_members)
     families: list[CatalogMatchFamily] = []
+    # Audit SG22-11 (ported from private main 842e137): a bare Swift name can match a
+    # repository-qualified request, but it cannot establish a positive or a negative.
+    swift_alias = swift_bare_name(name) if ecosystem == "swift" else None
     for family_key, values in sorted(grouped.items()):
+        ambiguous_package_ids = {
+            package.package_event_id
+            for _catalog, package in values
+            if swift_alias is not None
+            and package_lookup_key(ecosystem, package.name)
+            == package_lookup_key(ecosystem, swift_alias)
+        }
         evaluated_values = tuple(
             (
                 catalog,
                 package,
                 None
                 if (catalog.source_id, catalog.upstream_record_id) in gap_keys
+                or package.package_event_id in ambiguous_package_ids
                 else _package_match(package, version=version),
             )
             for catalog, package in values
@@ -1433,6 +1446,7 @@ def catalog_evidence_for_package(
                         ecosystem, version, expression
                     ),
                     osv_match=lambda affected: _openssf_range_matches(ecosystem, version, affected),
+                    ambiguous_package_ids=ambiguous_package_ids,
                     historical=report["field_policy_id"] in HISTORICAL_GITHUB_POLICIES,
                     unresolved=report_key in gap_keys,
                 )

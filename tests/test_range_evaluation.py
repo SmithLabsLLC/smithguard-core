@@ -1,5 +1,7 @@
 """The public and local paths share exact npm and PyPI range decisions."""
 
+import pytest
+
 from smithguard.range_evaluation import (
     normalize_github_npm_advisory_range,
     normalize_semver_comparator_range,
@@ -200,11 +202,25 @@ def test_osv_singleton_intervals_and_inclusive_limit_boundary() -> None:
     assert osv_range_matches("npm", "1.0.0", limited) is False
 
 
-def test_osv_pypi_semver_label_preserves_existing_pep440_policy() -> None:
+@pytest.mark.parametrize(
+    ("version", "semver", "python"),
+    [
+        ("1.0.0-1", True, False),
+        ("1.0.0", False, False),
+        ("0.9.9", True, True),
+        ("1.0rc1", None, True),
+        ("1.0.post1", None, False),
+        ("1!2.0", None, False),
+        ("v1.0.0", None, False),
+        ("1.0", None, False),
+        ("1.0.0+build..x", None, None),
+    ],
+)
+def test_osv_pypi_uses_declared_order(version, semver, python) -> None:
     from smithguard.range_evaluation import osv_range_matches
 
-    for version in ("1.0rc1", "1.0.post1", "1!2.0"):
-        assert (
-            osv_range_matches("pypi", version, {"type": "SEMVER", "events": [{"introduced": "0"}]})
-            is True
-        )
+    events = [{"introduced": "0"}, {"fixed": "1.0.0"}]
+    for kind, expected in (("SEMVER", semver), ("ECOSYSTEM", python)):
+        assert osv_range_matches("pypi", version, {"type": kind, "events": events}) is expected
+    if semver is None:
+        assert osv_range_matches("pypi", version, {"type": "SEMVER", "events": events[:1]}) is None

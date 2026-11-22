@@ -197,7 +197,11 @@ def _osv_version(value: str, ecosystem: str) -> Any:
         return Version(value)
     if ecosystem in {"semver", "npm"}:
         parsed, precision = _semver_operand(value)
-        if precision != 3 or value.startswith(("v", "=")):
+        if (
+            precision != 3
+            or value.startswith(("v", "="))
+            or ("+" in value and not all(value.split("+", 1)[1].split(".")))
+        ):
             raise RangeEvaluationError("unsupported_osv_semver")
         return parsed
     # Other ecosystems order with their registry's own rules (imported lazily because
@@ -213,9 +217,6 @@ def _osv_version(value: str, ecosystem: str) -> Any:
 def _osv_ordering(ecosystem: str, range_type: object) -> str | None:
     from smithguard.version_order import ORDERED_ECOSYSTEMS
 
-    # Preserve the deployed PyPI comparison policy for SEMVER-labelled records.
-    if ecosystem == "pypi" and range_type in ("SEMVER", "ECOSYSTEM"):
-        return "pypi"
     if range_type == "SEMVER":
         return "semver"
     if range_type == "ECOSYSTEM" and ecosystem in ORDERED_ECOSYSTEMS:
@@ -324,7 +325,9 @@ def _covers_every_version(ecosystem: str, affected_range: Mapping[str, Any]) -> 
 def osv_range_matches(
     ecosystem: str, version: str, affected_range: Mapping[str, Any]
 ) -> bool | None:
-    if _covers_every_version(ecosystem, affected_range):
+    # A PyPI identifier outside SemVer cannot be ordered by a declared SEMVER range.
+    pypi_semver = ecosystem == "pypi" and affected_range.get("type") == "SEMVER"
+    if not pypi_semver and _covers_every_version(ecosystem, affected_range):
         return True
     intervals = osv_intervals(ecosystem, affected_range)
     if intervals is None:
@@ -335,6 +338,8 @@ def osv_range_matches(
             # PEP 440: a local build is its public version for range checks.
             Version(Version(version).public)
             if ordering == "pypi"
+            else _osv_version(version, "semver")
+            if pypi_semver
             else SemVer.parse(version)
             if ordering in {"semver", "npm"}
             else _osv_version(version, ordering)

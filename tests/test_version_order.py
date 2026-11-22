@@ -242,3 +242,69 @@ def test_explicit_zero_lower_bound_excludes_earlier_prerelease(ecosystem):
     assert comparator_list_matches(ecosystem, "0.0.0-beta.1", ">=0.0.0") is False
     assert comparator_list_matches(ecosystem, "0.0.0", ">=0.0.0") is True
     assert comparator_list_matches(ecosystem, "0.0.0-beta.1", "*") is True
+
+
+# Audit SG22-11: short operands, ported from private main (842e137, e298f7a).
+@pytest.mark.parametrize(
+    "ecosystem", ["go", "rust", "swift", "erlang", "pub", "vscode", "open-vsx"]
+)
+@pytest.mark.parametrize(
+    "version,expression,expected",
+    [
+        ("1.2.5", "= 1.2", None),
+        ("1.2.0", "== 1.2", True),
+        ("1.3.0", "= 1.2", False),
+        ("1.1.9", "= 1.2", False),
+        ("1.2.5", "!= 1.2", None),
+        ("1.3.0", "!= 1.2", True),
+        ("1.2.0", "!= 1.2", False),
+        ("1.2.5", "<= 1.2", None),
+        ("1.2.0", "<= 1.2", True),
+        ("1.3.0", "<= 1.2", False),
+        ("1.2.5", "> 1.2", None),
+        ("1.3.0", "> 1.2", True),
+        ("1.2.0", "> 1.2", False),
+        ("1.2.5", "< 1.3", True),
+        ("1.2.5", ">= 1.2", True),
+        ("1.2.5", ">= 9.0.0, <= 1.2", False),
+        ("1.2.5", "<= 1.2, >= 9.0.0", False),
+        ("1.2.5", "> 1.2-beta", None),
+        ("1.2.5", "<= 1.06", None),
+        ("1.2.5", "<= " + "1" * 201, None),
+        ("1.2.0-beta.1", "<= 1.2", True),
+        ("1.2.1-beta.1", "<= 1.2", None),
+        ("1.3.0-beta.1", "= 1.2", None),
+        ("1.2.5", "<= 1.2.0", False),
+    ],
+)
+def test_short_operands_decide_only_where_both_readings_agree(
+    ecosystem, version, expression, expected
+):
+    assert comparator_list_matches(ecosystem, version, expression) is expected
+
+
+@pytest.mark.parametrize(
+    "ecosystem,version,operand,expected",
+    [
+        ("rust", "0.20.9", "0.20", None),
+        ("rust", "0.20.0", "0.20", True),
+        ("rust", "0.21.0", "0.20", False),
+        ("go", "v1.2.0", "1.2", True),
+        ("go", "v1.2.5", "1.2", None),
+        ("go", "v1.3.0", "1.2", False),
+        ("rust", "1.2.5", "1.2-beta", None),
+        ("rust", "1.2.5", "1" * 201, None),
+        ("github-actions", "v4.1.2", "4", False),
+    ],
+)
+def test_short_exact_advisory_versions(ecosystem, version, operand, expected):
+    assert exact_version_matches(ecosystem, version, operand) is expected
+
+
+@pytest.mark.parametrize(
+    "ecosystem", ["go", "rust", "swift", "erlang", "vscode", "open-vsx", "pub"]
+)
+@pytest.mark.parametrize("operand", ["0", "0.0"])
+def test_native_short_zero_keeps_ambiguous_series_comparisons_unknown(ecosystem, operand):
+    for operator in ("=", "==", "!=", ">", "<="):
+        assert comparator_list_matches(ecosystem, "0.0.1", f"{operator} {operand}") is None

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence, Set
 from typing import Any
 
 from smithguard.identifiers import canonical_json_bytes, sha256_id
@@ -163,6 +163,7 @@ def source_fix_evidence(
     osv_match: Callable[[Mapping[str, Any]], bool | None],
     historical: bool,
     unresolved: bool,
+    ambiguous_package_ids: Set[str] = frozenset(),
 ) -> dict[str, Any]:
     evidence, bounds = [], []
     missing_ranges = False
@@ -177,6 +178,10 @@ def source_fix_evidence(
                 github_match=github_match,
                 osv_match=osv_match,
             )
+            # Audit SG22-11: an ambiguous bare name cannot qualify a fix for this repository.
+            if package.package_event_id in ambiguous_package_ids:
+                for fix in fixes:
+                    fix["applies_to_requested_version"] = None
             evidence.extend(fixes)
             bounds.extend(ends)
     versions = ordered_versions(
@@ -185,6 +190,7 @@ def source_fix_evidence(
     incomplete = (
         unresolved
         or historical
+        or any(package.package_event_id in ambiguous_package_ids for package in packages)
         or missing_ranges
         or len(evidence) > MAX_FIX_EVIDENCE
         or len(bounds) > MAX_RANGE_BOUNDS

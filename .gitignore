@@ -17,3 +17,4 @@ local/
 *.sqlite
 *.sqlite3
 *.db
+.check.lock

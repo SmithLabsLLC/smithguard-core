@@ -1594,3 +1594,111 @@ def test_openssf_untyped_coordinate_does_not_hide_malformed_range():
     document["affected"][0]["ranges"] = [{"type": "SEMVER", "events": "broken"}]
     with pytest.raises(AdvisoryCatalogError, match="range events"):
         _openssf_projection(document, canonical_url="https://example.com", source_state="active")
+
+
+# Audit SG22-11: ported from private main tests (842e137).
+def _swift_advisory(ghsa: str, name: str, expression: str) -> dict[str, Any]:
+    document = _github_event_stream()
+    document.update(
+        ghsa_id=ghsa,
+        html_url=f"https://github.com/advisories/{ghsa}",
+        cwes=[],
+        identifiers=[{"type": "GHSA", "value": ghsa}],
+        vulnerabilities=[
+            {
+                "package": {"ecosystem": "swift", "name": name},
+                "vulnerable_version_range": expression,
+            }
+        ],
+    )
+    return document
+
+
+def test_swift_ambiguous_bare_advisory_never_decides_repository_identity(
+    database, contract_examples
+):
+    from smithguard.assessment_summary import _incident
+
+    bare = _swift_advisory("GHSA-2345-6789-cfgh", "swift-nio-http2", "< 1.45.0")
+    bare["vulnerabilities"][0]["first_patched_version"] = "1.45.0"
+    _append_match_document(database, bare)
+    request = deepcopy(
+        next(
+            item["value"]
+            for item in contract_examples
+            if item["definition"] == "PublicArtifactAssessmentRequest"
+        )
+    )
+    request["artifact"].update(ecosystem="swift", registry_host="swiftpackageindex.com")
+    with Session(database.engine) as session:
+        for name in (
+            "github.com/apple/swift-nio-http2",
+            "github.com/someone/swift-nio-http2",
+            "github.com/Apple/Swift-NIO-HTTP2",
+        ):
+            for version in ("1.44.0", "1.45.0"):
+                request["artifact"].update(name=name, version=version)
+                packet = catalog_evidence_for_package(
+                    session, ecosystem="swift", name=name, version=version
+                )
+                assert [family.evaluations for family in packet.families] == [(None,)]
+                body = SmithGuardService(clock=lambda: NOW).assess_public_artifact(session, request)
+                assert body["result"] == "possibly_affected"
+                incident = body["incidents"][0]
+                # The public summary accepts npm/PyPI only. Exercise its nested projection.
+                for result in (incident, _incident(incident, set())):
+                    report = result["source_reports"][0]
+                    assert report["fix_evidence_incomplete"]
+                    assert report["fix_evidence"][0]["applies_to_requested_version"] is None
+        assert catalog_matches_for_package(
+            session, ecosystem="swift", name="swift-nio-http2", version="1.44.0"
+        )[0].evaluations == (True,)
+        assert catalog_matches_for_package(
+            session, ecosystem="swift", name="swift-nio-http2", version="1.45.0"
+        )[0].evaluations == (False,)
+        for malformed in (
+            "github.com//swift-nio-http2",
+            "github.com/apple/extra/swift-nio-http2",
+            "github.com/apple/swift-nio-http2/",
+            "other.com/apple/swift-nio-http2",
+        ):
+            assert (
+                catalog_matches_for_package(
+                    session, ecosystem="swift", name=malformed, version="1.44.0"
+                )
+                == ()
+            )
+    _append_match_document(
+        database,
+        _swift_advisory("GHSA-3456-789c-fghj", "github.com/apple/swift-nio-http2", "< 1.44.0"),
+    )
+    with Session(database.engine) as session:
+        for version, evaluations in (
+            ("1.43.0", {(True,), (None,)}),
+            ("1.44.0", {(False,), (None,)}),
+            ("1.45.0", {(False,), (None,)}),
+        ):
+            packet = catalog_evidence_for_package(
+                session, ecosystem="swift", name="github.com/Apple/Swift-NIO-HTTP2", version=version
+            )
+            assert {family.evaluations for family in packet.families} == evaluations
+
+
+def test_swift_exact_and_ambiguous_fixes_in_same_source_report(database):
+    bare = _swift_advisory("GHSA-2345-6789-cfgh", "swift-nio-http2", "< 1.45.0")
+    exact = _swift_advisory("GHSA-2345-6789-cfgh", "github.com/apple/swift-nio-http2", "< 1.44.0")
+    bare["vulnerabilities"][0]["first_patched_version"] = "1.45.0"
+    exact["vulnerabilities"][0]["first_patched_version"] = "1.44.0"
+    bare["vulnerabilities"].extend(exact["vulnerabilities"])
+    _append_match_document(database, bare)
+    with Session(database.engine) as session:
+        for version, exact_applies in (("1.43.0", True), ("1.44.0", False)):
+            (family,) = catalog_matches_for_package(
+                session, ecosystem="swift", name="github.com/apple/swift-nio-http2", version=version
+            )
+            (report,) = family.source_reports
+            assert report["fix_evidence_incomplete"]
+            assert {
+                fix["fixed_version"]: fix["applies_to_requested_version"]
+                for fix in report["fix_evidence"]
+            } == {"1.45.0": None, "1.44.0": exact_applies}

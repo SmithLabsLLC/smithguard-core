@@ -1,12 +1,43 @@
 #!/usr/bin/env python3
 """Run the contributor checks from any working directory."""
 
+import fcntl
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# Audit SG22-31: the database suite and browser-style tests create many small files.
+# Use a short, task-owned, disk-backed folder and check its free space and free file
+# slots before starting, like the private gate.
+MINIMUM = {"bytes": 4 * 1024**3, "inodes": 500_000}
+MINIMUM_SYSTEM_TMP = {"bytes": 1024**3, "inodes": 100_000}
+
+
+def require_capacity(path, minimum):
+    stat = os.statvfs(path)
+    free_bytes, free_inodes = stat.f_bavail * stat.f_frsize, stat.f_favail
+    print(f"Check capacity {path}: {free_bytes} bytes, {free_inodes} inodes available", flush=True)
+    if free_bytes < minimum["bytes"] or free_inodes < minimum["inodes"]:
+        raise SystemExit(
+            f"Insufficient temporary capacity at {path} (need {minimum['bytes']} bytes and "
+            f"{minimum['inodes']} free file slots); "
+            "set SMITHGUARD_CHECK_TMP to a disk-backed folder."
+        )
+
+
+def task_temp():
+    base = os.environ.get("SMITHGUARD_CHECK_TMP") or (
+        "/var/tmp" if Path("/var/tmp").is_dir() else None
+    )
+    # A short root: pytest adds worker and test folders before AF_UNIX socket names.
+    folder = tempfile.mkdtemp(prefix="sgc-", dir=base)
+    require_capacity(folder, MINIMUM)
+    if Path("/tmp").is_dir():
+        require_capacity("/tmp", MINIMUM_SYSTEM_TMP)
+    return folder
 
 
 def run(*args):
@@ -23,6 +54,24 @@ def main():
     workers = os.environ.get("SMITHGUARD_TEST_WORKERS", str(min(os.cpu_count() or 1, 4)))
     if not workers.isdigit() or not 1 <= int(workers) <= 16:
         raise SystemExit("SMITHGUARD_TEST_WORKERS must be an integer from 1 to 16.")
+    # One check at a time: concurrent database suites share local PostgreSQL resources.
+    lock = open(ROOT / ".check.lock", "a")  # noqa: SIM115 (held for the whole run)
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit("Another contributor check is running; wait for it to finish.") from None
+    folder = task_temp()
+    os.environ["TMPDIR"] = folder
+    try:
+        checks(uv, workers)
+    except BaseException:
+        print(f"Check temporary evidence retained at {folder}.", flush=True)
+        raise
+    shutil.rmtree(folder, ignore_errors=True)
+    print("Contributor checks passed.")
+
+
+def checks(uv, workers):
     python_version = (ROOT / ".python-version").read_text().strip()
     run(uv, "python", "install", python_version)
     managed_python = subprocess.check_output(
@@ -43,7 +92,6 @@ def main():
     run(uv, "audit", "--locked", "--preview-features", "audit-command")
     run(uv, "run", "--locked", "python", "tools/check_client.py")
     run("git", "diff", "--check")
-    print("Contributor checks passed.")
 
 
 if __name__ == "__main__":

@@ -74,7 +74,12 @@ def run(
     resume: dict[str, Any] | None = None,
     checkpoint: Callable[[dict[str, Any]], None] | None = None,
     local_facts: dict[str, Any] | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    clock = clock or (lambda: datetime.now(UTC))
+    # Audit SG22-09: the verified answer of each coordinate, rechecked at the moment its
+    # local conditions are evaluated (answer and key age at the point of use).
+    answers: dict[str, Any] = {}
     coordinates = approved_coordinates(preview, approval)
     preview = copy.deepcopy(preview)
     facts = validate_facts(
@@ -155,6 +160,7 @@ def run(
             continue
         try:
             verified = reader.assess(coordinate)
+            answers[identity] = verified
             if verified.status == "invalid":
                 progress.update(status="failed", reason=verified.reason)
                 row = {
@@ -308,6 +314,13 @@ def run(
             if supplied:
                 item["local_applicability_status"] = "facts_supplied_without_eligible_answer"
                 report["interpretation_complete"] = False
+            continue
+        answer = answers.get(coordinate_id(coord))
+        if answer is None or not answer.eligible_at(clock()):
+            # The signed answer stays visible as history; no new local condition is
+            # derived from an answer or key observation that has aged out.
+            item["local_applicability_status"] = "answer_expired_not_evaluated"
+            report["interpretation_complete"] = False
             continue
         assessment = row["assessment"]
         total = sum(len(incident["source_reports"]) for incident in assessment["incidents"])
