@@ -30,6 +30,8 @@ def test_insufficient_location_is_rejected_with_guidance(monkeypatch):
 
 
 def test_sufficient_location_passes_and_task_folder_is_short(monkeypatch, tmp_path):
+    # pytest's own tmp_path can exceed the socket budget; that check is tested below.
+    monkeypatch.setattr(check, "SOCKET_PATH_MAX", 10**6)
     monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 10**7))
     monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(tmp_path))
     folder = check.task_temp()
@@ -38,6 +40,8 @@ def test_sufficient_location_passes_and_task_folder_is_short(monkeypatch, tmp_pa
 
 
 def test_refusal_leaves_no_task_folder(monkeypatch, tmp_path):
+    # pytest's own tmp_path can exceed the socket budget; that check is tested below.
+    monkeypatch.setattr(check, "SOCKET_PATH_MAX", 10**6)
     monkeypatch.setattr(os, "statvfs", fake_statvfs(10, 10))
     monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(tmp_path))
     with pytest.raises(SystemExit, match="Insufficient temporary capacity"):
@@ -52,6 +56,8 @@ def test_missing_base_is_refused_clearly(monkeypatch, tmp_path):
 
 
 def test_relative_base_gives_an_absolute_task_folder(monkeypatch, tmp_path):
+    # pytest's own tmp_path can exceed the socket budget; that check is tested below.
+    monkeypatch.setattr(check, "SOCKET_PATH_MAX", 10**6)
     monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 10**7))
     monkeypatch.chdir(tmp_path)
     (tmp_path / "rel").mkdir()
@@ -75,3 +81,25 @@ def test_tmp_shortage_names_tmp_not_the_task_setting(monkeypatch):
     with pytest.raises(SystemExit, match="free space or file slots in /tmp") as raised:
         check.require_capacity("/tmp", check.MINIMUM_SYSTEM_TMP)
     assert "SMITHGUARD_CHECK_TMP" not in str(raised.value)
+
+
+def test_base_too_long_for_the_database_socket_is_refused_first(monkeypatch, tmp_path):
+    """GPT review round 10: PostgreSQL's socket path must stay under 108 bytes."""
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 10**7))
+    deep = tmp_path / ("d" * max(1, 108 - check.SOCKET_SUFFIX - len(str(tmp_path))))
+    deep.mkdir()
+    assert len(os.fsencode(str(deep))) + check.SOCKET_SUFFIX > check.SOCKET_PATH_MAX
+    monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(deep))
+    with pytest.raises(SystemExit, match="too long for the test database socket"):
+        check.task_temp()
+    assert list(deep.iterdir()) == []
+
+
+def test_socket_suffix_matches_the_suite_layout():
+    """The budget covers <base>/sgc-XXXXXXXX/sg-pg-XXXXXXXX/socket/.s.PGSQL.5432."""
+    example = "/sgc-abcdefgh/sg-pg-abcdefgh/socket/.s.PGSQL.5432"
+    assert len(example) == check.SOCKET_SUFFIX
+    support = (Path(__file__).resolve().parent / "support.py").read_text()
+    assert 'prefix="sg-pg-"' in support and 'self.root / "socket"' in support
+    assert "self.port = 5432" in support
+    check.require_socket_room("/var/tmp")

@@ -14,6 +14,21 @@ ROOT = Path(__file__).resolve().parents[1]
 # slots before starting, like the private gate.
 MINIMUM = {"bytes": 4 * 1024**3, "inodes": 500_000}
 MINIMUM_SYSTEM_TMP = {"bytes": 1024**3, "inodes": 100_000}
+# GPT review round 10: PostgreSQL refuses a Unix socket path of 108 bytes or more. The
+# suite's socket is <task folder>/sg-pg-XXXXXXXX/socket/.s.PGSQL.5432 (tests/support.py),
+# with the task folder <base>/sgc-XXXXXXXX made here.
+SOCKET_PATH_MAX = 107
+SOCKET_SUFFIX = len("/sgc-") + 8 + len("/sg-pg-") + 8 + len("/socket/.s.PGSQL.5432")
+
+
+def require_socket_room(base):
+    need = len(os.fsencode(base)) + SOCKET_SUFFIX
+    if need > SOCKET_PATH_MAX:
+        raise SystemExit(
+            f"Temporary base {base} is too long for the test database socket ({need} bytes; "
+            f"PostgreSQL allows {SOCKET_PATH_MAX}); set SMITHGUARD_CHECK_TMP to a shorter "
+            "folder such as /var/tmp."
+        )
 
 
 def require_capacity(path, minimum):
@@ -49,7 +64,8 @@ def task_temp():
         raise SystemExit(
             f"Temporary base {base} does not exist; create it or set SMITHGUARD_CHECK_TMP."
         )
-    # Check capacity before creating anything, so a refusal leaves nothing behind.
+    # Check room and capacity before creating anything, so a refusal leaves nothing behind.
+    require_socket_room(base)
     require_capacity(base, MINIMUM)
     if Path("/tmp").is_dir():
         require_capacity("/tmp", MINIMUM_SYSTEM_TMP)

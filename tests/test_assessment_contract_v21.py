@@ -296,6 +296,43 @@ def test_retained_legacy_artifacts_match_equivalent_version_spellings(
     assert body["incidents"][0]["applies_to_version"] is True
 
 
+@pytest.mark.parametrize(
+    ("stored", "same_identity"),
+    [
+        ("github.com/apple/swift-nio-http2", "apple/swift-nio-http2"),
+        ("apple/swift-nio-http2", "github.com/Apple/swift-nio-http2"),
+    ],
+)
+def test_retained_swift_incident_has_one_verdict_for_both_qualified_spellings(
+    database, contract_examples, stored, same_identity
+) -> None:
+    """GPT review round 10: a retained incident stored under either qualified spelling
+    gives the same public verdict for the other; another owner stays separate."""
+    from tests.test_service_api import _append_api_legacy_match
+
+    with Session(database.engine) as session, session.begin():
+        incident_id = _append_api_legacy_match(
+            session, contract_examples, ecosystem="swift", name=stored, status="confirmed"
+        )
+    with _public_client(database) as client:
+        bodies = [
+            _post(client, {"ecosystem": "swift", "name": name, "version": "3.3.6"}).json()
+            for name in (stored, same_identity)
+        ]
+        other = _post(
+            client,
+            {"ecosystem": "swift", "name": "github.com/other/swift-nio-http2", "version": "3.3.6"},
+        ).json()
+        bare = _post(
+            client, {"ecosystem": "swift", "name": "swift-nio-http2", "version": "3.3.6"}
+        ).json()
+    for body in bodies:
+        assert body["result"] == "affected"
+        assert body["incident_ids"] == [incident_id]
+    assert incident_id not in other["incident_ids"]
+    assert incident_id not in bare["incident_ids"]
+
+
 @pytest.mark.parametrize("form", ["full", "short", "query"])
 def test_every_request_form_refuses_an_npm_partial_version(database, contract_examples, form):
     full = _example(contract_examples, "PublicArtifactAssessmentRequest")

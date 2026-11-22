@@ -44,8 +44,9 @@ def swift_bare_name(name: str) -> str | None:
 
 def swift_qualified_names(name: str) -> tuple[str, ...]:
     """Other spellings of the same exact GitHub owner/repository identity (GPT review
-    round 9): owner/repository and github.com/owner/repository name one package, so an
-    advisory stored under either spelling matches a request written in the other."""
+    rounds 9 and 10): owner/repository and github.com/owner/repository name one package,
+    so an advisory or a retained artifact stored under either spelling matches a request
+    written in the other. Stored names and identifiers are never rewritten."""
     parts = name.split("/")
     if len(parts) == 2 and all(parts):
         return ("github.com/" + name,)
@@ -69,9 +70,8 @@ def package_name_predicate(
     lookup index migration is not ported), so they are correct but scan Swift rows.
 
     Literal SQL constants (not bound parameters) let the planner prove each partial
-    index predicate. Advisory lookups may include an ambiguous Swift bare name and the
-    other qualified spelling of the same GitHub identity; retained artifact lookups keep
-    the exact spelling.
+    index predicate. Every Swift lookup includes the other qualified spelling of the same
+    GitHub identity; only advisory lookups add the ambiguous bare name.
     """
     if ecosystem in FOLDED_ECOSYSTEMS:
         source, target = _fold_tables(ecosystem)
@@ -79,10 +79,9 @@ def package_name_predicate(
             name_column, literal_column(f"'{source}'"), literal_column(f"'{target}'")
         )
         name_match = folded == package_lookup_key(ecosystem, name)
-        swift_advisory = include_swift_bare_name and ecosystem == "swift"
-        for qualified in swift_qualified_names(name) if swift_advisory else ():
+        for qualified in swift_qualified_names(name) if ecosystem == "swift" else ():
             name_match = or_(name_match, folded == package_lookup_key(ecosystem, qualified))
-        bare = swift_bare_name(name) if swift_advisory else None
+        bare = swift_bare_name(name) if include_swift_bare_name and ecosystem == "swift" else None
         if bare is not None:
             name_match = or_(name_match, folded == package_lookup_key(ecosystem, bare))
         return and_(ecosystem_column == literal_column(f"'{ecosystem}'"), name_match)

@@ -81,8 +81,23 @@ class LocalPostgres:
         self._initdb = postgres_tool("initdb")
         self._pg_ctl = postgres_tool("pg_ctl")
 
+    def _run_tool(self, args: list[str], *, log: str) -> None:
+        """Run a PostgreSQL tool with its output in a file (never a pipe: the server
+        keeps inherited pipes open); show the last lines if it fails (GPT review round 10)."""
+        path = self.root / log
+        with path.open("wb") as output:
+            result = subprocess.run(args, stdout=output, stderr=subprocess.STDOUT, check=False)
+        if result.returncode:
+            logs = [path, self.root / "postgres.log"]
+            tail = "\n".join(
+                f"--- {item.name} ---\n" + item.read_text(errors="replace")[-2000:]
+                for item in logs
+                if item.is_file()
+            )
+            raise RuntimeError(f"{Path(args[0]).name} exited {result.returncode}\n{tail}")
+
     def start(self) -> Self:
-        subprocess.run(
+        self._run_tool(
             [
                 self._initdb,
                 "-D",
@@ -95,23 +110,21 @@ class LocalPostgres:
                 "-E",
                 "UTF8",
             ],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            log="initdb.log",
         )
-        subprocess.run(
+        self._run_tool(
             [
                 self._pg_ctl,
                 "-D",
                 str(self.data),
+                "-l",
+                str(self.root / "postgres.log"),
                 "-o",
                 f"-F -k {self.socket} -h '' -p {self.port}",
                 "-w",
                 "start",
             ],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            log="pg_ctl.log",
         )
         self._started = True
         return self

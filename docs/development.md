@@ -16,9 +16,12 @@ short task folder under `/var/tmp` (or under `SMITHGUARD_CHECK_TMP`, an existing
 user-owned directory on a disk with enough free space, for example
 `SMITHGUARD_CHECK_TMP=/var/tmp/sg-tests python3 tools/check.py`), checks free space
 and free file slots there and in `/tmp` before it starts, and points `TMPDIR` at
-that folder. PostgreSQL socket paths must stay short. One check runs at a time per
-checkout (`.check.lock`); the folder is removed after a passing run and kept after
-a failure for inspection. When running pytest directly, set `TMPDIR` yourself.
+that folder. PostgreSQL socket paths must stay short: the check refuses a base
+path longer than 58 bytes (the test database socket would reach PostgreSQL's 108-byte
+limit), and a failed database start shows the last lines of the PostgreSQL logs. One
+check runs at a time per checkout (`.check.lock`); the folder is removed after a
+passing run and kept after a failure for inspection. When running pytest directly,
+set `TMPDIR` yourself.
 
 ```sh
 uv sync --locked
