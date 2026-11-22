@@ -871,3 +871,19 @@ def test_key_expiring_between_source_reports_stops_condition_results(tmp_path):
     assert not report["interpretation_complete"]
     assert "listed_conditions_evaluated" not in statuses
     assert report["exported_at"] >= max(c.isoformat() for c in checks[:3]).replace("+00:00", "Z")
+
+
+def test_older_compact_report_without_the_active_count_still_renders(tmp_path, monkeypatch):
+    """GPT review round 5: a compact report saved before preliminary_active_warning_count."""
+    import importlib
+
+    from smithguard_client.report import html_report, text_report
+
+    module = importlib.import_module("smithguard_client.run")
+    monkeypatch.setattr(module, "ITEM_BUDGET", 1)
+    preview = make_preview(tmp_path)
+    report, _ = run(preview, preview["approval_sha256"], reader=Reader())
+    for row in report["coordinate_results"].values():
+        row["assessment"].pop("preliminary_active_warning_count", None)
+    assert b"evidence" in text_report(report).lower()
+    assert b"<html" in html_report(report)

@@ -168,7 +168,8 @@ def text_report(report):
                 lines.append(
                     json.dumps(
                         {
-                            k: assessment[k]
+                            # Older saved compact reports lack the active count (round 5).
+                            k: assessment.get(k)
                             for k in (
                                 "retained_incident_ids",
                                 "preliminary_warning_count",
