@@ -387,8 +387,8 @@ def _retained_range_result(
 ) -> bool | None:
     """Audit SG22-05 (GPT review rounds 4-6): a retained PyPI SEMVER range is undecided
     (its projection may be lossy), unless the catalog holds the same source assertion at
-    the same commit-pinned revision; then the catalog's verdict from the original events
-    decides for that range. Any other retained range is evaluated as before."""
+    the same commit-pinned revision and that catalog verdict excludes the version; then the
+    range is not a match. Any other retained range is evaluated as before."""
     result = range_result(artifact=artifact, affected_range=record.document)
     if (
         result is not None
@@ -404,7 +404,10 @@ def _retained_range_result(
     )
     if not all(isinstance(part, str) for part in key):
         return None
-    return pinned_catalog.get(key)
+    # GPT review round 7: the catalog verdict is advisory-wide (exact versions and every
+    # range), so it may settle only an exclusion for this range. A positive comes from the
+    # catalog family itself, never by citing this retained range as the matched one.
+    return False if pinned_catalog.get(key) is False else None
 
 
 def _applies(results: tuple[bool | None, ...]) -> bool | None:

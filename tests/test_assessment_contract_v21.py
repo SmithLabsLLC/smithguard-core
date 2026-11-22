@@ -689,8 +689,11 @@ PINNED = (
 @pytest.mark.parametrize(
     ("retained_url", "retained_record", "expected"),
     [
-        # Same source, advisory and commit-pinned revision: the catalog decides.
+        # Same source, advisory and commit-pinned revision: the catalog's exclusion decides.
         (PINNED.format(commit="1" * 40), "MAL-2026-66666", "not_affected"),
+        # The same file also lists 1.0.1 explicitly: affected from the catalog, but the
+        # retained "<1.0.0" range is never cited as the matched range (review round 7).
+        (PINNED.format(commit="1" * 40), "MAL-2026-66666", "affected_explicit"),
         # A different commit (revision) keeps the retained range undecided.
         (PINNED.format(commit="2" * 40), "MAL-2026-66666", "possibly_affected"),
         # An unrelated advisory stays undecided.
@@ -758,6 +761,7 @@ def test_retained_pypi_semver_range_uses_the_same_pinned_catalog_revision(
                         "ranges": [
                             {"type": "SEMVER", "events": [{"introduced": "0"}, {"fixed": "1.0.0"}]}
                         ],
+                        **({"versions": ["1.0.1"]} if expected == "affected_explicit" else {}),
                     }
                 ],
             },
@@ -772,4 +776,10 @@ def test_retained_pypi_semver_range_uses_the_same_pinned_catalog_revision(
             client, {"ecosystem": "pypi", "name": "example-retained", "version": "1.0.1"}
         )
     assert response.status_code == 200, response.text
-    assert response.json()["result"] == expected
+    body = response.json()
+    if expected == "affected_explicit":
+        assert body["result"] == "affected"
+        cited = {rid for incident in body["incidents"] for rid in incident["affected_range_ids"]}
+        assert affected["id"] not in cited
+    else:
+        assert body["result"] == expected
