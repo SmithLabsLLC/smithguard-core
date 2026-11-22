@@ -248,7 +248,14 @@ class LocalPostgres:
         self.databases.remove(name)
 
     def close(self) -> None:
-        if self._started:
+        """GPT review round 16: shutdown never depends on SQL cleanup. The disposable
+        databases are dropped if possible; the cluster is always stopped, and its folder is
+        removed only when the stop is verified (pg_ctl status exits 3)."""
+        if not self._started:
+            shutil.rmtree(self.root, ignore_errors=True)
+            return
+        cleanup_error: BaseException | None = None
+        try:
             with self._admin_connection() as connection:
                 for name in self.databases:
                     connection.execute(
@@ -259,22 +266,29 @@ class LocalPostgres:
                     connection.execute(
                         sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(name))
                     )
-            subprocess.run(
-                [
-                    self._pg_ctl,
-                    "-D",
-                    str(self.data),
-                    "-m",
-                    "fast",
-                    "-w",
-                    "stop",
-                ],
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+        except BaseException as error:  # shutdown below still runs
+            cleanup_error = error
+        stop = self._run_tool(
+            [self._pg_ctl, "-D", str(self.data), "-m", "fast", "-w", "stop"],
+            log="pg_ctl-stop.log",
+        )
+        status = self._run_tool(
+            [self._pg_ctl, "-D", str(self.data), "status"], log="pg_ctl-status.log"
+        )
+        stopped = status == 3
+        self._started = not stopped
+        if stopped:
+            shutil.rmtree(self.root, ignore_errors=True)
+        if cleanup_error is not None or not stopped:
+            state = (
+                "stopped and removed"
+                if stopped
+                else f"shutdown not verified (stop {stop}, status {status}); kept at {self.root}"
             )
-            self._started = False
-        shutil.rmtree(self.root, ignore_errors=True)
+            raise RuntimeError(
+                f"test database teardown: {type(cleanup_error).__name__ if cleanup_error else 'ok'}"
+                f" during SQL cleanup; cluster {state}"
+            ) from cleanup_error
 
 
 def alembic_config(url: URL) -> Config:
