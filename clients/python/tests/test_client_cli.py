@@ -14,7 +14,8 @@ from smithguard_client.transport import ReadFailure
 from smithguard_client.verification import Verification, canonical
 
 
-def setup_cli(tmp_path, monkeypatch, interrupt=None):
+def setup_cli(tmp_path, monkeypatch, interrupt=None, aged=None):
+    aged = aged or {}
     scope = tmp_path / "site"
     scope.mkdir()
     for name in ("first", "second", "third"):
@@ -42,10 +43,22 @@ def setup_cli(tmp_path, monkeypatch, interrupt=None):
                 os.kill(os.getpid(), interrupt)
             if self.stopped.is_set():
                 raise ReadFailure("cancelled", True)
+            from datetime import UTC, datetime
+
             body = json.loads(Path(__file__).with_name("assessment-example.json").read_text())
             body["artifact"] = coord
+            at = aged.get(coord["name"], datetime.now(UTC))
             return Verification(
-                "verified", "signature_verified", True, "active", True, True, canonical(body)
+                "verified",
+                "signature_verified",
+                True,
+                "active",
+                True,
+                True,
+                canonical(body),
+                verified_at=at,
+                key_fetched_at=at,
+                response_at=at,
             )
 
         def close(self):
@@ -193,3 +206,16 @@ def test_cli_service_truncation_preserves_checks_but_exits_incomplete(
     state = states(output)[0]
     assert state["run_complete"] and len(readers[0].calls) == 3
     assert state["report_exports"]["status"] == "complete"
+
+
+def test_cli_expired_answer_without_facts_exits_incomplete(tmp_path, monkeypatch, capsys):
+    """GPT review round 4: one answer older than the freshness bound, no local facts."""
+    from datetime import UTC, datetime, timedelta
+
+    old = datetime.now(UTC) - timedelta(seconds=400)
+    output, args, readers = setup_cli(tmp_path, monkeypatch, aged={"second": old})
+    assert cli.main(args) == 2
+    out = capsys.readouterr().out
+    assert "Answers expired before export or local evaluation (historical only): 1." in out
+    report = json.loads(sorted(output.glob("report-*.json"))[-1].read_bytes())
+    assert report["counts"]["answers_expired_before_export_or_evaluation"] == 1

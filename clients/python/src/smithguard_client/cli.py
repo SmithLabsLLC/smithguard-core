@@ -208,9 +208,18 @@ def main(argv=None):
                 + str(counts["supplied_facts_not_fully_evaluated"])
                 + "."
             )
+            expired = counts.get("answers_expired_before_export_or_evaluation", 0)
+            print(
+                "Answers expired before export or local evaluation (historical only): "
+                + str(expired)
+                + "."
+            )
+            # GPT review round 4: an answer that aged out before export makes the run
+            # incomplete for automation, like any other incomplete evidence.
             return (
                 0
-                if all(
+                if not expired
+                and all(
                     report[k]
                     for k in (
                         "run_complete",
