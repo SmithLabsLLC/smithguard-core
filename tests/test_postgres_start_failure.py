@@ -174,3 +174,30 @@ def test_a_start_tool_that_cannot_launch_is_a_named_failure(outer, monkeypatch, 
     assert cluster._started is False
     if tool == "initdb":
         assert ("pg_ctl", "start") not in tools.calls
+
+
+def test_a_missing_tool_creates_no_folder(outer, monkeypatch):
+    """GPT review round 15: setup that fails leaves no abandoned cluster folder."""
+
+    def missing(name):
+        raise RuntimeError(f"{name} not found")
+
+    monkeypatch.setattr(support, "postgres_tool", missing)
+    with pytest.raises(RuntimeError, match="initdb not found"):
+        support.LocalPostgres()
+    assert list(outer.iterdir()) == []
+
+
+def test_a_socket_folder_that_cannot_be_made_creates_no_folder(outer, monkeypatch):
+    monkeypatch.setattr(support, "postgres_tool", lambda name: f"/fake/bin/{name}")
+    real_mkdir = Path.mkdir
+
+    def no_slots(self, *args, **kwargs):
+        if self.name == "socket":
+            raise OSError(28, "No space left on device")
+        return real_mkdir(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "mkdir", no_slots)
+    with pytest.raises(OSError, match="No space left"):
+        support.LocalPostgres()
+    assert list(outer.iterdir()) == []

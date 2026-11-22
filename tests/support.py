@@ -68,18 +68,24 @@ class LocalPostgres:
         # TMPDIR was set; standalone tests still use Python's normal fallback.
         # A plain folder (not TemporaryDirectory): it is removed only on purpose, so a
         # server whose shutdown is unverified keeps its cluster (GPT review round 11).
+        # GPT review round 15: find the tools before creating anything, and remove the new
+        # folder if its socket directory cannot be made, so a failed setup leaves nothing.
+        self._initdb = postgres_tool("initdb")
+        self._pg_ctl = postgres_tool("pg_ctl")
         self.root = Path(tempfile.mkdtemp(prefix="sg-pg-", dir=os.environ.get("TMPDIR") or None))
         self.data = self.root / "data"
         self.socket = self.root / "socket"
-        self.socket.mkdir(mode=0o700)
+        try:
+            self.socket.mkdir(mode=0o700)
+        except BaseException:
+            shutil.rmtree(self.root, ignore_errors=True)
+            raise
         self.port = 5432
         self.databases: list[str] = []
         # Migrated template databases by (revision, journal); cloning one is much
         # faster than running every migration for each test.
         self.templates: dict[tuple[str, bool], str] = {}
         self._started = False
-        self._initdb = postgres_tool("initdb")
-        self._pg_ctl = postgres_tool("pg_ctl")
 
     def _run_tool(self, args: list[str], *, log: str) -> int | None:
         """Run a PostgreSQL tool with its output in a file (never a pipe: the server
