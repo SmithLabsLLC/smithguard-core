@@ -48,7 +48,8 @@ def expired_coordinates(report):
         coordinate_id(item["coordinate"])
         for item in report.get("installations", ())
         if item.get("coordinate") is not None
-        and item.get("local_applicability_status") == "answer_expired_not_evaluated"
+        and item.get("local_applicability_status")
+        in {"answer_expired_not_evaluated", "answer_expired_during_evaluation"}
     }
 
 
@@ -226,6 +227,8 @@ def html_report(report):
 
 
 def _html_report(report, *, compact):
+    expired = expired_coordinates(report)
+
     def text(value):
         # Escape terminal/bidi controls as literal JSON escapes as well as HTML.
         return html.escape(json.dumps(str(value), ensure_ascii=True)[1:-1], quote=True)
@@ -330,7 +333,7 @@ def _html_report(report, *, compact):
                         + text(
                             evidence_label(
                                 row.get("assessment", {}),
-                                expired=identity in expired_coordinates(report),
+                                expired=identity in expired,
                             )
                         )
                         + ": <strong>"
@@ -378,7 +381,7 @@ def _html_report(report, *, compact):
         if assessment:
             parts.append(
                 "<p>"
-                + text(evidence_label(assessment, expired=identity in expired_coordinates(report)))
+                + text(evidence_label(assessment, expired=identity in expired))
                 + ": <strong>"
                 + text(assessment["result"])
                 + "</strong>. "

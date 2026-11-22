@@ -67,3 +67,11 @@ def test_unreported_inode_totals_are_not_exhaustion(monkeypatch):
     monkeypatch.setattr(os, "statvfs", fake_statvfs(10, 0, total_inodes=0))
     with pytest.raises(SystemExit, match="Insufficient"):
         check.require_capacity("/somewhere", check.MINIMUM)
+
+
+def test_tmp_shortage_names_tmp_not_the_task_setting(monkeypatch):
+    """GPT review round 3: SMITHGUARD_CHECK_TMP cannot fix a full /tmp."""
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10, 10**7))
+    with pytest.raises(SystemExit, match="free space or file slots in /tmp") as raised:
+        check.require_capacity("/tmp", check.MINIMUM_SYSTEM_TMP)
+    assert "SMITHGUARD_CHECK_TMP" not in str(raised.value)

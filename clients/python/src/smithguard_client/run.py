@@ -345,8 +345,14 @@ def run(
             continue
         item["local_applicability_status"] = "listed_conditions_evaluated"
         exhausted = False
+        expired_mid = False
         for incident in assessment["incidents"]:
             for source in incident["source_reports"]:
+                # GPT review round 3: recheck the answer and key before every condition
+                # result, so none is derived after the key observation ages out.
+                if not answer.eligible_at(clock()):
+                    expired_mid = True
+                    break
                 context = source.get("source_context")
                 result = {
                     "incident_id": incident["incident_id"],
@@ -369,15 +375,22 @@ def run(
                 item["local_applicability"].append(result)
                 annotation_count += 1
                 annotation_bytes += size
-            if exhausted:
+            if exhausted or expired_mid:
                 break
-        if exhausted:
+        if expired_mid:
+            # Results derived before the recheck stay; the rest are omitted.
+            item["local_applicability_status"] = "answer_expired_during_evaluation"
+            item["local_applicability_omitted"] = total - len(item["local_applicability"])
+            report["interpretation_complete"] = False
+        elif exhausted:
             item["local_applicability_status"] = "incomplete_output_budget"
             item["local_applicability_omitted"] = total - len(item["local_applicability"])
             report["interpretation_complete"] = False
     # GPT review round 2: freshness at export is recorded per coordinate, whether or not
     # its local conditions were evaluated (no facts, stale facts or truncated evidence).
     exported_at = clock()
+    # GPT review round 3: the export time is the moment these freshness decisions describe.
+    report["exported_at"] = exported_at.isoformat().replace("+00:00", "Z")
     expired = {
         identity
         for identity, answer in answers.items()
@@ -386,7 +399,8 @@ def run(
         coordinate_id(item["coordinate"])
         for item in report["installations"]
         if item["coordinate"] is not None
-        and item.get("local_applicability_status") == "answer_expired_not_evaluated"
+        and item.get("local_applicability_status")
+        in {"answer_expired_not_evaluated", "answer_expired_during_evaluation"}
     }
     expired &= set(verified_ids)
     report["expired_answer_coordinates"] = sorted(expired)

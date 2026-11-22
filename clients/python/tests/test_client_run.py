@@ -817,3 +817,57 @@ def test_active_warning_beside_an_original_not_affected_result(tmp_path):
     for output in (text_report(report), html_report(report)):
         assert b"not_affected" in output
         assert b"Preliminary warnings: 1 active of 1 listed" in output
+
+
+def test_key_expiring_between_source_reports_stops_condition_results(tmp_path):
+    """GPT review round 3: the answer and key are rechecked before every condition result,
+    and the export time is the moment the freshness decisions describe."""
+    from copy import deepcopy
+    from dataclasses import fields
+    from datetime import UTC, datetime
+
+    from smithguard_client.verification import Verification
+
+    preview = make_preview(tmp_path)
+    facts = {
+        item["installation_id"]: {
+            "target": "Synthetic target",
+            "observed_at": datetime.now(UTC).isoformat(),
+            "evidence": "Synthetic explicit facts",
+            "values": {"os": "linux"},
+        }
+        for item in preview["installations"]
+        if item["coordinate"] is not None
+    }
+    checks = []
+
+    class Ageing(Verification):
+        def eligible_at(self, now):
+            checks.append(now)
+            # Eligible for the installation check and the first source report only.
+            return len(checks) <= 2 and super().eligible_at(now)
+
+    class TwoSources(Reader):
+        def assess(self, coord):
+            base = verified(coord)
+            body = base.document
+            source = body["incidents"][0]["source_reports"][0]
+            second = deepcopy(source)
+            second["upstream_record_id"] = source["upstream_record_id"] + "-second"
+            body["incidents"][0]["source_reports"].append(second)
+            values = {f.name: getattr(base, f.name) for f in fields(base)}
+            return Ageing(**{**values, "original": canonical(body)})
+
+    report, _ = run(preview, preview["approval_sha256"], reader=TwoSources(), local_facts=facts)
+    statuses = [item.get("local_applicability_status") for item in report["installations"]]
+    assert "answer_expired_during_evaluation" in statuses
+    partial = next(
+        item
+        for item in report["installations"]
+        if item.get("local_applicability_status") == "answer_expired_during_evaluation"
+    )
+    assert len(partial["local_applicability"]) == 1
+    assert partial["local_applicability_omitted"] == 1
+    assert not report["interpretation_complete"]
+    assert "listed_conditions_evaluated" not in statuses
+    assert report["exported_at"] >= max(c.isoformat() for c in checks[:3]).replace("+00:00", "Z")

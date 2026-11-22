@@ -213,7 +213,8 @@ def public_artifact_candidates(
         row
         for row in rows
         if row.version is None
-        or exact_version_matches(ecosystem, version, row.version) is not False
+        # A stored artifact is one version: no short-operand series reading here.
+        or exact_version_matches(ecosystem, version, row.version, series=False) is not False
     )[:limit]
 
 

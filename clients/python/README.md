@@ -249,7 +249,11 @@ answer is also checked at export, with or without local facts: an aged answer is
 `expired_answer_coordinates`, labeled "Signed answer expired before export or local
 evaluation; historical evidence only", counted in
 `answers_expired_before_export_or_evaluation`, and left out of the verified current
-incident and source counts. The label "Verified current version
+incident and source counts. The answer and key are rechecked before every condition
+result; if they age out partway through an installation, the results already derived stay,
+the rest are counted in `local_applicability_omitted`, and the status is
+`answer_expired_during_evaluation`. `exported_at` is the time those freshness decisions
+were made. The label "Verified current version
 evidence (at answer time)" describes eligibility when the answer arrived.
 Split very large inventories into shorter runs when current local evaluation matters.
 

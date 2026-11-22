@@ -248,31 +248,30 @@ def test_retained_pypi_semver_record_uses_the_declared_order(version, expected) 
     artifact = {"ecosystem": "pypi", "version": version, "digest": None}
     # The catalog evaluator reads the original events and gives the SemVer verdict.
     assert osv_range_matches("pypi", version, source) is expected
-    # Plain X.Y.Z boundaries: the retained projection is faithful and SemVer decides.
-    assert range_result(artifact=artifact, affected_range=projected) is expected
+    # A retained PyPI SEMVER projection never decides (round 3): it may be a lossy
+    # projection by the earlier collector, which a retained row cannot rule out.
+    assert range_result(artifact=artifact, affected_range=projected) is None
 
 
 @pytest.mark.parametrize(
-    ("expression", "version", "expected"),
+    ("expression", "version"),
     [
-        # Projected by the earlier collector from introduced 0, fixed 1.0.0-1, introduced
-        # 1.0.0 (events sorted by PEP 440, so the reintroduction was lost): never excluded.
-        ("<1.0.0-1", "1.0.0", None),
-        ("<1.0.0-1", "2.0.0", None),
-        (">=2.0.0, <2.0.0+b", "3.0.0", None),
-        ("<1.0.0", "0.9.0", True),
-        ("<1.0.0", "1.2.0", False),
-        ("!=1.0.0", "1.0.0", False),
-        ("!=1.0.0", "1.0.1", True),
-        (">=1.0.0, !=1.0.1", "1.0.1", False),
+        # Projected by the earlier collector from events sorted by PEP 440 (rounds 2-3):
+        ("<1.0.0-1", "1.0.0"),  # introduced 0, fixed 1.0.0-1, introduced 1.0.0
+        ("<1.0.0-1", "2.0.0"),
+        ("<0.9.0", "1.0.0-2"),  # introduced 0, fixed 0.9.0, introduced 1.0.0-1, limit 1.0.0
+        ("<1.0.0", "1.0.0-2"),  # fixed 1.0.0-1 clipped by limit 1.0.0
+        ("<1.0.0", "1.2.0"),
+        ("!=1.0.0", "1.0.0"),
+        (">=1.0.0, !=1.0.1", "1.0.1"),
     ],
 )
-def test_legacy_retained_pypi_semver_projection_is_never_excluded(
-    expression, version, expected
-) -> None:
-    """GPT review round 2: a legacy projection, and every accepted operator."""
+def test_legacy_retained_pypi_semver_projection_is_never_excluded(expression, version) -> None:
+    """GPT review rounds 2-3: a retained PyPI SEMVER range is undecided, whatever its form."""
     from smithguard.range_evaluation import range_result
 
     projected = {"range_type": "SEMVER", "expression": expression, "evaluation_state": "supported"}
     artifact = {"ecosystem": "pypi", "version": version, "digest": None}
-    assert range_result(artifact=artifact, affected_range=projected) is expected
+    assert range_result(artifact=artifact, affected_range=projected) is None
+    everything = {"range_type": "SEMVER", "expression": "*", "evaluation_state": "supported"}
+    assert range_result(artifact=artifact, affected_range=everything) is True

@@ -364,26 +364,6 @@ def osv_range_matches(
         return None
 
 
-def _semver_comparators_match(version: str, expression: str) -> bool | None:
-    from smithguard.version_order import COMPARATOR
-
-    try:
-        candidate = _osv_version(version, "semver")
-        results = []
-        for part in expression.split(","):
-            match = COMPARATOR.fullmatch(part)
-            if match is None:
-                return None
-            operand = _osv_version(match.group(2), "semver")
-            operator = match.group(1) or "="
-            results.append(
-                candidate != operand if operator == "!=" else _compare(candidate, operator, operand)
-            )
-    except (InvalidVersion, RangeEvaluationError, ValueError):
-        return None
-    return all(results)
-
-
 def range_result(
     *,
     artifact: Mapping[str, Any],
@@ -425,16 +405,13 @@ def range_result(
         if artifact["ecosystem"] == "pypi":
             return pep440_matches(value, expression)
     if range_type == "SEMVER" and artifact["ecosystem"] == "pypi":
-        # Audit SG22-05 (GPT review rounds 1-2): the source declared SemVer. Records
+        # Audit SG22-05 (GPT review rounds 1-3): the source declared SemVer, but records
         # retained by the earlier collector were projected after sorting events by PEP 440,
-        # which orders a version with a "-" or "+" part differently from SemVer and so can
-        # drop or misplace a boundary. Plain X.Y.Z boundaries sort identically under both, so
-        # such a projection is faithful and SemVer decides (a prerelease candidate included);
-        # any other boundary leaves the retained range undecided, never excluded. The OSV
-        # catalog evaluator, which reads the original events, still decides exactly.
-        if any(character in expression for character in "-+"):
-            return None
-        return _semver_comparators_match(value, expression)
+        # which can drop or clip a boundary even where the stored bounds look plain, and a
+        # retained row does not say which collector produced it. A retained PyPI SEMVER
+        # range therefore never decides (only the explicit all-versions form does); the OSV
+        # catalog evaluator, which reads the original events, gives the exact verdict.
+        return None
     if range_type in {"SEMVER", "ECOSYSTEM"}:
         from smithguard.version_order import comparator_list_matches
 

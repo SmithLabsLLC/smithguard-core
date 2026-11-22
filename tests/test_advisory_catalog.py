@@ -1707,3 +1707,41 @@ def test_swift_exact_and_ambiguous_fixes_in_same_source_report(database):
             assert report["source_fixed_versions"] == ["1.44.0"]
             assert report["fixed_versions"] == ["1.44.0"]
             assert family.fixed_versions == ("1.44.0",)
+
+
+def test_stored_short_artifact_version_is_one_version_not_a_series(
+    database, contract_examples
+) -> None:
+    """GPT review round 3: a retained artifact stored as "1.2" is version 1.2.0, not the
+    1.2 series, so a request for 1.2.5 no longer picks it up as a candidate; the advisory
+    operand reading (series) is unchanged."""
+    from smithguard.db.repository import append_contract
+    from smithguard.normalization import normalize_artifact_identity
+    from smithguard.query import public_artifact_candidates
+    from smithguard.version_order import exact_version_matches
+
+    artifact = deepcopy(
+        next(value["value"] for value in contract_examples if value["definition"] == "Artifact")
+    )
+    identity = normalize_artifact_identity(
+        {"ecosystem": "rust", "name": "short-crate", "version": "1.2", "digest": None}
+    )
+    artifact.update(identity)
+    artifact["id"] = stable_id("artifact", identity["coordinate"])
+    with Session(database.engine) as session, session.begin():
+        append_contract(session, "Artifact", artifact)
+    with Session(database.engine) as session:
+
+        def lookup(version):
+            return public_artifact_candidates(
+                session,
+                ecosystem="rust",
+                normalized_name="short-crate",
+                version=version,
+                digest=None,
+            )
+
+        assert lookup("1.2.5") == ()
+        assert len(lookup("1.2.0")) == 1
+    assert exact_version_matches("rust", "1.2.5", "1.2") is None  # advisory reading
+    assert exact_version_matches("rust", "1.2.5", "1.2", series=False) is False

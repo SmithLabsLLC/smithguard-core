@@ -28,10 +28,14 @@ def require_capacity(path, minimum):
         flush=True,
     )
     if free_bytes < minimum["bytes"] or (reported and free_inodes < minimum["inodes"]):
+        advice = (
+            "free space or file slots in /tmp (it is used by tools outside the task folder)"
+            if os.path.realpath(path) == os.path.realpath("/tmp")
+            else "set SMITHGUARD_CHECK_TMP to a disk-backed folder with room"
+        )
         raise SystemExit(
             f"Insufficient temporary capacity at {path} (need {minimum['bytes']} bytes and "
-            f"{minimum['inodes']} free file slots); "
-            "set SMITHGUARD_CHECK_TMP to a disk-backed folder."
+            f"{minimum['inodes']} free file slots); {advice}."
         )
 
 

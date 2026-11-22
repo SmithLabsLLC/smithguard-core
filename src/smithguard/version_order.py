@@ -322,7 +322,9 @@ def is_exact_version(ecosystem: str, value: object) -> bool:
     return True
 
 
-def exact_version_matches(ecosystem: str, version: str, expected: str) -> bool | None:
+def exact_version_matches(
+    ecosystem: str, version: str, expected: str, *, series: bool = True
+) -> bool | None:
     """Whether ``version`` is the exact advisory version ``expected``; None if unsure.
 
     Equality uses the ecosystem's ordering (Go ``v1.2.3`` is ``1.2.3``; Maven ``1.0`` is
@@ -331,10 +333,15 @@ def exact_version_matches(ecosystem: str, version: str, expected: str) -> bool |
     outside the implemented ordering of an ordered ecosystem, only identical strings
     are decided (True); different ones are undecided, never "not this version".
     Ecosystems without a version order (git, containers) compare byte for byte.
+
+    ``series`` (default) applies the short-operand reading to an advisory version such as
+    ``1.2``, which can name the version or the whole series. A stored artifact identity is
+    one version, so the retained-artifact lookup passes ``series=False`` and keeps padded
+    equality there (GPT review round 3).
     """
     if ecosystem not in ORDERED_ECOSYSTEMS:
         return version == expected
-    if ecosystem in SHORT_OPERAND_ECOSYSTEMS and _SHORT_OPERAND.fullmatch(expected):
+    if series and ecosystem in SHORT_OPERAND_ECOSYSTEMS and _SHORT_OPERAND.fullmatch(expected):
         series = _short_series(expected)
         if series is None or not is_exact_version(ecosystem, version):
             return True if version == expected else None
