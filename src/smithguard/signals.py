@@ -12,7 +12,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, exists, func, literal_column, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from smithguard.acquisition import AcquisitionRejected, OperationDeadline
@@ -224,17 +224,61 @@ def get_preliminary_warning(
     return record
 
 
+def _swift_warning_match(latest: Any, names: Sequence[str], marker: str) -> Any:
+    """GPT review round 12: a stored Swift warning entry ("swift:<name>@<marker>" or
+    "pkg:swift/<name>@<marker>") matches when its name folds (ASCII case, as the Swift
+    package lookups do) to one of the requested qualified names and its version or digest
+    is exactly the requested one."""
+    entries = (
+        func.jsonb_array_elements_text(latest.document["affected_artifacts"])
+        .table_valued("value")
+        .alias("swift_warning_artifact")
+    )
+    value = entries.c.value
+    name = func.regexp_replace(
+        func.regexp_replace(value, literal_column("'^(swift:|pkg:swift/)'"), literal_column("''")),
+        literal_column("'@[^@]*$'"),
+        literal_column("''"),
+    )
+    folded = func.translate(
+        name,
+        literal_column("'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"),
+        literal_column("'abcdefghijklmnopqrstuvwxyz'"),
+    )
+    return exists(
+        select(literal_column("1"))
+        .select_from(entries)
+        .where(
+            or_(value.like("swift:%"), value.like("pkg:swift/%")),
+            folded.in_(list(names)),
+            func.substring(value, literal_column("'@([^@]*)$'")) == marker,
+        )
+    )
+
+
 def matching_preliminary_warnings(
     session: Session,
     *,
     affected_artifacts: Sequence[str],
     limit: int = 101,
     now: datetime | None = None,
+    swift_names: Sequence[str] = (),
+    swift_marker: str | None = None,
 ) -> tuple[PreliminaryWarningRecord, ...]:
-    """Return latest warning revisions for only the exact queried artifact aliases."""
+    """Return latest warning revisions for only the exact queried artifact aliases, and
+    for Swift also case-folded qualified names with the exact version or digest."""
     values = tuple(dict.fromkeys(affected_artifacts))
+    names = tuple(dict.fromkeys(swift_names))
+    if names and (
+        swift_marker is None
+        or len(names) > 10
+        or any(not v.isascii() or not 1 <= len(v) <= 300 or v != v.lower() for v in names)
+        or not swift_marker.isascii()
+        or not 1 <= len(swift_marker) <= 300
+    ):
+        raise PreliminaryWarningError("warning Swift filter is invalid")
     if (
-        not values
+        not (values or names)
         or len(values) > 10
         or any(
             not isinstance(value, str) or not value.isascii() or not 1 <= len(value) <= 300
@@ -250,7 +294,10 @@ def matching_preliminary_warnings(
         statement.where(
             latest.state == "active",
             latest.expires_at > current_time,
-            or_(*(latest.document["affected_artifacts"].contains([value]) for value in values)),
+            or_(
+                *(latest.document["affected_artifacts"].contains([value]) for value in values),
+                *((_swift_warning_match(latest, names, swift_marker),) if names else ()),
+            ),
         )
         .order_by(latest.updated_at.desc(), latest.id)
         .limit(limit)

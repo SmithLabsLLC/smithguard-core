@@ -19,7 +19,8 @@ class FakeTools:
         name = Path(args[0]).name
         action = args[-1]
         self.calls.append((name, action))
-        stdout.write(f"{name} {action} output\n".encode())
+        if hasattr(stdout, "write"):  # DEVNULL when the log file could not be created
+            stdout.write(f"{name} {action} output\n".encode())
         if name == "initdb":
             data = Path(args[args.index("-D") + 1])
             data.mkdir()
@@ -89,3 +90,33 @@ def test_folder_with_a_space_is_refused_before_any_tool_runs(tmp_path, monkeypat
     cluster, message = run(monkeypatch, tools)
     assert "unsupported characters" in message and tools.calls == []
     assert not cluster.root.exists()
+
+
+def test_no_free_file_slots_still_stops_the_server(outer, monkeypatch):
+    """GPT review round 12: shutdown does not depend on creating its log file."""
+    tools = FakeTools(fail="pg_ctl", status=3)
+    real_open = Path.open
+
+    def no_slots(self, mode="r", *args, **kwargs):
+        if self.name in {"pg_ctl-stop.log", "pg_ctl-status.log"}:
+            raise OSError(24, "Too many open files")
+        return real_open(self, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", no_slots)
+    cluster, message = run(monkeypatch, tools)
+    assert ("pg_ctl", "stop") in tools.calls and ("pg_ctl", "status") in tools.calls
+    assert message.startswith("pg_ctl exited 1") and "stopped and removed" in message
+
+
+def test_failed_log_copy_keeps_the_logs_in_the_cluster(outer, monkeypatch):
+    tools = FakeTools(fail="pg_ctl", status=3)
+
+    def broken_copy(*_args, **_kwargs):
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(support.shutil, "copy2", broken_copy)
+    cluster, message = run(monkeypatch, tools)
+    assert message.startswith("pg_ctl exited 1")
+    assert "could not be copied (OSError)" in message and str(cluster.root) in message
+    assert cluster.root.exists() and (cluster.root / "postgres.log").exists()
+    assert "FATAL: could not start in time" in message

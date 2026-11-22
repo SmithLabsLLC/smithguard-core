@@ -335,7 +335,12 @@ def test_retained_swift_incident_has_one_verdict_for_both_qualified_spellings(
 
 @pytest.mark.parametrize(
     "recorded",
-    ["swift:github.com/apple/swift-nio-http2@3.3.6", "swift:apple/swift-nio-http2@3.3.6"],
+    [
+        "swift:github.com/apple/swift-nio-http2@3.3.6",
+        "swift:apple/swift-nio-http2@3.3.6",
+        "swift:GitHub.com/Apple/Swift-NIO-HTTP2@3.3.6",
+        "pkg:swift/Apple/swift-nio-http2@3.3.6",
+    ],
 )
 def test_swift_warning_has_one_verdict_for_both_qualified_spellings(
     database, contract_examples, recorded
@@ -371,6 +376,9 @@ def test_swift_warning_has_one_verdict_for_both_qualified_spellings(
     qualified = ask("github.com/apple/swift-nio-http2")
     assert qualified[1] == [warning["id"]]
     assert ask("apple/swift-nio-http2") == qualified
+    # GPT review round 12: names fold by ASCII case in both directions.
+    assert ask("Apple/Swift-NIO-HTTP2") == qualified
+    assert ask("GITHUB.COM/APPLE/SWIFT-NIO-HTTP2") == qualified
     assert ask("github.com/other/swift-nio-http2")[1] == []
     assert ask("swift-nio-http2")[1] == []
     assert ask("apple/swift-nio-http2", "3.3.7")[1] == []
@@ -863,3 +871,47 @@ def test_retained_pypi_semver_range_uses_the_same_pinned_catalog_revision(
         assert affected["id"] not in cited
     else:
         assert body["result"] == expected
+
+
+def test_swift_warning_version_stays_exact_under_case_folding(database, contract_examples) -> None:
+    """GPT review round 12: only the name folds; a version differing in case does not match."""
+    from datetime import timedelta
+
+    from smithguard.db.repository import append_contract
+    from smithguard.identifiers import timestamp
+
+    warning = _example(contract_examples, "PreliminaryWarning")
+    warning.update(
+        {
+            "affected_artifacts": ["swift:apple/swift-nio-http2@1.0.0-BETA"],
+            "created_at": timestamp(NOW),
+            "updated_at": timestamp(NOW),
+            "observed_at": timestamp(NOW),
+            "last_checked_at": timestamp(NOW),
+            "next_check_at": timestamp(NOW + timedelta(hours=1)),
+            "expires_at": timestamp(NOW + timedelta(hours=12)),
+        }
+    )
+    with Session(database.engine) as session, session.begin():
+        append_contract(session, "PreliminaryWarning", warning)
+    with _public_client(database) as client:
+        exact = _post(
+            client, {"ecosystem": "swift", "name": "Apple/Swift-NIO-HTTP2", "version": "1.0.0-BETA"}
+        ).json()
+        other = _post(
+            client, {"ecosystem": "swift", "name": "apple/swift-nio-http2", "version": "1.0.0-beta"}
+        ).json()
+    assert [w["warning_id"] for w in exact["preliminary_warnings"]] == [warning["id"]]
+    assert other["preliminary_warnings"] == []
+
+
+def test_long_swift_names_never_turn_an_assessment_into_an_error(database) -> None:
+    """GPT review round 12: an alias longer than any stored warning entry is skipped."""
+    owner, repo = "o" * 69, "r" * 70
+    with _public_client(database) as client:
+        for name in (f"{owner}/{repo}", f"github.com/{owner}/{repo}"):
+            response = _post(
+                client, {"ecosystem": "swift", "name": name, "version": "1.0.0-" + "a" * 139}
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["preliminary_warnings"] == []

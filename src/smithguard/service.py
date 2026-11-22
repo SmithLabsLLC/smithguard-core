@@ -36,7 +36,7 @@ from smithguard.db.models import (
     SourceIncidentLinkRecord,
     SourceRecord,
 )
-from smithguard.db.package_lookup import swift_qualified_names
+from smithguard.db.package_lookup import package_lookup_key, swift_qualified_names
 from smithguard.ecosystems import REGISTRY_HOSTS_BY_ECOSYSTEM
 from smithguard.feeds import SnapshotSigner
 from smithguard.identifiers import canonical_json_bytes, stable_id, timestamp
@@ -972,6 +972,7 @@ class SmithGuardService:
             warning_aliases.append(f"{identity['ecosystem']}:{identity['name']}@{exact_marker}")
         # GPT review round 11: a warning recorded under the other qualified spelling of the
         # same Swift GitHub identity applies too; the exact version or digest still must match.
+        swift_names: list[str] = []
         if identity["ecosystem"] == "swift":
             for qualified in swift_qualified_names(identity["name"]):
                 same = normalize_artifact_identity(
@@ -985,12 +986,36 @@ class SmithGuardService:
                 warning_aliases.append(same["coordinate"])
                 if exact_marker is not None:
                     warning_aliases.append(f"swift:{same['name']}@{exact_marker}")
+            # GPT review round 12: names fold by ASCII case like the Swift package lookups.
+            if exact_marker is not None:
+                swift_names = [
+                    package_lookup_key("swift", candidate)
+                    for candidate in (identity["name"], *swift_qualified_names(identity["name"]))
+                ]
+        # GPT review round 12: a stored warning entry is printable ASCII of at most 300
+        # characters, so a longer or non-ASCII alias cannot match and is skipped.
+        warning_aliases = [
+            alias
+            for alias in dict.fromkeys(warning_aliases)
+            if len(alias) <= 300 and alias.isascii() and alias.isprintable()
+        ]
+        swift_names = [
+            name for name in dict.fromkeys(swift_names) if len(name) <= 300 and name.isascii()
+        ]
+        if exact_marker is None or len(exact_marker) > 300 or not exact_marker.isascii():
+            swift_names = []
         try:
-            warning_records = matching_preliminary_warnings(
-                session,
-                affected_artifacts=warning_aliases,
-                limit=101,
-                now=self._clock(),
+            warning_records = (
+                matching_preliminary_warnings(
+                    session,
+                    affected_artifacts=warning_aliases,
+                    limit=101,
+                    now=self._clock(),
+                    swift_names=swift_names,
+                    swift_marker=exact_marker if swift_names else None,
+                )
+                if warning_aliases or swift_names
+                else ()
             )
         except PreliminaryWarningError as error:
             raise InternalStateError(str(error)) from error

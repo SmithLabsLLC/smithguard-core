@@ -83,15 +83,24 @@ class LocalPostgres:
 
     def _run_tool(self, args: list[str], *, log: str) -> int:
         """Run a PostgreSQL tool with its output in a file (never a pipe: the server
-        keeps inherited pipes open). Returns the exit code (GPT review round 10)."""
-        with (self.root / log).open("wb") as output:
+        keeps inherited pipes open). If the log cannot be created (for example no free
+        file slots), the tool still runs, without a log (GPT review round 12)."""
+        try:
+            output = (self.root / log).open("wb")
+        except OSError:
+            return subprocess.run(
+                args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
+            ).returncode
+        with output:
             return subprocess.run(
                 args, stdout=output, stderr=subprocess.STDOUT, check=False
             ).returncode
 
     def _failed_start(self, tool: str, code: int) -> None:
         """GPT review round 11: stop a partly started server of this exact cluster, keep
-        its logs in the outer task folder, and remove the cluster only once stopped."""
+        its logs in the outer task folder, and remove the cluster only once stopped.
+        Round 12: shutdown is attempted first and does not depend on creating any file;
+        if the logs cannot be copied they stay in the cluster, which is then kept."""
         stopped = True
         if (self.data / "postmaster.pid").exists() or tool == "pg_ctl":
             self._run_tool(
@@ -105,20 +114,28 @@ class LocalPostgres:
                 )
                 == 3
             )
-        keep = self.root.parent / f"postgres-start-failure-{uuid4().hex[:8]}"
-        keep.mkdir(mode=0o700)
-        for item in sorted(self.root.glob("*.log")):
-            shutil.copy2(item, keep / item.name)
+        logs = sorted(self.root.glob("*.log"))
         tail = "\n".join(
-            f"--- {item.name} ---\n" + item.read_text(errors="replace")[-2000:]
-            for item in sorted(keep.glob("*.log"))
+            f"--- {item.name} ---\n" + item.read_text(errors="replace")[-2000:] for item in logs
         )
-        if stopped:
+        try:
+            keep = self.root.parent / f"postgres-start-failure-{uuid4().hex[:8]}"
+            keep.mkdir(mode=0o700)
+            for item in logs:
+                shutil.copy2(item, keep / item.name)
+            where = f"logs retained at {keep}"
+            copied = True
+        except OSError as error:
+            where = f"logs could not be copied ({type(error).__name__}); they stay in {self.root}"
+            copied = False
+        if stopped and copied:
             shutil.rmtree(self.root, ignore_errors=True)
             state = "the cluster was stopped and removed"
+        elif stopped:
+            state = f"the cluster was stopped and is kept at {self.root} for its logs"
         else:
             state = f"shutdown could not be verified; the cluster is kept at {self.root}"
-        raise RuntimeError(f"{tool} exited {code}; {state}; logs retained at {keep}\n{tail}")
+        raise RuntimeError(f"{tool} exited {code}; {state}; {where}\n{tail}")
 
     def start(self) -> Self:
         # GPT review round 11: the socket folder goes into PostgreSQL's options unquoted
