@@ -788,6 +788,12 @@ def test_mixed_fresh_and_expired_answers_without_local_facts(tmp_path):
 
     report, _ = run(preview, preview["approval_sha256"], reader=Mixed())
     assert len(report["expired_answer_coordinates"]) == 1
+    # GPT review round 8: the saved JSON shows the expiry and incomplete evidence.
+    (expired_id,) = report["expired_answer_coordinates"]
+    exported = report["coordinate_results"][expired_id]["assessment"]
+    assert exported["current_decision_eligible"] is False
+    assert exported["eligible_at_receipt"] is True
+    assert report["evidence_complete"] is False
     assert report["counts"]["answers_expired_before_export_or_evaluation"] == 1
     assert report["counts"]["unique_incidents"] > 0  # the fresh coordinate still counts
     for output in (text_report(report), html_report(report)):

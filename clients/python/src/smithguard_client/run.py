@@ -404,6 +404,15 @@ def run(
     }
     expired &= set(verified_ids)
     report["expired_answer_coordinates"] = sorted(expired)
+    # GPT review round 8: the saved report itself shows the expiry. Receipt-time eligibility
+    # is kept as history; the exported flag and evidence completeness reflect it.
+    for identity in expired:
+        exported = report["coordinate_results"][identity].get("assessment")
+        if isinstance(exported, dict):
+            exported["eligible_at_receipt"] = exported.get("current_decision_eligible")
+            exported["current_decision_eligible"] = False
+    if expired:
+        report["evidence_complete"] = False
     incidents, sources = set(), set()
     for identity, (incident_ids, source_ids) in verified_ids.items():
         if identity not in expired:

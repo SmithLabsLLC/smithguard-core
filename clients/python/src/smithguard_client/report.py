@@ -35,10 +35,12 @@ class Parts(list):
 def evidence_label(assessment, *, expired=False):
     """Audit SG22-09 (review): eligibility is recorded when the answer arrived; an answer
     that aged out before local evaluation is labeled signed history, not current evidence."""
+    if expired and (
+        assessment.get("current_decision_eligible") or assessment.get("eligible_at_receipt")
+    ):
+        return "Signed answer expired before export or local evaluation; historical evidence only"
     if not assessment.get("current_decision_eligible"):
         return "Unverified answer; not decision evidence"
-    if expired:
-        return "Signed answer expired before export or local evaluation; historical evidence only"
     return "Verified current version evidence (at answer time)"
 
 

@@ -253,8 +253,10 @@ incident and source counts. The answer and key are rechecked before every condit
 result; if they age out partway through an installation, the results already derived stay,
 the rest are counted in `local_applicability_omitted`, and the status is
 `answer_expired_during_evaluation`. `exported_at` is the time those freshness decisions
-were made. The command line prints the expired count and exits 2 whenever it is above
-zero, even when no local facts were supplied. The label "Verified current version
+were made. In the saved JSON such an answer shows `current_decision_eligible: false`
+with the receipt-time value kept as `eligible_at_receipt`, and `evidence_complete` is
+false. The command line prints the expired count and exits 2 whenever it is above zero,
+even when no local facts were supplied. The label "Verified current version
 evidence (at answer time)" describes eligibility when the answer arrived.
 Split very large inventories into shorter runs when current local evaluation matters.
 
