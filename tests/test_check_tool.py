@@ -14,8 +14,10 @@ check = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check)
 
 
-def fake_statvfs(free_bytes, free_inodes):
-    return lambda path: SimpleNamespace(f_bavail=free_bytes, f_frsize=1, f_favail=free_inodes)
+def fake_statvfs(free_bytes, free_inodes, total_inodes=10**9):
+    return lambda path: SimpleNamespace(
+        f_bavail=free_bytes, f_frsize=1, f_favail=free_inodes, f_files=total_inodes
+    )
 
 
 def test_insufficient_location_is_rejected_with_guidance(monkeypatch):
@@ -56,3 +58,12 @@ def test_relative_base_gives_an_absolute_task_folder(monkeypatch, tmp_path):
     monkeypatch.setenv("SMITHGUARD_CHECK_TMP", "rel")
     folder = check.task_temp()
     assert Path(folder).is_absolute() and Path(folder).parent == tmp_path / "rel"
+
+
+def test_unreported_inode_totals_are_not_exhaustion(monkeypatch):
+    """GPT review round 2: Btrfs reports f_files 0; only the byte check applies."""
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 0, total_inodes=0))
+    check.require_capacity("/somewhere", check.MINIMUM)
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10, 0, total_inodes=0))
+    with pytest.raises(SystemExit, match="Insufficient"):
+        check.require_capacity("/somewhere", check.MINIMUM)

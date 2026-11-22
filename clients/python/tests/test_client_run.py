@@ -1,5 +1,6 @@
 import copy
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -683,17 +684,17 @@ def test_conditions_are_not_derived_after_the_answer_expires_mid_run(tmp_path):
     from smithguard_client.report import html_report, text_report
 
     for output in (text_report(late), html_report(late)):
-        assert b"Signed answer expired before local evaluation" in output
+        assert b"Signed answer expired before export or local evaluation" in output
         assert b"Verified current version evidence" not in output
-    assert fresh["counts"]["answers_expired_before_local_evaluation"] == 0
+    assert fresh["counts"]["answers_expired_before_export_or_evaluation"] == 0
     assert fresh["counts"]["unique_incidents"] > 0
-    assert late["counts"]["answers_expired_before_local_evaluation"] == len(
+    assert late["counts"]["answers_expired_before_export_or_evaluation"] == len(
         late["coordinate_results"]
     )
     assert late["counts"]["unique_incidents"] == late["counts"]["unique_source_reports"] == 0
     fresh_text = text_report(fresh)
     assert b"Verified current version evidence (at answer time)" in fresh_text
-    assert b"Signed answer expired before local evaluation" not in fresh_text
+    assert b"Signed answer expired before export or local evaluation" not in fresh_text
 
 
 @pytest.mark.parametrize("compact", [False, True])
@@ -767,3 +768,52 @@ def test_active_warning_is_shown_beside_a_negative_result(
         assert b"Preliminary warnings:" not in text.replace(b"Preliminary warnings: 0", b"")
         assert b"not exact version evidence" not in text
         assert b"not exact version evidence" not in html
+
+
+def test_mixed_fresh_and_expired_answers_without_local_facts(tmp_path):
+    """GPT review round 2: freshness is judged per coordinate at export even when no local
+    facts were supplied, so an aged answer is history and leaves the current counts."""
+    from datetime import UTC, datetime, timedelta
+
+    from smithguard_client.report import html_report, text_report
+
+    preview = make_preview(tmp_path)
+    old = datetime.now(UTC) - timedelta(seconds=400)
+    seen = []
+
+    class Mixed(Reader):
+        def assess(self, coord):
+            seen.append(coord)
+            return verified(coord, at=old if len(seen) == 1 else None)
+
+    report, _ = run(preview, preview["approval_sha256"], reader=Mixed())
+    assert len(report["expired_answer_coordinates"]) == 1
+    assert report["counts"]["answers_expired_before_export_or_evaluation"] == 1
+    assert report["counts"]["unique_incidents"] > 0  # the fresh coordinate still counts
+    for output in (text_report(report), html_report(report)):
+        assert b"Signed answer expired before export or local evaluation" in output
+        assert b"Verified current version evidence (at answer time)" in output
+
+
+def test_active_warning_beside_an_original_not_affected_result(tmp_path):
+    """GPT review round 2 (optional): the original not_affected response with an active,
+    untruncated warning still shows the note in text and HTML."""
+    from smithguard_client.report import html_report, text_report
+
+    preview = make_preview(tmp_path)
+
+    class Warned(Reader):
+        def assess(self, coord):
+            original = verified(coord)
+            body = original.document
+            body.update(
+                result="not_affected",
+                preliminary_warnings=[{"warning_id": "gbsec:warning:synthetic", "state": "active"}],
+                preliminary_warnings_truncated=False,
+            )
+            return replace(original, original=canonical(body))
+
+    report, _ = run(preview, preview["approval_sha256"], reader=Warned())
+    for output in (text_report(report), html_report(report)):
+        assert b"not_affected" in output
+        assert b"Preliminary warnings: 1 active of 1 listed" in output

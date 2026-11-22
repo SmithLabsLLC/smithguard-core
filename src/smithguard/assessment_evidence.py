@@ -184,8 +184,21 @@ def source_fix_evidence(
                     fix["applies_to_requested_version"] = None
             evidence.extend(fixes)
             bounds.extend(ends)
+    # GPT review round 2: the package-level list names only fixes for the exact package; an
+    # ambiguous bare-name fix stays in its attributed fix_evidence row only.
+    ambiguous_events = {
+        package.package_event_id
+        for package in packages
+        if package.package_event_id in ambiguous_package_ids
+    }
     versions = ordered_versions(
-        ecosystem, [row["fixed_version"] for row in evidence if row["fixed_version"] is not None]
+        ecosystem,
+        [
+            row["fixed_version"]
+            for row in evidence
+            if row["fixed_version"] is not None
+            and row.get("package_entry_id") not in ambiguous_events
+        ],
     )
     incomplete = (
         unresolved

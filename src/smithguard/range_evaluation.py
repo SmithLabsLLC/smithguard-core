@@ -375,7 +375,10 @@ def _semver_comparators_match(version: str, expression: str) -> bool | None:
             if match is None:
                 return None
             operand = _osv_version(match.group(2), "semver")
-            results.append(_compare(candidate, match.group(1) or "=", operand))
+            operator = match.group(1) or "="
+            results.append(
+                candidate != operand if operator == "!=" else _compare(candidate, operator, operand)
+            )
     except (InvalidVersion, RangeEvaluationError, ValueError):
         return None
     return all(results)
@@ -422,9 +425,15 @@ def range_result(
         if artifact["ecosystem"] == "pypi":
             return pep440_matches(value, expression)
     if range_type == "SEMVER" and artifact["ecosystem"] == "pypi":
-        # Audit SG22-05 (review): a retained PyPI record whose source declared SEMVER is
-        # ordered by SemVer, as the catalog evaluator does; a version outside strict
-        # SemVer stays undecided and is never excluded.
+        # Audit SG22-05 (GPT review rounds 1-2): the source declared SemVer. Records
+        # retained by the earlier collector were projected after sorting events by PEP 440,
+        # which orders a version with a "-" or "+" part differently from SemVer and so can
+        # drop or misplace a boundary. Plain X.Y.Z boundaries sort identically under both, so
+        # such a projection is faithful and SemVer decides (a prerelease candidate included);
+        # any other boundary leaves the retained range undecided, never excluded. The OSV
+        # catalog evaluator, which reads the original events, still decides exactly.
+        if any(character in expression for character in "-+"):
+            return None
         return _semver_comparators_match(value, expression)
     if range_type in {"SEMVER", "ECOSYSTEM"}:
         from smithguard.version_order import comparator_list_matches

@@ -246,5 +246,33 @@ def test_retained_pypi_semver_record_uses_the_declared_order(version, expected) 
     source = {"type": "SEMVER", "events": [{"introduced": "0"}, {"fixed": "1.0.0"}]}
     (projected,) = _osv_ranges({"ranges": [source]}, ecosystem="pypi")
     artifact = {"ecosystem": "pypi", "version": version, "digest": None}
-    assert range_result(artifact=artifact, affected_range=projected) is expected
+    # The catalog evaluator reads the original events and gives the SemVer verdict.
     assert osv_range_matches("pypi", version, source) is expected
+    # Plain X.Y.Z boundaries: the retained projection is faithful and SemVer decides.
+    assert range_result(artifact=artifact, affected_range=projected) is expected
+
+
+@pytest.mark.parametrize(
+    ("expression", "version", "expected"),
+    [
+        # Projected by the earlier collector from introduced 0, fixed 1.0.0-1, introduced
+        # 1.0.0 (events sorted by PEP 440, so the reintroduction was lost): never excluded.
+        ("<1.0.0-1", "1.0.0", None),
+        ("<1.0.0-1", "2.0.0", None),
+        (">=2.0.0, <2.0.0+b", "3.0.0", None),
+        ("<1.0.0", "0.9.0", True),
+        ("<1.0.0", "1.2.0", False),
+        ("!=1.0.0", "1.0.0", False),
+        ("!=1.0.0", "1.0.1", True),
+        (">=1.0.0, !=1.0.1", "1.0.1", False),
+    ],
+)
+def test_legacy_retained_pypi_semver_projection_is_never_excluded(
+    expression, version, expected
+) -> None:
+    """GPT review round 2: a legacy projection, and every accepted operator."""
+    from smithguard.range_evaluation import range_result
+
+    projected = {"range_type": "SEMVER", "expression": expression, "evaluation_state": "supported"}
+    artifact = {"ecosystem": "pypi", "version": version, "digest": None}
+    assert range_result(artifact=artifact, affected_range=projected) is expected

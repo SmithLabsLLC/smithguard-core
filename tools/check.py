@@ -19,8 +19,15 @@ MINIMUM_SYSTEM_TMP = {"bytes": 1024**3, "inodes": 100_000}
 def require_capacity(path, minimum):
     stat = os.statvfs(path)
     free_bytes, free_inodes = stat.f_bavail * stat.f_frsize, stat.f_favail
-    print(f"Check capacity {path}: {free_bytes} bytes, {free_inodes} inodes available", flush=True)
-    if free_bytes < minimum["bytes"] or free_inodes < minimum["inodes"]:
+    # GPT review round 2: some filesystems (Btrfs) report no inode totals (f_files 0);
+    # that is "not reported", not exhaustion, so only the byte check applies there.
+    reported = stat.f_files != 0
+    print(
+        f"Check capacity {path}: {free_bytes} bytes, "
+        + (f"{free_inodes} inodes available" if reported else "inode count not reported"),
+        flush=True,
+    )
+    if free_bytes < minimum["bytes"] or (reported and free_inodes < minimum["inodes"]):
         raise SystemExit(
             f"Insufficient temporary capacity at {path} (need {minimum['bytes']} bytes and "
             f"{minimum['inodes']} free file slots); "

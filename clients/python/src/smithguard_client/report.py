@@ -38,13 +38,13 @@ def evidence_label(assessment, *, expired=False):
     if not assessment.get("current_decision_eligible"):
         return "Unverified answer; not decision evidence"
     if expired:
-        return "Signed answer expired before local evaluation; historical evidence only"
+        return "Signed answer expired before export or local evaluation; historical evidence only"
     return "Verified current version evidence (at answer time)"
 
 
 def expired_coordinates(report):
-    """Coordinates whose signed answer expired before local conditions were evaluated."""
-    return {
+    """Coordinates whose signed answer had expired by export or before local evaluation."""
+    return set(report.get("expired_answer_coordinates", ())) | {
         coordinate_id(item["coordinate"])
         for item in report.get("installations", ())
         if item.get("coordinate") is not None
@@ -90,8 +90,8 @@ def text_report(report):
             f"{counts['unique_source_reports']} verified current source reports.\n",
             f"Unverified answers: {counts.get('unverified_unique_incidents', 0)} incidents; "
             f"{counts.get('unverified_unique_source_reports', 0)} source reports.\n",
-            f"Answers expired before local evaluation (signed history, not counted as "
-            f"current): {counts.get('answers_expired_before_local_evaluation', 0)}.\n",
+            f"Answers expired before export or local evaluation (signed history, not counted as "
+            f"current): {counts.get('answers_expired_before_export_or_evaluation', 0)}.\n",
             f"Run complete: {report['run_complete']}. "
             f"Discovery scope complete: {report['scope_complete']}.\n",
             f"Evidence complete: {report['evidence_complete']}. "
@@ -275,8 +275,8 @@ def _html_report(report, *, compact):
             "verified current source reports.</p>",
             f"<p>Unverified answers: {counts.get('unverified_unique_incidents', 0)} incidents / "
             f"{counts.get('unverified_unique_source_reports', 0)} source reports.</p>",
-            "<p>Answers expired before local evaluation (signed history, not counted as "
-            f"current): {counts.get('answers_expired_before_local_evaluation', 0)}.</p>",
+            "<p>Answers expired before export or local evaluation (signed history, not counted as "
+            f"current): {counts.get('answers_expired_before_export_or_evaluation', 0)}.</p>",
             "<p>Checks complete: "
             + text(report["run_complete"])
             + ". Selected discovery complete: "

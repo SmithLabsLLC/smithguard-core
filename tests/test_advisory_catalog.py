@@ -1702,3 +1702,8 @@ def test_swift_exact_and_ambiguous_fixes_in_same_source_report(database):
                 fix["fixed_version"]: fix["applies_to_requested_version"]
                 for fix in report["fix_evidence"]
             } == {"1.45.0": None, "1.44.0": exact_applies}
+            # GPT review round 2: only the exact package's fix is listed at package level;
+            # the ambiguous one stays in its attributed fix_evidence row.
+            assert report["source_fixed_versions"] == ["1.44.0"]
+            assert report["fixed_versions"] == ["1.44.0"]
+            assert family.fixed_versions == ("1.44.0",)

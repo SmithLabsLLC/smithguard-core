@@ -243,11 +243,13 @@ forcing exit 2. It still cannot support a verified upgrade recommendation.
 Local conditions are evaluated after all reads finish, and each answer is rechecked
 for eligibility at that moment. In a long run (reads spanning more than about five
 minutes) an earlier answer can expire first: it then stays in the report as signed
-history with `local_applicability_status` `answer_expired_not_evaluated` and the text
-and HTML label "Signed answer expired before local evaluation; historical evidence
-only", its local conditions are not evaluated, interpretation is incomplete and the run
-exits 2. Such answers are counted in `answers_expired_before_local_evaluation`, not in
-the verified current incident and source counts. The label "Verified current version
+history with `local_applicability_status` `answer_expired_not_evaluated`, its local
+conditions are not evaluated, interpretation is incomplete and the run exits 2. Every
+answer is also checked at export, with or without local facts: an aged answer is listed in
+`expired_answer_coordinates`, labeled "Signed answer expired before export or local
+evaluation; historical evidence only", counted in
+`answers_expired_before_export_or_evaluation`, and left out of the verified current
+incident and source counts. The label "Verified current version
 evidence (at answer time)" describes eligibility when the answer arrived.
 Split very large inventories into shorter runs when current local evaluation matters.
 

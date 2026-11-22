@@ -1434,7 +1434,14 @@ def catalog_evidence_for_package(
             reports[report_key]["fixed_versions"] = list(
                 _fixed_versions(
                     entries[0][0].ecosystem,
-                    [] if report_key in gap_keys else [package for package, _evaluation in entries],
+                    []
+                    if report_key in gap_keys
+                    else [
+                        package
+                        for package, _evaluation in entries
+                        # GPT review round 2: an ambiguous bare-name fix is never listed.
+                        if package.package_event_id not in ambiguous_package_ids
+                    ],
                 )
             )
             report = reports[report_key]
@@ -1471,6 +1478,7 @@ def catalog_evidence_for_package(
                         package
                         for catalog, package in values
                         if (catalog.source_id, catalog.upstream_record_id) not in gap_keys
+                        and package.package_event_id not in ambiguous_package_ids
                     ],
                 ),
                 aliases=family_aliases,

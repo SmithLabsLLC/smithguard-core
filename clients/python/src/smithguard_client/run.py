@@ -375,12 +375,21 @@ def run(
             item["local_applicability_status"] = "incomplete_output_budget"
             item["local_applicability_omitted"] = total - len(item["local_applicability"])
             report["interpretation_complete"] = False
+    # GPT review round 2: freshness at export is recorded per coordinate, whether or not
+    # its local conditions were evaluated (no facts, stale facts or truncated evidence).
+    exported_at = clock()
     expired = {
+        identity
+        for identity, answer in answers.items()
+        if answer is not None and not answer.eligible_at(exported_at)
+    } | {
         coordinate_id(item["coordinate"])
         for item in report["installations"]
         if item["coordinate"] is not None
         and item.get("local_applicability_status") == "answer_expired_not_evaluated"
-    } & set(verified_ids)
+    }
+    expired &= set(verified_ids)
+    report["expired_answer_coordinates"] = sorted(expired)
     incidents, sources = set(), set()
     for identity, (incident_ids, source_ids) in verified_ids.items():
         if identity not in expired:
@@ -408,7 +417,7 @@ def run(
         "unique_source_reports": len(sources),
         "unverified_unique_incidents": len(unverified_incidents),
         "unverified_unique_source_reports": len(unverified_sources),
-        "answers_expired_before_local_evaluation": len(expired),
+        "answers_expired_before_export_or_evaluation": len(expired),
         "evidence_count_scope": "verified_current_eligible_and_unverified_counted_separately",
         "installation_statuses": {
             s: sum(item["run_status"] == s for item in report["installations"])
