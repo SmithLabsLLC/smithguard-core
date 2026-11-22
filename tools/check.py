@@ -3,6 +3,7 @@
 
 import fcntl
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -22,6 +23,14 @@ SOCKET_SUFFIX = len("/sgc-") + 8 + len("/sg-pg-") + 8 + len("/socket/.s.PGSQL.54
 
 
 def require_socket_room(base):
+    # GPT review round 11: the socket folder is passed to PostgreSQL unquoted, inside a
+    # comma-separated setting; only plain path characters are supported.
+    if not re.fullmatch(r"[A-Za-z0-9/._-]+", base):
+        raise SystemExit(
+            f"Temporary base {base} has characters the test database cannot use (spaces, "
+            "commas, quotes or others); set SMITHGUARD_CHECK_TMP to a folder whose path has "
+            "only letters, digits, '/', '.', '_' or '-'."
+        )
     need = len(os.fsencode(base)) + SOCKET_SUFFIX
     if need > SOCKET_PATH_MAX:
         raise SystemExit(

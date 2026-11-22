@@ -103,3 +103,13 @@ def test_socket_suffix_matches_the_suite_layout():
     assert 'prefix="sg-pg-"' in support and 'self.root / "socket"' in support
     assert "self.port = 5432" in support
     check.require_socket_room("/var/tmp")
+
+
+@pytest.mark.parametrize("name", ["with space", "with,comma", "quote'd", "semi;colon"])
+def test_base_with_unsupported_characters_is_refused_first(monkeypatch, tmp_path, name):
+    """GPT review round 11: PostgreSQL gets the socket folder unquoted."""
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 10**7))
+    base = Path("/tmp") / name if len(str(tmp_path)) > 40 else tmp_path / name
+    monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(base))
+    with pytest.raises(SystemExit, match="characters the test database cannot use"):
+        check.require_socket_room(str(base))

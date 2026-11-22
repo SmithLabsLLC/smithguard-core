@@ -36,6 +36,7 @@ from smithguard.db.models import (
     SourceIncidentLinkRecord,
     SourceRecord,
 )
+from smithguard.db.package_lookup import swift_qualified_names
 from smithguard.ecosystems import REGISTRY_HOSTS_BY_ECOSYSTEM
 from smithguard.feeds import SnapshotSigner
 from smithguard.identifiers import canonical_json_bytes, stable_id, timestamp
@@ -969,6 +970,21 @@ class SmithGuardService:
         exact_marker = identity["digest"] or identity["version"]
         if exact_marker is not None:
             warning_aliases.append(f"{identity['ecosystem']}:{identity['name']}@{exact_marker}")
+        # GPT review round 11: a warning recorded under the other qualified spelling of the
+        # same Swift GitHub identity applies too; the exact version or digest still must match.
+        if identity["ecosystem"] == "swift":
+            for qualified in swift_qualified_names(identity["name"]):
+                same = normalize_artifact_identity(
+                    {
+                        "ecosystem": "swift",
+                        "name": qualified,
+                        "version": identity["version"],
+                        "digest": identity["digest"],
+                    }
+                )
+                warning_aliases.append(same["coordinate"])
+                if exact_marker is not None:
+                    warning_aliases.append(f"swift:{same['name']}@{exact_marker}")
         try:
             warning_records = matching_preliminary_warnings(
                 session,

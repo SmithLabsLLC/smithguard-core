@@ -333,6 +333,49 @@ def test_retained_swift_incident_has_one_verdict_for_both_qualified_spellings(
     assert incident_id not in bare["incident_ids"]
 
 
+@pytest.mark.parametrize(
+    "recorded",
+    ["swift:github.com/apple/swift-nio-http2@3.3.6", "swift:apple/swift-nio-http2@3.3.6"],
+)
+def test_swift_warning_has_one_verdict_for_both_qualified_spellings(
+    database, contract_examples, recorded
+) -> None:
+    """GPT review round 11: an active warning recorded under either qualified spelling is
+    returned for both, with the same verdict; another owner, a bare name and another
+    version do not get it."""
+    from datetime import timedelta
+
+    from smithguard.db.repository import append_contract
+    from smithguard.identifiers import timestamp
+
+    warning = _example(contract_examples, "PreliminaryWarning")
+    warning.update(
+        {
+            "affected_artifacts": [recorded],
+            "created_at": timestamp(NOW),
+            "updated_at": timestamp(NOW),
+            "observed_at": timestamp(NOW),
+            "last_checked_at": timestamp(NOW),
+            "next_check_at": timestamp(NOW + timedelta(hours=1)),
+            "expires_at": timestamp(NOW + timedelta(hours=12)),
+        }
+    )
+    with Session(database.engine) as session, session.begin():
+        append_contract(session, "PreliminaryWarning", warning)
+
+    def ask(name, version="3.3.6"):
+        with _public_client(database) as client:
+            body = _post(client, {"ecosystem": "swift", "name": name, "version": version}).json()
+        return body["result"], [w["warning_id"] for w in body["preliminary_warnings"]]
+
+    qualified = ask("github.com/apple/swift-nio-http2")
+    assert qualified[1] == [warning["id"]]
+    assert ask("apple/swift-nio-http2") == qualified
+    assert ask("github.com/other/swift-nio-http2")[1] == []
+    assert ask("swift-nio-http2")[1] == []
+    assert ask("apple/swift-nio-http2", "3.3.7")[1] == []
+
+
 @pytest.mark.parametrize("form", ["full", "short", "query"])
 def test_every_request_form_refuses_an_npm_partial_version(database, contract_examples, form):
     full = _example(contract_examples, "PublicArtifactAssessmentRequest")

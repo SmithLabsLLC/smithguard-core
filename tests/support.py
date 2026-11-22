@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -65,10 +66,9 @@ class LocalPostgres:
         # The check entry provides a short, disk-backed task directory. Pass it
         # explicitly because tempfile may have cached a different default before
         # TMPDIR was set; standalone tests still use Python's normal fallback.
-        self._temporary = tempfile.TemporaryDirectory(
-            prefix="sg-pg-", dir=os.environ.get("TMPDIR") or None
-        )
-        self.root = Path(self._temporary.name)
+        # A plain folder (not TemporaryDirectory): it is removed only on purpose, so a
+        # server whose shutdown is unverified keeps its cluster (GPT review round 11).
+        self.root = Path(tempfile.mkdtemp(prefix="sg-pg-", dir=os.environ.get("TMPDIR") or None))
         self.data = self.root / "data"
         self.socket = self.root / "socket"
         self.socket.mkdir(mode=0o700)
@@ -81,23 +81,55 @@ class LocalPostgres:
         self._initdb = postgres_tool("initdb")
         self._pg_ctl = postgres_tool("pg_ctl")
 
-    def _run_tool(self, args: list[str], *, log: str) -> None:
+    def _run_tool(self, args: list[str], *, log: str) -> int:
         """Run a PostgreSQL tool with its output in a file (never a pipe: the server
-        keeps inherited pipes open); show the last lines if it fails (GPT review round 10)."""
-        path = self.root / log
-        with path.open("wb") as output:
-            result = subprocess.run(args, stdout=output, stderr=subprocess.STDOUT, check=False)
-        if result.returncode:
-            logs = [path, self.root / "postgres.log"]
-            tail = "\n".join(
-                f"--- {item.name} ---\n" + item.read_text(errors="replace")[-2000:]
-                for item in logs
-                if item.is_file()
+        keeps inherited pipes open). Returns the exit code (GPT review round 10)."""
+        with (self.root / log).open("wb") as output:
+            return subprocess.run(
+                args, stdout=output, stderr=subprocess.STDOUT, check=False
+            ).returncode
+
+    def _failed_start(self, tool: str, code: int) -> None:
+        """GPT review round 11: stop a partly started server of this exact cluster, keep
+        its logs in the outer task folder, and remove the cluster only once stopped."""
+        stopped = True
+        if (self.data / "postmaster.pid").exists() or tool == "pg_ctl":
+            self._run_tool(
+                [self._pg_ctl, "-D", str(self.data), "-m", "immediate", "-w", "-t", "30", "stop"],
+                log="pg_ctl-stop.log",
             )
-            raise RuntimeError(f"{Path(args[0]).name} exited {result.returncode}\n{tail}")
+            # pg_ctl status exits 3 when no server runs for this data directory.
+            stopped = (
+                self._run_tool(
+                    [self._pg_ctl, "-D", str(self.data), "status"], log="pg_ctl-status.log"
+                )
+                == 3
+            )
+        keep = self.root.parent / f"postgres-start-failure-{uuid4().hex[:8]}"
+        keep.mkdir(mode=0o700)
+        for item in sorted(self.root.glob("*.log")):
+            shutil.copy2(item, keep / item.name)
+        tail = "\n".join(
+            f"--- {item.name} ---\n" + item.read_text(errors="replace")[-2000:]
+            for item in sorted(keep.glob("*.log"))
+        )
+        if stopped:
+            shutil.rmtree(self.root, ignore_errors=True)
+            state = "the cluster was stopped and removed"
+        else:
+            state = f"shutdown could not be verified; the cluster is kept at {self.root}"
+        raise RuntimeError(f"{tool} exited {code}; {state}; logs retained at {keep}\n{tail}")
 
     def start(self) -> Self:
-        self._run_tool(
+        # GPT review round 11: the socket folder goes into PostgreSQL's options unquoted
+        # and into a comma-separated setting, so only plain path characters are supported.
+        if not re.fullmatch(r"[A-Za-z0-9/._-]+", str(self.socket)):
+            shutil.rmtree(self.root, ignore_errors=True)
+            raise RuntimeError(
+                f"Test database folder {self.socket} has unsupported characters; use a "
+                "temporary folder whose path has only letters, digits, '/', '.', '_' or '-'."
+            )
+        code = self._run_tool(
             [
                 self._initdb,
                 "-D",
@@ -112,7 +144,9 @@ class LocalPostgres:
             ],
             log="initdb.log",
         )
-        self._run_tool(
+        if code:
+            self._failed_start("initdb", code)
+        code = self._run_tool(
             [
                 self._pg_ctl,
                 "-D",
@@ -126,6 +160,8 @@ class LocalPostgres:
             ],
             log="pg_ctl.log",
         )
+        if code:
+            self._failed_start("pg_ctl", code)
         self._started = True
         return self
 
@@ -198,7 +234,7 @@ class LocalPostgres:
                 stderr=subprocess.DEVNULL,
             )
             self._started = False
-        self._temporary.cleanup()
+        shutil.rmtree(self.root, ignore_errors=True)
 
 
 def alembic_config(url: URL) -> Config:
