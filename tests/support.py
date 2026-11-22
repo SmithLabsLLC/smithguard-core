@@ -102,7 +102,7 @@ class LocalPostgres:
         except OSError:
             return None
 
-    def _failed_start(self, tool: str, code: int) -> None:
+    def _failed_start(self, tool: str, code: int | None) -> None:
         """GPT review round 11: stop a partly started server of this exact cluster, keep
         its logs in the outer task folder, and remove the cluster only once stopped.
         Round 12: shutdown is attempted first and does not depend on creating any file;
@@ -151,7 +151,8 @@ class LocalPostgres:
         else:
             state = f"shutdown could not be verified; the cluster is kept at {self.root}"
         extra = "".join(f"; {note}" for note in notes)
-        raise RuntimeError(f"{tool} exited {code}; {state}{extra}; {where}\n{tail}")
+        how = "could not be launched" if code is None else f"exited {code}"
+        raise RuntimeError(f"{tool} {how}; {state}{extra}; {where}\n{tail}")
 
     def start(self) -> Self:
         # GPT review round 11: the socket folder goes into PostgreSQL's options unquoted
@@ -177,7 +178,7 @@ class LocalPostgres:
             ],
             log="initdb.log",
         )
-        if code:
+        if code != 0:  # GPT review round 14: None (not launched) is a failure too
             self._failed_start("initdb", code)
         code = self._run_tool(
             [
@@ -193,7 +194,7 @@ class LocalPostgres:
             ],
             log="pg_ctl.log",
         )
-        if code:
+        if code != 0:  # GPT review round 14: None (not launched) is a failure too
             self._failed_start("pg_ctl", code)
         self._started = True
         return self

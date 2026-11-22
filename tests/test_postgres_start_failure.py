@@ -155,3 +155,22 @@ def test_unreadable_log_does_not_hide_the_start_error(outer, monkeypatch):
     cluster, message = run(monkeypatch, tools)
     assert message.startswith("pg_ctl exited 1")
     assert "postgres.log --- (unreadable: OSError)" in message
+
+
+@pytest.mark.parametrize("tool", ["initdb", "pg_ctl"])
+def test_a_start_tool_that_cannot_launch_is_a_named_failure(outer, monkeypatch, tool):
+    """GPT review round 14: only exit code 0 is success; a launch failure is reported."""
+    tools = FakeTools(fail=None, status=3)
+
+    def unlaunchable(args, **kwargs):
+        name, action = Path(args[0]).name, args[-1]
+        if name == tool and (tool == "initdb" or action == "start"):
+            tools.calls.append((name, action))
+            raise OSError(2, "No such file or directory")
+        return tools(args, **kwargs)
+
+    cluster, message = run(monkeypatch, unlaunchable)
+    assert message.startswith(f"{tool} could not be launched")
+    assert cluster._started is False
+    if tool == "initdb":
+        assert ("pg_ctl", "start") not in tools.calls
