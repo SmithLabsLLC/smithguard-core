@@ -140,6 +140,9 @@ class CatalogMatchFamily:
     fixed_versions: tuple[str, ...] = ()
     aliases: tuple[str, ...] = ()
     upstream_urls: tuple[str, ...] = ()
+    # GPT review round 6: (source_id, upstream_record_id, canonical_url, evaluation) per
+    # evaluated package, so a retained range can be matched to the same pinned revision.
+    record_evaluations: tuple[tuple[str, str, str, bool | None], ...] = ()
 
     @property
     def applies(self) -> bool | None:
@@ -1483,6 +1486,10 @@ def catalog_evidence_for_package(
                 ),
                 aliases=family_aliases,
                 upstream_urls=family_urls,
+                record_evaluations=tuple(
+                    (catalog.source_id, catalog.upstream_record_id, catalog.canonical_url, value)
+                    for catalog, _package, value in evaluated_values
+                ),
             )
         )
     return CatalogPackageEvidence(

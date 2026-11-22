@@ -31,8 +31,12 @@ def package_lookup_key(ecosystem: str, name: str) -> str:
 
 
 def swift_bare_name(name: str) -> str | None:
-    """Bare Swift candidate only for an exact GitHub owner/repository identity."""
+    """Bare Swift candidate only for an exact GitHub owner/repository identity, written
+    either as github.com/owner/repository or as the documented owner/repository form
+    (GPT review round 6)."""
     parts = name.split("/")
+    if len(parts) == 2 and all(parts):
+        return parts[1]
     if len(parts) != 3 or parts[0].lower() != "github.com" or not all(parts[1:]):
         return None
     return parts[2]

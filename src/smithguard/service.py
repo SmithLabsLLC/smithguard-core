@@ -281,19 +281,15 @@ def _evaluate_assessment_incidents(
         for record, _ranges in correlated
         if record.status not in {"withdrawn", "expired", "disputed"}
     }
+    artifact = {
+        "ecosystem": identity["ecosystem"],
+        "version": identity["version"],
+        "digest": identity["digest"],
+    }
+    pinned_catalog = _pinned_catalog_evaluations(catalog_families)
     range_evaluations_by_incident = {
         incident_record.id: tuple(
-            (
-                record,
-                range_result(
-                    artifact={
-                        "ecosystem": identity["ecosystem"],
-                        "version": identity["version"],
-                        "digest": identity["digest"],
-                    },
-                    affected_range=record.document,
-                ),
-            )
+            (record, _retained_range_result(record, artifact, pinned_catalog))
             for record in incident_ranges
         )
         for incident_record, incident_ranges in correlated
@@ -364,6 +360,51 @@ def _evaluate_assessment_incidents(
     elif catalog_not_affected and result == "unknown":
         result = "not_affected"
     return incidents, matched_range_ids, confirmed_incidents, result, applicability
+
+
+# A commit-pinned OpenSSF advisory file: the same URL names the same file content.
+_PINNED_OPENSSF_URL = re.compile(
+    r"https://github\.com/ossf/malicious-packages/blob/[0-9a-f]{40}/[A-Za-z0-9/._%@:+-]+\.json"
+)
+
+
+def _pinned_catalog_evaluations(
+    families: tuple[CatalogMatchFamily, ...],
+) -> dict[tuple[str, str, str], bool | None]:
+    """Catalog verdicts per commit-pinned source record, combined over its packages."""
+    grouped: dict[tuple[str, str, str], list[bool | None]] = {}
+    for family in families:
+        for source_id, record_id, url, value in family.record_evaluations:
+            if _PINNED_OPENSSF_URL.fullmatch(url or ""):
+                grouped.setdefault((source_id, record_id, url), []).append(value)
+    return {key: _applies(tuple(values)) for key, values in grouped.items()}
+
+
+def _retained_range_result(
+    record: Any,
+    artifact: dict[str, Any],
+    pinned_catalog: dict[tuple[str, str, str], bool | None],
+) -> bool | None:
+    """Audit SG22-05 (GPT review rounds 4-6): a retained PyPI SEMVER range is undecided
+    (its projection may be lossy), unless the catalog holds the same source assertion at
+    the same commit-pinned revision; then the catalog's verdict from the original events
+    decides for that range. Any other retained range is evaluated as before."""
+    result = range_result(artifact=artifact, affected_range=record.document)
+    if (
+        result is not None
+        or artifact["ecosystem"] != "pypi"
+        or record.document.get("range_type") != "SEMVER"
+    ):
+        return result
+    provenance = getattr(record, "provenance", None) or record.document.get("provenance") or {}
+    key = (
+        provenance.get("source_id"),
+        provenance.get("source_record_id"),
+        provenance.get("source_url"),
+    )
+    if not all(isinstance(part, str) for part in key):
+        return None
+    return pinned_catalog.get(key)
 
 
 def _applies(results: tuple[bool | None, ...]) -> bool | None:

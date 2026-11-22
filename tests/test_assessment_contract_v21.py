@@ -678,3 +678,98 @@ def test_pypi_record_follows_its_declared_range_type(
         )
     assert response.status_code == 200, response.text
     assert response.json()["result"] == expected
+
+
+PINNED = (
+    "https://github.com/ossf/malicious-packages/blob/{commit}/"
+    "osv/malicious/pypi/example-retained/MAL-2026-66666.json"
+)
+
+
+@pytest.mark.parametrize(
+    ("retained_url", "retained_record", "expected"),
+    [
+        # Same source, advisory and commit-pinned revision: the catalog decides.
+        (PINNED.format(commit="1" * 40), "MAL-2026-66666", "not_affected"),
+        # A different commit (revision) keeps the retained range undecided.
+        (PINNED.format(commit="2" * 40), "MAL-2026-66666", "possibly_affected"),
+        # An unrelated advisory stays undecided.
+        (PINNED.format(commit="1" * 40), "MAL-2026-77777", "possibly_affected"),
+    ],
+)
+def test_retained_pypi_semver_range_uses_the_same_pinned_catalog_revision(
+    database, contract_examples, retained_url, retained_record, expected
+) -> None:
+    """GPT review rounds 4-6: an undecided retained PyPI SEMVER range takes the catalog's
+    verdict only for the same source assertion at the same commit-pinned revision."""
+    from smithguard.advisory_catalog import OPENSSF_SOURCE_ID
+    from smithguard.db.repository import append_contract
+    from smithguard.identifiers import stable_id
+    from smithguard.normalization import normalize_artifact_identity
+    from tests.test_service_api import _create_incident
+
+    with Session(database.engine) as session, session.begin():
+        identity = normalize_artifact_identity(
+            {"ecosystem": "pypi", "name": "example-retained", "version": None, "digest": None}
+        )
+        artifact = _example(contract_examples, "Artifact")
+        artifact.update(identity)
+        artifact["id"] = stable_id("artifact", identity["coordinate"])
+        affected = _example(contract_examples, "AffectedRange")
+        affected.update(
+            artifact_id=artifact["id"],
+            range_type="SEMVER",
+            expression="<1.0.0",
+            introduced="0",
+            fixed="1.0.0",
+            last_affected=None,
+            evaluation_state="supported",
+        )
+        affected["provenance"] = {
+            **affected["provenance"],
+            "source_id": OPENSSF_SOURCE_ID,
+            "source_record_id": retained_record,
+            "source_url": retained_url,
+        }
+        affected["id"] = stable_id("range", artifact["id"], retained_record, retained_url)
+        claim = _example(contract_examples, "Claim")
+        claim["subject_id"] = artifact["id"]
+        claim["provenance"] = dict(affected["provenance"])  # the claim backs this range
+        append_contract(session, "Artifact", artifact)
+        append_contract(session, "Claim", claim)
+        append_contract(session, "AffectedRange", affected)
+        _create_incident(
+            session,
+            "retained-pinned",
+            artifact_ids=(artifact["id"],),
+            range_ids=(affected["id"],),
+            claim_ids=(claim["id"],),
+            status="confirmed",
+        )
+        append_openssf_advisory(
+            session,
+            document={
+                "id": "MAL-2026-66666",
+                "published": "2026-08-30T00:00:00Z",
+                "modified": "2026-08-31T00:00:00Z",
+                "affected": [
+                    {
+                        "package": {"ecosystem": "PyPI", "name": "example-retained"},
+                        "ranges": [
+                            {"type": "SEMVER", "events": [{"introduced": "0"}, {"fixed": "1.0.0"}]}
+                        ],
+                    }
+                ],
+            },
+            canonical_url=PINNED.format(commit="1" * 40),
+            source_state="active",
+            evidence_id="gbsec:evidence:retained-pinned",
+            governance_decision_id="gbsec:governance:retained-pinned",
+            observed_at=NOW,
+        )
+    with _public_client(database) as client:
+        response = _post(
+            client, {"ecosystem": "pypi", "name": "example-retained", "version": "1.0.1"}
+        )
+    assert response.status_code == 200, response.text
+    assert response.json()["result"] == expected

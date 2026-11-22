@@ -1635,6 +1635,10 @@ def test_swift_ambiguous_bare_advisory_never_decides_repository_identity(
             "github.com/apple/swift-nio-http2",
             "github.com/someone/swift-nio-http2",
             "github.com/Apple/Swift-NIO-HTTP2",
+            # The documented owner/repository form (GPT review round 6).
+            "apple/swift-nio-http2",
+            "someone/swift-nio-http2",
+            "Apple/Swift-NIO-HTTP2",
         ):
             for version in ("1.44.0", "1.45.0"):
                 request["artifact"].update(name=name, version=version)
@@ -1661,6 +1665,8 @@ def test_swift_ambiguous_bare_advisory_never_decides_repository_identity(
             "github.com/apple/extra/swift-nio-http2",
             "github.com/apple/swift-nio-http2/",
             "other.com/apple/swift-nio-http2",
+            "apple/",
+            "/swift-nio-http2",
         ):
             assert (
                 catalog_matches_for_package(
