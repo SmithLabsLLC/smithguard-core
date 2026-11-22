@@ -679,6 +679,21 @@ def test_conditions_are_not_derived_after_the_answer_expires_mid_run(tmp_path):
     assert not late["interpretation_complete"]
     # The historical signed answers stay visible.
     assert all(r["assessment"]["incidents"] for r in late["coordinate_results"].values())
+    # Review finding: exports label them as signed history, not current evidence.
+    from smithguard_client.report import html_report, text_report
+
+    for output in (text_report(late), html_report(late)):
+        assert b"Signed answer expired before local evaluation" in output
+        assert b"Verified current version evidence" not in output
+    assert fresh["counts"]["answers_expired_before_local_evaluation"] == 0
+    assert fresh["counts"]["unique_incidents"] > 0
+    assert late["counts"]["answers_expired_before_local_evaluation"] == len(
+        late["coordinate_results"]
+    )
+    assert late["counts"]["unique_incidents"] == late["counts"]["unique_source_reports"] == 0
+    fresh_text = text_report(fresh)
+    assert b"Verified current version evidence (at answer time)" in fresh_text
+    assert b"Signed answer expired before local evaluation" not in fresh_text
 
 
 @pytest.mark.parametrize("compact", [False, True])
@@ -741,6 +756,8 @@ def test_active_warning_is_shown_beside_a_negative_result(
         active = states.count("active")
         expected = f"Preliminary warnings: {active} active of {len(states)} listed".encode()
         assert expected in text and expected in html
+        # Review finding: also beside each installation's result in HTML.
+        assert html.count(expected) >= 2
         assert b"unconfirmed reports, not exact version evidence" in text
         assert (b"(more not listed)" in text) is truncated
     elif truncated:

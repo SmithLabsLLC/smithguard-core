@@ -325,9 +325,10 @@ def _covers_every_version(ecosystem: str, affected_range: Mapping[str, Any]) -> 
 def osv_range_matches(
     ecosystem: str, version: str, affected_range: Mapping[str, Any]
 ) -> bool | None:
-    # A PyPI identifier outside SemVer cannot be ordered by a declared SEMVER range.
+    # A PyPI identifier outside SemVer cannot be ordered by a declared SEMVER range, but
+    # "introduced: 0" alone covers every version and needs no ordering (OSV schema).
     pypi_semver = ecosystem == "pypi" and affected_range.get("type") == "SEMVER"
-    if not pypi_semver and _covers_every_version(ecosystem, affected_range):
+    if _covers_every_version(ecosystem, affected_range):
         return True
     intervals = osv_intervals(ecosystem, affected_range)
     if intervals is None:
@@ -361,6 +362,23 @@ def osv_range_matches(
         )
     except (InvalidVersion, RangeEvaluationError):
         return None
+
+
+def _semver_comparators_match(version: str, expression: str) -> bool | None:
+    from smithguard.version_order import COMPARATOR
+
+    try:
+        candidate = _osv_version(version, "semver")
+        results = []
+        for part in expression.split(","):
+            match = COMPARATOR.fullmatch(part)
+            if match is None:
+                return None
+            operand = _osv_version(match.group(2), "semver")
+            results.append(_compare(candidate, match.group(1) or "=", operand))
+    except (InvalidVersion, RangeEvaluationError, ValueError):
+        return None
+    return all(results)
 
 
 def range_result(
@@ -403,6 +421,11 @@ def range_result(
             return semver_matches(value, expression)
         if artifact["ecosystem"] == "pypi":
             return pep440_matches(value, expression)
+    if range_type == "SEMVER" and artifact["ecosystem"] == "pypi":
+        # Audit SG22-05 (review): a retained PyPI record whose source declared SEMVER is
+        # ordered by SemVer, as the catalog evaluator does; a version outside strict
+        # SemVer stays undecided and is never excluded.
+        return _semver_comparators_match(value, expression)
     if range_type in {"SEMVER", "ECOSYSTEM"}:
         from smithguard.version_order import comparator_list_matches
 

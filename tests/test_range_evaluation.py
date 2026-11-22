@@ -222,5 +222,29 @@ def test_osv_pypi_uses_declared_order(version, semver, python) -> None:
     events = [{"introduced": "0"}, {"fixed": "1.0.0"}]
     for kind, expected in (("SEMVER", semver), ("ECOSYSTEM", python)):
         assert osv_range_matches("pypi", version, {"type": kind, "events": events}) is expected
-    if semver is None:
-        assert osv_range_matches("pypi", version, {"type": "SEMVER", "events": events[:1]}) is None
+    # Review finding: "introduced: 0" alone covers every version, needing no ordering.
+    assert osv_range_matches("pypi", version, {"type": "SEMVER", "events": events[:1]}) is True
+
+
+@pytest.mark.parametrize(
+    ("version", "expected"),
+    [
+        ("1.0.0-1", True),
+        ("1.0.0", False),
+        ("0.9.9", True),
+        ("1.0rc1", None),
+        ("1.0.post1", None),
+        ("1.0", None),
+    ],
+)
+def test_retained_pypi_semver_record_uses_the_declared_order(version, expected) -> None:
+    """Audit SG22-05 (review): the retained-record path, fed by the collector's own
+    projection of a PyPI SEMVER range, agrees with the catalog evaluator."""
+    from smithguard.collectors import _osv_ranges
+    from smithguard.range_evaluation import osv_range_matches, range_result
+
+    source = {"type": "SEMVER", "events": [{"introduced": "0"}, {"fixed": "1.0.0"}]}
+    (projected,) = _osv_ranges({"ranges": [source]}, ecosystem="pypi")
+    artifact = {"ecosystem": "pypi", "version": version, "digest": None}
+    assert range_result(artifact=artifact, affected_range=projected) is expected
+    assert osv_range_matches("pypi", version, source) is expected

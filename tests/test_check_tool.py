@@ -47,3 +47,12 @@ def test_missing_base_is_refused_clearly(monkeypatch, tmp_path):
     monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(tmp_path / "absent"))
     with pytest.raises(SystemExit, match="does not exist"):
         check.task_temp()
+
+
+def test_relative_base_gives_an_absolute_task_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10**12, 10**7))
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "rel").mkdir()
+    monkeypatch.setenv("SMITHGUARD_CHECK_TMP", "rel")
+    folder = check.task_temp()
+    assert Path(folder).is_absolute() and Path(folder).parent == tmp_path / "rel"

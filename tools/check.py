@@ -32,6 +32,8 @@ def task_temp():
     base = os.environ.get("SMITHGUARD_CHECK_TMP") or (
         "/var/tmp" if Path("/var/tmp").is_dir() else tempfile.gettempdir()
     )
+    # An absolute base: the task folder becomes TMPDIR for children started elsewhere.
+    base = os.path.abspath(base)
     if not Path(base).is_dir():
         raise SystemExit(
             f"Temporary base {base} does not exist; create it or set SMITHGUARD_CHECK_TMP."

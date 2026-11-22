@@ -32,12 +32,24 @@ class Parts(list):
         super().append(value)
 
 
-def evidence_label(assessment):
-    return (
-        "Verified current version evidence"
-        if assessment.get("current_decision_eligible")
-        else "Unverified answer; not decision evidence"
-    )
+def evidence_label(assessment, *, expired=False):
+    """Audit SG22-09 (review): eligibility is recorded when the answer arrived; an answer
+    that aged out before local evaluation is labeled signed history, not current evidence."""
+    if not assessment.get("current_decision_eligible"):
+        return "Unverified answer; not decision evidence"
+    if expired:
+        return "Signed answer expired before local evaluation; historical evidence only"
+    return "Verified current version evidence (at answer time)"
+
+
+def expired_coordinates(report):
+    """Coordinates whose signed answer expired before local conditions were evaluated."""
+    return {
+        coordinate_id(item["coordinate"])
+        for item in report.get("installations", ())
+        if item.get("coordinate") is not None
+        and item.get("local_applicability_status") == "answer_expired_not_evaluated"
+    }
 
 
 def warning_note(assessment):
@@ -78,6 +90,8 @@ def text_report(report):
             f"{counts['unique_source_reports']} verified current source reports.\n",
             f"Unverified answers: {counts.get('unverified_unique_incidents', 0)} incidents; "
             f"{counts.get('unverified_unique_source_reports', 0)} source reports.\n",
+            f"Answers expired before local evaluation (signed history, not counted as "
+            f"current): {counts.get('answers_expired_before_local_evaluation', 0)}.\n",
             f"Run complete: {report['run_complete']}. "
             f"Discovery scope complete: {report['scope_complete']}.\n",
             f"Evidence complete: {report['evidence_complete']}. "
@@ -111,13 +125,15 @@ def text_report(report):
                 + item.get("local_applicability_status", "not_evaluated")
                 + "\n"
             )
-        for row in report["coordinate_results"].values():
+        expired = expired_coordinates(report)
+        for identity, row in report["coordinate_results"].items():
             coordinate = row["coordinate"]
             assessment = row.get("assessment", {})
+            label = evidence_label(assessment, expired=identity in expired)
             lines.append(
                 json.dumps(
                     f"{coordinate['name']} {coordinate['version']}: {row['status']}; "
-                    f"{evidence_label(assessment)}: {assessment.get('result', 'not assessed')}; "
+                    f"{label}: {assessment.get('result', 'not assessed')}; "
                     f"reason: {row.get('reason', 'none')}",
                     ensure_ascii=True,
                 )
@@ -259,6 +275,8 @@ def _html_report(report, *, compact):
             "verified current source reports.</p>",
             f"<p>Unverified answers: {counts.get('unverified_unique_incidents', 0)} incidents / "
             f"{counts.get('unverified_unique_source_reports', 0)} source reports.</p>",
+            "<p>Answers expired before local evaluation (signed history, not counted as "
+            f"current): {counts.get('answers_expired_before_local_evaluation', 0)}.</p>",
             "<p>Checks complete: "
             + text(report["run_complete"])
             + ". Selected discovery complete: "
@@ -309,7 +327,12 @@ def _html_report(report, *, compact):
                     result = row.get("assessment", {}).get("result", "not assessed")
                     parts.append(
                         "<p>"
-                        + text(evidence_label(row.get("assessment", {})))
+                        + text(
+                            evidence_label(
+                                row.get("assessment", {}),
+                                expired=identity in expired_coordinates(report),
+                            )
+                        )
                         + ": <strong>"
                         + text(result)
                         + "</strong>. "
@@ -317,6 +340,9 @@ def _html_report(report, *, compact):
                         + identity
                         + '">Shared assessment and sources</a></p>'
                     )
+                    note = warning_note(row.get("assessment", {}))
+                    if note:
+                        parts.append("<p>" + text(note) + "</p>")
             if item.get("run_reason"):
                 parts.append("<p>Reason: " + text(item["run_reason"]) + "</p>")
             parts.append(
@@ -352,7 +378,7 @@ def _html_report(report, *, compact):
         if assessment:
             parts.append(
                 "<p>"
-                + text(evidence_label(assessment))
+                + text(evidence_label(assessment, expired=identity in expired_coordinates(report)))
                 + ": <strong>"
                 + text(assessment["result"])
                 + "</strong>. "

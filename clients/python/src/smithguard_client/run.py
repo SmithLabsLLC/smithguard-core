@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import uuid
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Any
 
@@ -148,6 +149,9 @@ def run(
         checkpoint(state)
     stop = None
     evidence_ids = {True: (set(), set()), False: (set(), set())}
+    # Review finding (SG22-09): which coordinate contributed which verified evidence, so
+    # an answer that expires before local evaluation leaves the current counts.
+    verified_ids: dict[str, tuple[set, set]] = {}
     report["evidence_complete"] = True
     for coordinate in coordinates:
         identity = coordinate_id(coordinate)
@@ -160,7 +164,11 @@ def run(
             continue
         try:
             verified = reader.assess(coordinate)
-            answers[identity] = verified
+            # Review finding (SG22-09): keep only what the later eligibility check needs,
+            # never the raw response bytes of every answer in a large run.
+            answers[identity] = (
+                replace(verified, original=b"") if verified.current_decision_eligible else None
+            )
             if verified.status == "invalid":
                 progress.update(status="failed", reason=verified.reason)
                 row = {
@@ -264,6 +272,8 @@ def run(
                     eligible = verified.current_decision_eligible
                     evidence_ids[eligible][0].update(incident_ids)
                     evidence_ids[eligible][1].update(source_ids)
+                    if eligible:
+                        verified_ids[identity] = (set(incident_ids), set(source_ids))
                     if (
                         projection.get("evidence_truncated")
                         or projection["service_evidence_omissions"]
@@ -365,7 +375,17 @@ def run(
             item["local_applicability_status"] = "incomplete_output_budget"
             item["local_applicability_omitted"] = total - len(item["local_applicability"])
             report["interpretation_complete"] = False
-    incidents, sources = evidence_ids[True]
+    expired = {
+        coordinate_id(item["coordinate"])
+        for item in report["installations"]
+        if item["coordinate"] is not None
+        and item.get("local_applicability_status") == "answer_expired_not_evaluated"
+    } & set(verified_ids)
+    incidents, sources = set(), set()
+    for identity, (incident_ids, source_ids) in verified_ids.items():
+        if identity not in expired:
+            incidents |= incident_ids
+            sources |= source_ids
     unverified_incidents, unverified_sources = evidence_ids[False]
     report["counts"] = {
         "service_incomplete_answers": sum(
@@ -388,6 +408,7 @@ def run(
         "unique_source_reports": len(sources),
         "unverified_unique_incidents": len(unverified_incidents),
         "unverified_unique_source_reports": len(unverified_sources),
+        "answers_expired_before_local_evaluation": len(expired),
         "evidence_count_scope": "verified_current_eligible_and_unverified_counted_separately",
         "installation_statuses": {
             s: sum(item["run_status"] == s for item in report["installations"])
