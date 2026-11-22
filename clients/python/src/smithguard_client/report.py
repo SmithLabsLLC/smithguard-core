@@ -72,7 +72,13 @@ def warning_note(assessment):
     if not listed and not truncated:
         return None
     if not listed:
-        return "Preliminary warnings: list truncated; see the JSON report."
+        # GPT review round 13: the service omitted every entry, so the JSON has none
+        # either; say what is known instead of pointing at the JSON.
+        return (
+            "Preliminary warnings: present but omitted by the service (total unknown); "
+            "unconfirmed reports, not exact version evidence; an active warning can raise "
+            "the result to possibly_affected."
+        )
     counted = f"{active} active of {listed} listed" if active is not None else f"{listed} listed"
     return (
         f"Preliminary warnings: {counted}{' (more not listed)' if truncated else ''}; "

@@ -973,8 +973,15 @@ class SmithGuardService:
         # GPT review round 11: a warning recorded under the other qualified spelling of the
         # same Swift GitHub identity applies too; the exact version or digest still must match.
         swift_names: list[str] = []
+        swift_purl_names: list[str] = []
+        swift_purl_marker: str | None = None
         if identity["ecosystem"] == "swift":
+            spellings = [identity]
             for qualified in swift_qualified_names(identity["name"]):
+                # GPT review round 13: an alternate spelling longer than a name may be
+                # cannot exist anywhere; skip it before normalization would refuse it.
+                if len(qualified) > 300:
+                    continue
                 same = normalize_artifact_identity(
                     {
                         "ecosystem": "swift",
@@ -983,27 +990,33 @@ class SmithGuardService:
                         "digest": identity["digest"],
                     }
                 )
+                spellings.append(same)
                 warning_aliases.append(same["coordinate"])
                 if exact_marker is not None:
                     warning_aliases.append(f"swift:{same['name']}@{exact_marker}")
-            # GPT review round 12: names fold by ASCII case like the Swift package lookups.
+            # GPT review rounds 12-13: names fold by ASCII case like the Swift package
+            # lookups; "swift:" entries keep the raw marker and Package URL entries their
+            # own encoded name and version.
             if exact_marker is not None:
-                swift_names = [
-                    package_lookup_key("swift", candidate)
-                    for candidate in (identity["name"], *swift_qualified_names(identity["name"]))
-                ]
+                swift_names = [package_lookup_key("swift", item["name"]) for item in spellings]
+            purl_prefix = "pkg:swift/"
+            for item in spellings:
+                path, _, version = item["coordinate"][len(purl_prefix) :].partition("@")
+                swift_purl_names.append(package_lookup_key("swift", path))
+                swift_purl_marker = version or None
+
         # GPT review round 12: a stored warning entry is printable ASCII of at most 300
-        # characters, so a longer or non-ASCII alias cannot match and is skipped.
-        warning_aliases = [
-            alias
-            for alias in dict.fromkeys(warning_aliases)
-            if len(alias) <= 300 and alias.isascii() and alias.isprintable()
-        ]
-        swift_names = [
-            name for name in dict.fromkeys(swift_names) if len(name) <= 300 and name.isascii()
-        ]
-        if exact_marker is None or len(exact_marker) > 300 or not exact_marker.isascii():
+        # characters, so a longer or non-ASCII alias or name cannot match and is skipped.
+        def usable(text: str) -> bool:
+            return len(text) <= 300 and text.isascii() and text.isprintable()
+
+        warning_aliases = [alias for alias in dict.fromkeys(warning_aliases) if usable(alias)]
+        swift_names = [name for name in dict.fromkeys(swift_names) if usable(name)]
+        swift_purl_names = [name for name in dict.fromkeys(swift_purl_names) if usable(name)]
+        if exact_marker is None or not usable(exact_marker):
             swift_names = []
+        if swift_purl_marker is not None and not usable(swift_purl_marker):
+            swift_purl_names = []
         try:
             warning_records = (
                 matching_preliminary_warnings(
@@ -1013,8 +1026,10 @@ class SmithGuardService:
                     now=self._clock(),
                     swift_names=swift_names,
                     swift_marker=exact_marker if swift_names else None,
+                    swift_purl_names=swift_purl_names,
+                    swift_purl_marker=swift_purl_marker if swift_purl_names else None,
                 )
-                if warning_aliases or swift_names
+                if warning_aliases or swift_names or swift_purl_names
                 else ()
             )
         except PreliminaryWarningError as error:

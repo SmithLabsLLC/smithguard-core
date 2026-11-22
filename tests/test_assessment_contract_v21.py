@@ -915,3 +915,82 @@ def test_long_swift_names_never_turn_an_assessment_into_an_error(database) -> No
             )
             assert response.status_code == 200, response.text
             assert response.json()["preliminary_warnings"] == []
+
+
+def _store_warning(database, contract_examples, artifacts):
+    from datetime import timedelta
+
+    from smithguard.db.repository import append_contract
+    from smithguard.identifiers import timestamp
+
+    warning = _example(contract_examples, "PreliminaryWarning")
+    warning.update(
+        {
+            "affected_artifacts": artifacts,
+            "created_at": timestamp(NOW),
+            "updated_at": timestamp(NOW),
+            "observed_at": timestamp(NOW),
+            "last_checked_at": timestamp(NOW),
+            "next_check_at": timestamp(NOW + timedelta(hours=1)),
+            "expires_at": timestamp(NOW + timedelta(hours=12)),
+        }
+    )
+    with Session(database.engine) as session, session.begin():
+        append_contract(session, "PreliminaryWarning", warning)
+    return warning["id"]
+
+
+def _warning_ids(database, body):
+    with _public_client(database) as client:
+        response = _post(client, body)
+    assert response.status_code == 200, response.text
+    return [w["warning_id"] for w in response.json()["preliminary_warnings"]]
+
+
+def test_swift_package_url_warning_matches_its_encoded_version(database, contract_examples):
+    """GPT review round 13: a Package URL stores 1.0.0+Build as 1.0.0%2BBuild."""
+    warning_id = _store_warning(
+        database, contract_examples, ["pkg:swift/Apple/Swift-NIO-HTTP2@1.0.0%2BBuild"]
+    )
+    for name in (
+        "apple/swift-nio-http2",
+        "github.com/apple/swift-nio-http2",
+        "APPLE/swift-nio-http2",
+    ):
+        body = {"ecosystem": "swift", "name": name, "version": "1.0.0+Build"}
+        assert _warning_ids(database, body) == [warning_id]
+    other = {"ecosystem": "swift", "name": "apple/swift-nio-http2", "version": "1.0.0+build"}
+    assert _warning_ids(database, other) == []
+
+
+def test_swift_package_url_without_version_never_matches_a_versioned_request(
+    database, contract_examples
+):
+    """A Swift request must name an exact version (a digest alone is refused), so a
+    stored versionless Package URL never matches by case folding."""
+    _store_warning(database, contract_examples, ["pkg:swift/Apple/Swift-NIO-HTTP2"])
+    digest = "sha256:" + "a" * 64
+    with _public_client(database) as client:
+        response = _post(
+            client,
+            {
+                "ecosystem": "swift",
+                "name": "apple/swift-nio-http2",
+                "version": None,
+                "digest": digest,
+            },
+        )
+    assert response.status_code == 400
+    versioned = {"ecosystem": "swift", "name": "apple/swift-nio-http2", "version": "1.0.0"}
+    assert _warning_ids(database, versioned) == []
+
+
+def test_longest_swift_names_with_a_short_version_are_answered(database) -> None:
+    """GPT review round 13: github.com/ added to a 290-300 character name is skipped."""
+    for length in (290, 296, 300):
+        owner = "o" * 50
+        name = f"{owner}/" + "r" * (length - len(owner) - 1)
+        assert len(name) == length
+        assert (
+            _warning_ids(database, {"ecosystem": "swift", "name": name, "version": "1.0.0"}) == []
+        )

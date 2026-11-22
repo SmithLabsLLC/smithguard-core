@@ -224,36 +224,56 @@ def get_preliminary_warning(
     return record
 
 
-def _swift_warning_match(latest: Any, names: Sequence[str], marker: str) -> Any:
-    """GPT review round 12: a stored Swift warning entry ("swift:<name>@<marker>" or
-    "pkg:swift/<name>@<marker>") matches when its name folds (ASCII case, as the Swift
-    package lookups do) to one of the requested qualified names and its version or digest
-    is exactly the requested one."""
+def _swift_warning_match(
+    latest: Any,
+    *,
+    names: Sequence[str],
+    marker: str | None,
+    purl_names: Sequence[str],
+    purl_marker: str | None,
+) -> Any:
+    """GPT review rounds 12-13: a stored Swift warning entry matches when its name folds
+    (ASCII case, as the Swift package lookups do) to a requested qualified name and its
+    version or digest is exact. "swift:<name>@<marker>" entries compare the raw marker;
+    "pkg:swift/<name>[@<version>]" entries compare the Package URL's encoded name and
+    version, and one without a version matches only a request whose coordinate has none."""
     entries = (
         func.jsonb_array_elements_text(latest.document["affected_artifacts"])
         .table_valued("value")
         .alias("swift_warning_artifact")
     )
     value = entries.c.value
-    name = func.regexp_replace(
-        func.regexp_replace(value, literal_column("'^(swift:|pkg:swift/)'"), literal_column("''")),
-        literal_column("'@[^@]*$'"),
-        literal_column("''"),
-    )
-    folded = func.translate(
-        name,
+    upper, lower = (
         literal_column("'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"),
         literal_column("'abcdefghijklmnopqrstuvwxyz'"),
     )
-    return exists(
-        select(literal_column("1"))
-        .select_from(entries)
-        .where(
-            or_(value.like("swift:%"), value.like("pkg:swift/%")),
-            folded.in_(list(names)),
-            func.substring(value, literal_column("'@([^@]*)$'")) == marker,
+
+    def folded_name(prefix: str) -> Any:
+        stripped = func.regexp_replace(value, literal_column(f"'^{prefix}'"), literal_column("''"))
+        return func.translate(
+            func.regexp_replace(stripped, literal_column("'@[^@]*$'"), literal_column("''")),
+            upper,
+            lower,
         )
-    )
+
+    tail = func.substring(value, literal_column("'@([^@]*)$'"))
+    clauses = []
+    if names and marker is not None:
+        clauses.append(
+            and_(value.like("swift:%"), folded_name("swift:").in_(list(names)), tail == marker)
+        )
+    if purl_names:
+        version_match = (
+            tail == purl_marker if purl_marker is not None else func.strpos(value, "@") == 0
+        )
+        clauses.append(
+            and_(
+                value.like("pkg:swift/%"),
+                folded_name("pkg:swift/").in_(list(purl_names)),
+                version_match,
+            )
+        )
+    return exists(select(literal_column("1")).select_from(entries).where(or_(*clauses)))
 
 
 def matching_preliminary_warnings(
@@ -264,21 +284,34 @@ def matching_preliminary_warnings(
     now: datetime | None = None,
     swift_names: Sequence[str] = (),
     swift_marker: str | None = None,
+    swift_purl_names: Sequence[str] = (),
+    swift_purl_marker: str | None = None,
 ) -> tuple[PreliminaryWarningRecord, ...]:
     """Return latest warning revisions for only the exact queried artifact aliases, and
     for Swift also case-folded qualified names with the exact version or digest."""
     values = tuple(dict.fromkeys(affected_artifacts))
     names = tuple(dict.fromkeys(swift_names))
-    if names and (
-        swift_marker is None
-        or len(names) > 10
-        or any(not v.isascii() or not 1 <= len(v) <= 300 or v != v.lower() for v in names)
-        or not swift_marker.isascii()
-        or not 1 <= len(swift_marker) <= 300
+    purl_names = tuple(dict.fromkeys(swift_purl_names))
+
+    def bad(items: Sequence[str]) -> bool:
+        return len(items) > 10 or any(
+            not v.isascii() or not 1 <= len(v) <= 300 or v != v.lower() for v in items
+        )
+
+    def bad_marker(marker: str | None) -> bool:
+        return marker is not None and (not marker.isascii() or not 1 <= len(marker) <= 300)
+
+    if (
+        bad(names)
+        or bad(purl_names)
+        or (names and swift_marker is None)
+        or bad_marker(swift_marker)
+        or bad_marker(swift_purl_marker)
     ):
         raise PreliminaryWarningError("warning Swift filter is invalid")
+    swift_any = bool(names) or bool(purl_names)
     if (
-        not (values or names)
+        not (values or swift_any)
         or len(values) > 10
         or any(
             not isinstance(value, str) or not value.isascii() or not 1 <= len(value) <= 300
@@ -296,7 +329,19 @@ def matching_preliminary_warnings(
             latest.expires_at > current_time,
             or_(
                 *(latest.document["affected_artifacts"].contains([value]) for value in values),
-                *((_swift_warning_match(latest, names, swift_marker),) if names else ()),
+                *(
+                    (
+                        _swift_warning_match(
+                            latest,
+                            names=names,
+                            marker=swift_marker,
+                            purl_names=purl_names,
+                            purl_marker=swift_purl_marker,
+                        ),
+                    )
+                    if swift_any
+                    else ()
+                ),
             ),
         )
         .order_by(latest.updated_at.desc(), latest.id)

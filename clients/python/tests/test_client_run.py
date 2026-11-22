@@ -765,8 +765,12 @@ def test_active_warning_is_shown_beside_a_negative_result(
         assert b"unconfirmed reports, not exact version evidence" in text
         assert (b"(more not listed)" in text) is truncated
     elif truncated:
-        assert b"Preliminary warnings: list truncated; see the JSON report." in text
-        assert b"Preliminary warnings: list truncated" in html
+        # GPT review round 13: no omitted entries exist in the JSON either.
+        expected = b"Preliminary warnings: present but omitted by the service (total unknown)"
+        assert expected in text and expected in html
+        assert b"unconfirmed reports, not exact version evidence" in text
+        assert b"not exact version evidence" in html
+        assert b"see the JSON report" not in text.split(expected, 1)[1].split(b"\n", 1)[0]
     else:
         assert b"Preliminary warnings:" not in text.replace(b"Preliminary warnings: 0", b"")
         assert b"not exact version evidence" not in text

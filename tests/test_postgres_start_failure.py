@@ -120,3 +120,38 @@ def test_failed_log_copy_keeps_the_logs_in_the_cluster(outer, monkeypatch):
     assert "could not be copied (OSError)" in message and str(cluster.root) in message
     assert cluster.root.exists() and (cluster.root / "postgres.log").exists()
     assert "FATAL: could not start in time" in message
+
+
+def test_unlaunchable_stop_still_checks_status_and_keeps_the_cluster(outer, monkeypatch):
+    """GPT review round 13: a launch failure of pg_ctl stop does not skip the status
+    check, and an unknown status keeps the cluster with the original error first."""
+    tools = FakeTools(fail="pg_ctl", status=3)
+
+    def flaky(args, **kwargs):
+        if args[-1] == "stop":
+            raise OSError(24, "Too many open files")
+        if args[-1] == "status":
+            tools.calls.append(("pg_ctl", "status"))
+            raise OSError(24, "Too many open files")
+        return tools(args, **kwargs)
+
+    cluster, message = run(monkeypatch, flaky)
+    assert ("pg_ctl", "status") in tools.calls
+    assert message.startswith("pg_ctl exited 1")
+    assert "pg_ctl stop could not be launched" in message
+    assert "shutdown could not be verified" in message and cluster.root.exists()
+
+
+def test_unreadable_log_does_not_hide_the_start_error(outer, monkeypatch):
+    tools = FakeTools(fail="pg_ctl", status=3)
+    real_read = Path.read_text
+
+    def unreadable(self, *args, **kwargs):
+        if self.name == "postgres.log":
+            raise OSError(5, "I/O error")
+        return real_read(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", unreadable)
+    cluster, message = run(monkeypatch, tools)
+    assert message.startswith("pg_ctl exited 1")
+    assert "postgres.log --- (unreadable: OSError)" in message
