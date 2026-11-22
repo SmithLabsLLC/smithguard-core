@@ -777,6 +777,55 @@ def test_active_warning_is_shown_beside_a_negative_result(
         assert b"not exact version evidence" not in html
 
 
+def test_output_limit_never_separates_a_verdict_from_its_warning(tmp_path, monkeypatch):
+    """GPT review round 17: the limit falling between the verdict and its warning drops
+    both (the truncation notice appears instead), never the warning alone."""
+    import importlib
+    from datetime import UTC, datetime
+
+    import smithguard_client.report as rendering
+
+    preview = make_preview(tmp_path)
+    reader = Reader()
+
+    def warned(coord):
+        body = verified(coord).document
+        body.update(
+            result="not_affected",
+            preliminary_warnings=[{"warning_id": "gbsec:warning:synthetic-0", "state": "active"}],
+            preliminary_warnings_truncated=False,
+        )
+        now = datetime.now(UTC)
+        return Verification(
+            "verified",
+            "signature_verified",
+            True,
+            "active",
+            True,
+            True,
+            canonical(body),
+            verified_at=now,
+            key_fetched_at=now,
+            response_at=now,
+        )
+
+    reader.assess = warned
+    importlib.import_module("smithguard_client.run")
+    report, _ = run(preview, preview["approval_sha256"], reader=reader)
+    full = rendering.text_report(report)
+    verdict_end = full.index(b"not_affected")
+    note_start = full.index(b"Preliminary warnings:", verdict_end)
+    for cut in range(verdict_end, note_start + 40, 7):
+        monkeypatch.setattr(rendering, "MAX_RENDER_BYTES", cut + 1024)
+        text = rendering.text_report(report)
+        lines = text.split(b"\n")
+        for index, line in enumerate(lines):
+            if b"not_affected" in line and b": " in line and b"Preliminary" not in line:
+                assert index + 1 < len(lines) and lines[index + 1].startswith(
+                    b"Preliminary warnings:"
+                ), (cut, text[-300:])
+
+
 def test_mixed_fresh_and_expired_answers_without_local_facts(tmp_path):
     """GPT review round 2: freshness is judged per coordinate at export even when no local
     facts were supplied, so an aged answer is history and leaves the current counts."""

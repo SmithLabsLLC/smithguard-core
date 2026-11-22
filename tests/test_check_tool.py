@@ -113,3 +113,52 @@ def test_base_with_unsupported_characters_is_refused_first(monkeypatch, tmp_path
     monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(base))
     with pytest.raises(SystemExit, match="characters the test database cannot use"):
         check.require_socket_room(str(base))
+
+
+def test_a_cancelled_step_is_stopped_before_the_wrapper_moves_on(tmp_path, monkeypatch):
+    """GPT review round 17: a termination request interrupts the whole step, waits for
+    its cleanup (pytest teardown) and only then lets the wrapper exit and drop its lock."""
+    import signal
+    import sys
+    import threading
+    import time
+
+    marker = tmp_path / "cleaned"
+    child = (
+        "import signal, sys, time\n"
+        "def stop(*_):\n"
+        "    time.sleep(1.0)\n"
+        f"    open({str(marker)!r}, 'w').write('done')\n"
+        "    sys.exit(130)\n"
+        "signal.signal(signal.SIGINT, stop)\n"
+        "time.sleep(60)\n"
+    )
+    monkeypatch.setattr(check, "ROOT", tmp_path)
+    previous = signal.signal(signal.SIGTERM, check._cancel)
+    threading.Timer(0.5, lambda: os.kill(os.getpid(), signal.SIGTERM)).start()
+    started = time.monotonic()
+    try:
+        with pytest.raises(check.Cancelled):
+            check.run(sys.executable, "-c", child)
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+    assert marker.read_text() == "done"
+    assert time.monotonic() - started >= 1.0
+
+
+def test_a_step_ignoring_interrupts_is_terminated_within_bounds(tmp_path):
+    import subprocess
+    import sys
+
+    child = subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            "import signal, time; signal.signal(signal.SIGINT, signal.SIG_IGN); time.sleep(60)",
+        ],
+        start_new_session=True,
+    )
+    import signal
+
+    check.stop_child(child, steps=((signal.SIGINT, 0.5), (signal.SIGTERM, 5), (signal.SIGKILL, 5)))
+    assert child.poll() is not None

@@ -139,6 +139,9 @@ def text_report(report):
             coordinate = row["coordinate"]
             assessment = row.get("assessment", {})
             label = evidence_label(assessment, expired=identity in expired)
+            note = warning_note(assessment)
+            # GPT review round 17: the verdict and its warning are one block, so the
+            # output limit can never keep the verdict and drop the warning.
             lines.append(
                 json.dumps(
                     f"{coordinate['name']} {coordinate['version']}: {row['status']}; "
@@ -147,10 +150,8 @@ def text_report(report):
                     ensure_ascii=True,
                 )
                 + "\n"
+                + (note + "\n" if note else "")
             )
-            note = warning_note(assessment)
-            if note:
-                lines.append(note + "\n")
             if assessment:
                 lines.append(
                     "Service limits: "

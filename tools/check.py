@@ -5,6 +5,7 @@ import fcntl
 import os
 import re
 import shutil
+import signal
 import subprocess
 import tempfile
 from pathlib import Path
@@ -82,9 +83,45 @@ def task_temp():
     return tempfile.mkdtemp(prefix="sgc-", dir=base)
 
 
+class Cancelled(BaseException):
+    """GPT review round 17: a termination request reached this wrapper."""
+
+
+def _cancel(signum, _frame):
+    raise Cancelled(signal.Signals(signum).name)
+
+
+# Bounded shutdown of a cancelled step: interrupt (lets pytest run its teardown, which
+# stops the disposable PostgreSQL clusters), then terminate, then kill.
+STOP_STEPS = ((signal.SIGINT, 90), (signal.SIGTERM, 30), (signal.SIGKILL, 10))
+
+
+def stop_child(child, steps=STOP_STEPS):
+    for signum, grace in steps:
+        try:
+            os.killpg(child.pid, signum)
+        except ProcessLookupError:
+            break
+        try:
+            child.wait(timeout=grace)
+            break
+        except subprocess.TimeoutExpired:
+            continue
+    print(f"Cancelled step stopped (exit {child.poll()}).", flush=True)
+
+
 def run(*args):
     print("+", " ".join(args), flush=True)
-    subprocess.run(args, cwd=ROOT, check=True)
+    # Its own process group, so a cancellation can stop the whole step (and its workers)
+    # before this wrapper exits and releases the check lock.
+    child = subprocess.Popen(args, cwd=ROOT, start_new_session=True)
+    try:
+        code = child.wait()
+    except BaseException:
+        stop_child(child)
+        raise
+    if code:
+        raise subprocess.CalledProcessError(code, args)
 
 
 def main():
@@ -104,6 +141,9 @@ def main():
         raise SystemExit("Another contributor check is running; wait for it to finish.") from None
     folder = task_temp()
     os.environ["TMPDIR"] = folder
+    # The lock stays held until every cancelled step has been stopped (see run()).
+    for signum in (signal.SIGTERM, signal.SIGHUP):
+        signal.signal(signum, _cancel)
     try:
         checks(uv, workers)
     except BaseException:

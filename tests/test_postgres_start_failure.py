@@ -204,21 +204,22 @@ def test_a_socket_folder_that_cannot_be_made_creates_no_folder(outer, monkeypatc
 
 
 @pytest.mark.parametrize("status,removed", [(3, True), (0, False)])
-def test_teardown_stops_the_cluster_even_without_an_admin_connection(
-    outer, monkeypatch, status, removed
-):
-    """GPT review round 16: SQL cleanup failing does not skip shutdown."""
+def test_teardown_stops_the_cluster_without_any_sql(outer, monkeypatch, status, removed):
+    """GPT review rounds 16-17: teardown never waits on SQL; it stops the cluster directly
+    and removes it only when the stop is verified."""
     tools = FakeTools(fail=None, status=status)
     monkeypatch.setattr(support, "postgres_tool", lambda name: f"/fake/bin/{name}")
     monkeypatch.setattr(support.subprocess, "run", tools)
     cluster = support.LocalPostgres().start()
 
-    def unavailable():
-        raise OSError(111, "Connection refused")
+    def never(*_args, **_kwargs):
+        raise AssertionError("teardown must not open an admin connection")
 
-    monkeypatch.setattr(cluster, "_admin_connection", unavailable)
-    with pytest.raises(RuntimeError, match="ConnectionRefusedError during SQL cleanup") as raised:
+    monkeypatch.setattr(cluster, "_admin_connection", never)
+    if removed:
         cluster.close()
+    else:
+        with pytest.raises(RuntimeError, match="shutdown not verified"):
+            cluster.close()
     assert ("pg_ctl", "stop") in tools.calls and ("pg_ctl", "status") in tools.calls
     assert cluster.root.exists() is not removed
-    assert ("stopped and removed" in str(raised.value)) is removed
