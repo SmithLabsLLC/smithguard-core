@@ -162,3 +162,108 @@ def test_a_step_ignoring_interrupts_is_terminated_within_bounds(tmp_path):
 
     check.stop_child(child, steps=((signal.SIGINT, 0.5), (signal.SIGTERM, 5), (signal.SIGKILL, 5)))
     assert child.poll() is not None
+
+
+def test_cancel_waits_for_a_worker_that_outlives_its_launcher(tmp_path):
+    """GPT review round 18: success requires the whole process group to be gone."""
+    import signal
+    import subprocess
+    import sys
+    import time
+
+    marker = tmp_path / "worker-done"
+    worker = (
+        "import signal, time\n"
+        "signal.signal(signal.SIGINT, signal.SIG_IGN)\n"
+        "time.sleep(1.5)\n"
+        f"open({str(marker)!r}, 'w').write('done')\n"
+    )
+    launcher = (
+        "import subprocess, sys, time\n"
+        f"subprocess.Popen([sys.executable, '-c', {worker!r}])\n"
+        "time.sleep(60)\n"
+    )
+    child = subprocess.Popen([sys.executable, "-c", launcher], start_new_session=True)
+    time.sleep(0.5)
+    assert check.stop_child(
+        child, steps=((signal.SIGINT, 5), (signal.SIGTERM, 5), (signal.SIGKILL, 5))
+    )
+    assert marker.read_text() == "done"
+    assert not check.group_alive(child.pid)
+
+
+def test_an_unstoppable_group_is_reported_and_blocks_the_next_check(tmp_path, monkeypatch):
+    import signal
+    import subprocess
+    import sys
+
+    monkeypatch.setattr(check, "CANCELLED_MARKER", tmp_path / ".check-cancelled.json")
+    child = subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            "import signal, time; signal.signal(signal.SIGINT, signal.SIG_IGN); time.sleep(30)",
+        ],
+        start_new_session=True,
+    )
+    import time
+
+    time.sleep(0.5)  # let the child install its handler first
+    try:
+        assert check.stop_child(child, steps=((signal.SIGINT, 0.3),)) is False
+        with pytest.raises(SystemExit, match="still running"):
+            check.refuse_if_cancelled_step_runs()
+    finally:
+        os.killpg(child.pid, signal.SIGKILL)
+        child.wait()
+    check.refuse_if_cancelled_step_runs()  # the group is gone: the marker is cleared
+    assert not (tmp_path / ".check-cancelled.json").exists()
+
+
+def test_runner_stops_clusters_a_worker_left_behind(tmp_path, monkeypatch):
+    """A cluster whose worker exited before teardown is stopped by the runner and verified."""
+    calls = tmp_path / "calls"
+    fake = tmp_path / "bin" / "pg_ctl"
+    fake.parent.mkdir()
+    fake.write_text(
+        f'#!/bin/sh\necho "$@" >> {calls}\ncase "$*" in *status*) exit 3;; esac\nexit 0\n'
+    )
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{fake.parent}:{os.environ['PATH']}")
+    folder = tmp_path / "sgc-task"
+    for name in ("sg-pg-aaaa", "sg-pg-bbbb"):
+        data = folder / name / "data"
+        data.mkdir(parents=True)
+        (data / "postmaster.pid").write_text("1\n")
+    (folder / "sg-pg-cccc" / "data").mkdir(parents=True)  # never started: no pid file
+    assert check.stop_clusters(folder) == []
+    lines = calls.read_text().splitlines()
+    assert sum(line.endswith(" stop") for line in lines) == 2
+    assert sum(line.endswith(" status") for line in lines) == 2
+    assert all("sg-pg-cccc" not in line for line in lines)
+
+
+def test_runner_ignores_test_files_and_stale_pid_files(tmp_path, monkeypatch):
+    """Only live clusters directly under the task folder are the suite's; nested test
+    fixtures and pid files of finished processes are left alone."""
+    import subprocess
+    import sys
+
+    calls = tmp_path / "calls"
+    fake = tmp_path / "bin" / "pg_ctl"
+    fake.parent.mkdir()
+    fake.write_text(f'#!/bin/sh\necho "$@" >> {calls}\nexit 3\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{fake.parent}:{os.environ['PATH']}")
+    folder = tmp_path / "sgc-task"
+    nested = folder / "pytest-of-user" / "test_x0" / "task" / "sg-pg-nested" / "data"
+    nested.mkdir(parents=True)
+    (nested / "postmaster.pid").write_text("1\n")
+    finished = subprocess.run(
+        [sys.executable, "-c", "import os; print(os.getpid())"], capture_output=True, text=True
+    ).stdout.strip()
+    stale = folder / "sg-pg-stale" / "data"
+    stale.mkdir(parents=True)
+    (stale / "postmaster.pid").write_text(finished + "\n")
+    assert check.stop_clusters(folder) == []
+    assert not calls.exists()

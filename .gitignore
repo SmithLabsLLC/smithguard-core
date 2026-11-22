@@ -18,3 +18,4 @@ local/
 *.sqlite3
 *.db
 .check.lock
+.check-cancelled.json

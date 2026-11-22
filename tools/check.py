@@ -2,12 +2,14 @@
 """Run the contributor checks from any working directory."""
 
 import fcntl
+import json
 import os
 import re
 import shutil
 import signal
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,18 +98,114 @@ def _cancel(signum, _frame):
 STOP_STEPS = ((signal.SIGINT, 90), (signal.SIGTERM, 30), (signal.SIGKILL, 10))
 
 
+CANCELLED_MARKER = ROOT / ".check-cancelled.json"
+
+
+def group_alive(pgid):
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
 def stop_child(child, steps=STOP_STEPS):
+    """GPT review round 18: success means the whole process group is gone, not only the
+    direct child (a launcher can exit before its workers)."""
+    pgid = child.pid
     for signum, grace in steps:
+        if not group_alive(pgid):
+            break
         try:
-            os.killpg(child.pid, signum)
+            os.killpg(pgid, signum)
         except ProcessLookupError:
             break
+        deadline = time.monotonic() + grace
+        while time.monotonic() < deadline and group_alive(pgid):
+            child.poll()
+            time.sleep(0.05)
+    child.poll()
+    if group_alive(pgid):
+        # Keep the next check from overlapping with what could not be stopped.
+        CANCELLED_MARKER.write_text(json.dumps({"pgid": pgid}) + "\n")
+        print(
+            f"Cancelled step NOT verified stopped (process group {pgid} remains); the "
+            f"next check refuses to start while it runs.",
+            flush=True,
+        )
+        return False
+    print(f"Cancelled step stopped (process group {pgid} gone).", flush=True)
+    return True
+
+
+def refuse_if_cancelled_step_runs():
+    if not CANCELLED_MARKER.exists():
+        return
+    try:
+        pgid = int(json.loads(CANCELLED_MARKER.read_text())["pgid"])
+    except (OSError, ValueError, KeyError, TypeError):
+        pgid = None
+    if pgid is not None and group_alive(pgid):
+        raise SystemExit(
+            f"A cancelled check's process group {pgid} is still running; stop it first."
+        )
+    CANCELLED_MARKER.unlink(missing_ok=True)
+
+
+def pg_ctl():
+    direct = shutil.which("pg_ctl")
+    if direct:
+        return direct
+    config = shutil.which("pg_config")
+    if config:
+        bindir = subprocess.run([config, "--bindir"], capture_output=True, text=True).stdout.strip()
+        candidate = Path(bindir) / "pg_ctl"
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def stop_clusters(folder):
+    """GPT review round 18: every disposable cluster of this run lives under its task folder
+    (pg_ctl starts PostgreSQL in its own session, outside the step's process group), so the
+    runner stops whatever a worker left behind and verifies it. Returns the clusters it could
+    not verify stopped."""
+    tool = pg_ctl()
+    remaining = []
+    # The suite's clusters are direct children of the task folder (tests/support.py uses
+    # TMPDIR); deeper folders belong to tests' own temporary files. Only a pid file whose
+    # process is alive means a server may still be running.
+    for pid_file in sorted(Path(folder).glob("sg-pg-*/data/postmaster.pid")):
+        data = pid_file.parent
         try:
-            child.wait(timeout=grace)
-            break
-        except subprocess.TimeoutExpired:
+            pid = int(pid_file.read_text().split()[0])
+            os.kill(pid, 0)
+        except ProcessLookupError:
             continue
-    print(f"Cancelled step stopped (exit {child.poll()}).", flush=True)
+        except (OSError, ValueError, IndexError):
+            pass
+        if tool is None:
+            remaining.append(str(data))
+            continue
+        subprocess.run(
+            [tool, "-D", str(data), "-m", "immediate", "-w", "-t", "30", "stop"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        status = subprocess.run(
+            [tool, "-D", str(data), "status"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode
+        if status != 3:
+            remaining.append(str(data))
+    for data in remaining:
+        print(f"Test database NOT verified stopped: {data}", flush=True)
+    return remaining
 
 
 def run(*args):
@@ -139,6 +237,7 @@ def main():
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         raise SystemExit("Another contributor check is running; wait for it to finish.") from None
+    refuse_if_cancelled_step_runs()
     folder = task_temp()
     os.environ["TMPDIR"] = folder
     # The lock stays held until every cancelled step has been stopped (see run()).
@@ -147,8 +246,11 @@ def main():
     try:
         checks(uv, workers)
     except BaseException:
+        stop_clusters(folder)
         print(f"Check temporary evidence retained at {folder}.", flush=True)
         raise
+    if stop_clusters(folder):
+        raise SystemExit(f"Test databases left running; evidence retained at {folder}.")
     shutil.rmtree(folder, ignore_errors=True)
     print("Contributor checks passed.")
 
