@@ -304,6 +304,9 @@ def test_html_oversized_local_labels_fall_back_to_explicit_summary(tmp_path, mon
     page = rendering.html_report(report)
     assert len(page) <= 16000 and b"HTML index omitted" in page
     assert b"Complete counts" in page and b"installations&quot;: 4" in page
+    # GPT review round 9: the smallest form keeps the expiry and completion status.
+    assert b"Evidence complete: " in page and b"Answers expired before export" in page
+    assert b"Checks complete: " in page
     assert b"<private>" not in page and page.endswith(b"</body></html>")
     assert canonical(report) == before
 

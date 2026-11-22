@@ -202,6 +202,33 @@ def text_report(report):
     return "".join(lines).encode()
 
 
+def _html_text(value):
+    # Escape terminal/bidi controls as literal JSON escapes as well as HTML.
+    return html.escape(json.dumps(str(value), ensure_ascii=True)[1:-1], quote=True)
+
+
+def _html_status(report):
+    """Expiry and completion status, shared by every HTML form, including the smallest
+    fallback (GPT review round 9)."""
+    counts, text = report["counts"], _html_text
+    return [
+        "<p>Answers expired before export or local evaluation (signed history, not counted as "
+        f"current): {counts.get('answers_expired_before_export_or_evaluation', 0)}.</p>",
+        "<p>Checks complete: "
+        + text(report["run_complete"])
+        + ". Selected discovery complete: "
+        + text(report["scope_complete"])
+        + ". Completion does not mean the packages are safe.</p>",
+        "<p>Evidence complete: "
+        + text(report["evidence_complete"])
+        + ". Interpretation complete: "
+        + text(report["interpretation_complete"])
+        + ". Supplied fact sets not fully evaluated: "
+        + text(counts["supplied_facts_not_fully_evaluated"])
+        + ".</p>",
+    ]
+
+
 def html_report(report):
     try:
         return _html_report(report, compact=False)
@@ -225,16 +252,17 @@ def html_report(report):
                 "retains every installation and all derived evidence.</p>"
                 "<p>Counts describe this selected run. Completion does not mean packages "
                 "are safe. Installed identity is unverified; active use is unknown.</p>"
-                "<h2>Complete counts</h2><pre>" + counts + "</pre></body></html>"
+                + "".join(_html_status(report))
+                + "<h2>Complete counts</h2><pre>"
+                + counts
+                + "</pre></body></html>"
             ).encode()
 
 
 def _html_report(report, *, compact):
     expired = expired_coordinates(report)
 
-    def text(value):
-        # Escape terminal/bidi controls as literal JSON escapes as well as HTML.
-        return html.escape(json.dumps(str(value), ensure_ascii=True)[1:-1], quote=True)
+    text = _html_text
 
     def literal(value):
         return html.escape(json.dumps(value, ensure_ascii=True, indent=2), quote=True)
@@ -281,20 +309,7 @@ def _html_report(report, *, compact):
             "verified current source reports.</p>",
             f"<p>Unverified answers: {counts.get('unverified_unique_incidents', 0)} incidents / "
             f"{counts.get('unverified_unique_source_reports', 0)} source reports.</p>",
-            "<p>Answers expired before export or local evaluation (signed history, not counted as "
-            f"current): {counts.get('answers_expired_before_export_or_evaluation', 0)}.</p>",
-            "<p>Checks complete: "
-            + text(report["run_complete"])
-            + ". Selected discovery complete: "
-            + text(report["scope_complete"])
-            + ". Completion does not mean the packages are safe.</p>",
-            "<p>Evidence complete: "
-            + text(report["evidence_complete"])
-            + ". Interpretation complete: "
-            + text(report["interpretation_complete"])
-            + ". Supplied fact sets not fully evaluated: "
-            + text(counts["supplied_facts_not_fully_evaluated"])
-            + ".</p>",
+            *_html_status(report),
             details("Installation completion counts", counts["installation_statuses"]),
             f"<p>Service incomplete answers: {counts['service_incomplete_answers']}; "
             f"service truncated answers: {counts['service_truncated_answers']}.</p>",

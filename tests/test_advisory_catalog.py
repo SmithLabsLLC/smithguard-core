@@ -1690,6 +1690,61 @@ def test_swift_ambiguous_bare_advisory_never_decides_repository_identity(
             assert {family.evaluations for family in packet.families} == evaluations
 
 
+def test_swift_qualified_spellings_get_the_same_exact_verdict(database):
+    """GPT review round 9: owner/repository and github.com/owner/repository are one
+    identity in both directions; a bare name stays ambiguous and another owner with the
+    same repository name never receives the exact advisory."""
+    from smithguard.db.package_lookup import swift_qualified_names
+
+    _append_match_document(
+        database, _swift_advisory("GHSA-2345-6789-cfgh", "swift-nio-http2", "< 1.45.0")
+    )
+    _append_match_document(
+        database,
+        _swift_advisory("GHSA-3456-789c-fghj", "github.com/apple/swift-nio-http2", "< 1.44.0"),
+    )
+    _append_match_document(
+        database, _swift_advisory("GHSA-4567-89cf-ghjm", "apple/swift-crypto", "< 3.0.0")
+    )
+
+    def verdicts(name, version):
+        with Session(database.engine) as session:
+            packet = catalog_evidence_for_package(
+                session, ecosystem="swift", name=name, version=version
+            )
+            return sorted(
+                (
+                    (
+                        family.evaluations,
+                        sorted(r["upstream_record_id"] for r in family.source_reports),
+                    )
+                    for family in packet.families
+                ),
+                key=repr,
+            )
+
+    for version in ("1.43.0", "1.44.0"):
+        qualified = verdicts("github.com/apple/swift-nio-http2", version)
+        assert verdicts("apple/swift-nio-http2", version) == qualified
+        assert verdicts("Apple/Swift-NIO-HTTP2", version) == qualified
+        assert any("GHSA-3456-789c-fghj" in ids for _e, ids in qualified)
+    assert {e for e, _ids in verdicts("apple/swift-nio-http2", "1.43.0")} == {(True,), (None,)}
+    # Stored as owner/repository, requested with the host: the same exact match.
+    crypto = verdicts("apple/swift-crypto", "2.9.0")
+    assert verdicts("github.com/apple/swift-crypto", "2.9.0") == crypto
+    assert {e for e, _ids in verdicts("github.com/apple/swift-crypto", "2.9.0")} == {(True,)}
+    # Another owner, same repository name: only the ambiguous bare advisory, never the exact one.
+    other = verdicts("other/swift-nio-http2", "1.43.0")
+    assert other == verdicts("github.com/other/swift-nio-http2", "1.43.0")
+    assert {e for e, _ids in other} == {(None,)}
+    assert all("GHSA-3456-789c-fghj" not in ids for _e, ids in other)
+    assert verdicts("other/swift-crypto", "2.9.0") == []
+    assert swift_qualified_names("apple/x") == ("github.com/apple/x",)
+    assert swift_qualified_names("GitHub.com/apple/x") == ("apple/x",)
+    for malformed in ("x", "a/b/c", "other.com/a/b", "github.com//b", "/b", "a/"):
+        assert swift_qualified_names(malformed) == ()
+
+
 def test_swift_exact_and_ambiguous_fixes_in_same_source_report(database):
     bare = _swift_advisory("GHSA-2345-6789-cfgh", "swift-nio-http2", "< 1.45.0")
     exact = _swift_advisory("GHSA-2345-6789-cfgh", "github.com/apple/swift-nio-http2", "< 1.44.0")
