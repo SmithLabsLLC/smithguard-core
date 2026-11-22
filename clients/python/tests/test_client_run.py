@@ -682,11 +682,21 @@ def test_conditions_are_not_derived_after_the_answer_expires_mid_run(tmp_path):
 
 
 @pytest.mark.parametrize("compact", [False, True])
-@pytest.mark.parametrize("warnings,truncated", [(1, False), (2, True), (0, True), (0, False)])
+@pytest.mark.parametrize(
+    "states,truncated",
+    [
+        (["active"], False),
+        (["active", "expired"], True),
+        (["expired"], False),
+        ([], True),
+        ([], False),
+    ],
+)
 def test_active_warning_is_shown_beside_a_negative_result(
-    tmp_path, monkeypatch, compact, warnings, truncated
+    tmp_path, monkeypatch, compact, states, truncated
 ):
-    """Audit SG22-10: full, summary (compact), truncated and no-warning text and HTML."""
+    """Audit SG22-10: full, summary (compact), truncated, non-active and no-warning text
+    and HTML; an active warning is shown beside the possibly_affected it causes."""
     import importlib
     from datetime import UTC, datetime
 
@@ -701,9 +711,10 @@ def test_active_warning_is_shown_beside_a_negative_result(
     def warned(coord):
         body = verified(coord).document
         body.update(
-            result="not_affected",
+            result="possibly_affected" if "active" in states else "not_affected",
             preliminary_warnings=[
-                {"warning_id": f"gbsec:warning:synthetic-{n}"} for n in range(warnings)
+                {"warning_id": f"gbsec:warning:synthetic-{n}", "state": state}
+                for n, state in enumerate(states)
             ],
             preliminary_warnings_truncated=truncated,
         )
@@ -724,15 +735,18 @@ def test_active_warning_is_shown_beside_a_negative_result(
     reader.assess = warned
     report, _ = run(preview, preview["approval_sha256"], reader=reader)
     text, html = text_report(report), html_report(report)
-    if warnings or truncated:
-        expected = f"Preliminary warnings: {warnings} active".encode()
+    result = b"possibly_affected" if "active" in states else b"not_affected"
+    assert result in text and result in html
+    if states:
+        active = states.count("active")
+        expected = f"Preliminary warnings: {active} active of {len(states)} listed".encode()
         assert expected in text and expected in html
-        assert b"unverified advisories, separate from the exact result" in text
+        assert b"unconfirmed reports, not exact version evidence" in text
         assert (b"(more not listed)" in text) is truncated
-        # The exact result is unchanged and still shown.
-        assert b"not_affected" in text
+    elif truncated:
+        assert b"Preliminary warnings: list truncated; see the JSON report." in text
+        assert b"Preliminary warnings: list truncated" in html
     else:
-        assert (
-            b"active; unverified advisories" not in text
-            and b"active; unverified advisories" not in html
-        )
+        assert b"Preliminary warnings:" not in text.replace(b"Preliminary warnings: 0", b"")
+        assert b"not exact version evidence" not in text
+        assert b"not exact version evidence" not in html

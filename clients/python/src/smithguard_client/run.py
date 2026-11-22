@@ -205,6 +205,11 @@ def run(
                 if len(canonical(row)) > ITEM_BUDGET:
                     compact_limits = {
                         "preliminary_warning_count": len(projection["preliminary_warnings"]),
+                        "preliminary_active_warning_count": sum(
+                            1
+                            for x in projection["preliminary_warnings"]
+                            if x.get("state") == "active"
+                        ),
                         "preliminary_warning_ids": [
                             x["warning_id"] for x in projection["preliminary_warnings"]
                         ],

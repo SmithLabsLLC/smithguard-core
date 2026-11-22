@@ -41,20 +41,28 @@ def evidence_label(assessment):
 
 
 def warning_note(assessment):
-    """Audit SG22-10: active preliminary warnings beside the result, kept distinct from
-    exact applicability. Returns None when there are none and none were truncated."""
+    """Audit SG22-10: preliminary warnings beside the result, kept distinct from exact
+    applicability. Only entries whose state is "active" count as active. Returns None when
+    there are none and none were truncated."""
     if not assessment:
         return None
     if assessment.get("evidence_truncated"):
-        count = assessment.get("preliminary_warning_count") or 0
+        listed = assessment.get("preliminary_warning_count") or 0
+        active = assessment.get("preliminary_active_warning_count")
     else:
-        count = len(assessment.get("preliminary_warnings") or [])
+        warnings = assessment.get("preliminary_warnings") or []
+        listed = len(warnings)
+        active = sum(1 for w in warnings if isinstance(w, dict) and w.get("state") == "active")
     truncated = bool(assessment.get("preliminary_warnings_truncated"))
-    if not count and not truncated:
+    if not listed and not truncated:
         return None
+    if not listed:
+        return "Preliminary warnings: list truncated; see the JSON report."
+    counted = f"{active} active of {listed} listed" if active is not None else f"{listed} listed"
     return (
-        f"Preliminary warnings: {count} active{' (more not listed)' if truncated else ''}; "
-        "unverified advisories, separate from the exact result above."
+        f"Preliminary warnings: {counted}{' (more not listed)' if truncated else ''}; "
+        "unconfirmed reports, not exact version evidence; an active warning can raise the "
+        "result to possibly_affected."
     )
 
 
@@ -147,6 +155,7 @@ def text_report(report):
                             for k in (
                                 "retained_incident_ids",
                                 "preliminary_warning_count",
+                                "preliminary_active_warning_count",
                                 "preliminary_warning_ids",
                                 "incidents_truncated",
                                 "preliminary_warnings_truncated",

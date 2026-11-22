@@ -240,6 +240,13 @@ Full and compact reports retain the omission reasons and counts. The broader
 stays a visible limit without implying the service shortened the evidence or
 forcing exit 2. It still cannot support a verified upgrade recommendation.
 
+Local conditions are evaluated after all reads finish, and each answer is rechecked
+for eligibility at that moment. In a long run (reads spanning more than about five
+minutes) an earlier answer can expire first: it then stays in the report as signed
+history with `local_applicability_status` `answer_expired_not_evaluated`, its local
+conditions are not evaluated, interpretation is incomplete and the run exits 2.
+Split very large inventories into shorter runs when current local evaluation matters.
+
 A near-expiry cached answer may arrive outside the five-minute freshness bound.
 It stays unchecked and the run exits 2. The client does not silently relax that
 bound or repeat the assessment; authorize a fresh run when current evidence is

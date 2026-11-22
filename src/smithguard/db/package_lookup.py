@@ -46,7 +46,11 @@ def package_name_predicate(
     name: str,
     include_swift_bare_name: bool = False,
 ) -> ColumnElement[bool]:
-    """Fold names only where the registry does, identically to the expression indexes.
+    """Fold names only where the registry does, matching the expression indexes.
+
+    Public Core has folded-name indexes for nuget, vscode/open-vsx, composer and rust;
+    Swift lookups fold the same way but have no Core index yet (the private service's
+    lookup index migration is not ported), so they are correct but scan Swift rows.
 
     Literal SQL constants (not bound parameters) let the planner prove each partial
     index predicate. Advisory lookups may include an ambiguous Swift bare name;

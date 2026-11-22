@@ -30,14 +30,18 @@ def require_capacity(path, minimum):
 
 def task_temp():
     base = os.environ.get("SMITHGUARD_CHECK_TMP") or (
-        "/var/tmp" if Path("/var/tmp").is_dir() else None
+        "/var/tmp" if Path("/var/tmp").is_dir() else tempfile.gettempdir()
     )
-    # A short root: pytest adds worker and test folders before AF_UNIX socket names.
-    folder = tempfile.mkdtemp(prefix="sgc-", dir=base)
-    require_capacity(folder, MINIMUM)
+    if not Path(base).is_dir():
+        raise SystemExit(
+            f"Temporary base {base} does not exist; create it or set SMITHGUARD_CHECK_TMP."
+        )
+    # Check capacity before creating anything, so a refusal leaves nothing behind.
+    require_capacity(base, MINIMUM)
     if Path("/tmp").is_dir():
         require_capacity("/tmp", MINIMUM_SYSTEM_TMP)
-    return folder
+    # A short root: pytest adds worker and test folders before AF_UNIX socket names.
+    return tempfile.mkdtemp(prefix="sgc-", dir=base)
 
 
 def run(*args):

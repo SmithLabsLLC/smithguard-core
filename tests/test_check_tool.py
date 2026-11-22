@@ -33,3 +33,17 @@ def test_sufficient_location_passes_and_task_folder_is_short(monkeypatch, tmp_pa
     folder = check.task_temp()
     assert Path(folder).parent == tmp_path and Path(folder).name.startswith("sgc-")
     assert len(Path(folder).name) < 16
+
+
+def test_refusal_leaves_no_task_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(os, "statvfs", fake_statvfs(10, 10))
+    monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(tmp_path))
+    with pytest.raises(SystemExit, match="Insufficient temporary capacity"):
+        check.task_temp()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_missing_base_is_refused_clearly(monkeypatch, tmp_path):
+    monkeypatch.setenv("SMITHGUARD_CHECK_TMP", str(tmp_path / "absent"))
+    with pytest.raises(SystemExit, match="does not exist"):
+        check.task_temp()

@@ -11,11 +11,14 @@ are created under the platform's local temporary storage and removed at the end 
 their test session. The suite checks that service installation directories remain
 unchanged. Never point tests at an existing database or run the suite as root.
 
-The full suite creates many disposable databases. If the default temporary
-filesystem is a small RAM disk, select a short, user-owned directory on a disk
-with enough free space, for example `TMPDIR=/var/tmp/sg-tests python3 tools/check.py`
-after creating that directory. PostgreSQL socket paths must stay short. The
-helper honors `TMPDIR`; temporary clusters are removed after the test session.
+The full suite creates many disposable databases. `tools/check.py` makes its own
+short task folder under `/var/tmp` (or under `SMITHGUARD_CHECK_TMP`, an existing,
+user-owned directory on a disk with enough free space, for example
+`SMITHGUARD_CHECK_TMP=/var/tmp/sg-tests python3 tools/check.py`), checks free space
+and free file slots there and in `/tmp` before it starts, and points `TMPDIR` at
+that folder. PostgreSQL socket paths must stay short. One check runs at a time per
+checkout (`.check.lock`); the folder is removed after a passing run and kept after
+a failure for inspection. When running pytest directly, set `TMPDIR` yourself.
 
 ```sh
 uv sync --locked
