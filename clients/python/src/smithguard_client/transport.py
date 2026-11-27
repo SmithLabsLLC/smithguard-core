@@ -95,7 +95,7 @@ class PublicReader:
                     transport=self.transport,
                     timeout=timeout,
                     headers={
-                        "User-Agent": "SmithGuardClient/0.1.2",
+                        "User-Agent": "SmithGuardClient/0.1.3",
                         "Accept": "application/json",
                         "Accept-Encoding": "identity",
                         "Cache-Control": "no-cache",
